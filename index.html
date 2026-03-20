@@ -33,12 +33,12 @@
       animation: ruleReveal 0.95s cubic-bezier(0.16,1,0.3,1) 1.2s forwards;
     }
     #intro-sub {
-      font-size:12.5px; color:#484862; letter-spacing:3.5px; text-align:center; line-height:2.3;
+      font-size:14px; color:#9090b8; letter-spacing:3.5px; text-align:center; line-height:2.3;
       opacity:0;
       animation: softReveal 0.85s ease 1.6s forwards;
     }
     #intro-eras { display:flex; gap:30px; margin-top:28px; }
-    .intro-era { font-size:10px; letter-spacing:2.5px; text-transform:uppercase; opacity:0; }
+    .intro-era { font-size:11.5px; letter-spacing:2.5px; text-transform:uppercase; opacity:0; }
     .intro-era:nth-child(1) { animation: softReveal 0.6s ease 2.15s forwards; }
     .intro-era:nth-child(2) { animation: softReveal 0.6s ease 2.38s forwards; }
     .intro-era:nth-child(3) { animation: softReveal 0.6s ease 2.61s forwards; }
@@ -63,36 +63,33 @@
 
     /* ── HEADER ── */
     #header {
-      position:absolute; top:0; left:0; right:0;
+      position:absolute; top:0; left:0; right:0; height:58px;
       background:rgba(10,10,22,0.99);
       border-bottom:1px solid #181830; z-index:10;
-      display:flex; flex-direction:column;
+      display:flex; align-items:center; gap:6px; padding:0 14px;
+      overflow-x:auto; overflow-y:hidden;
     }
-    #header-row1 {
-      height:50px; display:flex; align-items:center; gap:10px; padding:0 18px;
-      border-bottom:1px solid #0d0d22;
-    }
-    #header-row2 {
-      height:34px; display:flex; align-items:center; gap:5px; padding:0 18px;
-    }
-    #brand { display:flex; flex-direction:column; justify-content:center; gap:2px; white-space:nowrap; }
-    #header-title { font-size:13px; color:#c8a050; letter-spacing:3.5px; font-weight:normal; }
-    #header-credit { font-size:8px; color:#30304e; }
-    #header-credit a { color:#806830; text-decoration:none; }
-    #header-spacer { flex:1; }
+    #header::-webkit-scrollbar { display:none; }
+    #brand { display:flex; flex-direction:column; justify-content:center; gap:1px; white-space:nowrap; margin-right:4px; flex-shrink:0; }
+    #header-title { font-size:14px; color:#c8a050; letter-spacing:3px; font-weight:normal; }
+    #header-credit { font-size:9px; color:#606080; }
+    #header-credit a { color:#a07838; text-decoration:none; }
+    #header-spacer { flex:1; min-width:4px; }
+    .filter-sep { width:1px; height:16px; background:#1e1e38; flex-shrink:0; margin:0 2px; }
+    #era-filters   { display:flex; align-items:center; gap:4px; flex-shrink:0; flex-wrap:nowrap; }
+    #instr-filters { display:flex; align-items:center; gap:4px; flex-shrink:0; flex-wrap:nowrap; }
     .action-btn {
-      padding:3px 12px; border-radius:16px; border:1px solid #1e1e38;
-      background:transparent; cursor:pointer; font-size:10px; color:#444460;
-      font-family:Georgia,serif; transition:all 0.25s; white-space:nowrap;
+      padding:3px 11px; border-radius:12px; border:1px solid #1e1e38;
+      background:transparent; cursor:pointer; font-size:11.5px; color:#707090;
+      font-family:Georgia,serif; transition:all 0.25s; white-space:nowrap; flex-shrink:0;
     }
-    .action-btn:hover { border-color:#3a3a60; color:#aaaacc; }
-    .instr-lbl { font-size:8px; color:#252540; letter-spacing:1.5px; text-transform:uppercase; margin-right:4px; white-space:nowrap; }
+    .action-btn:hover { border-color:#5a5a80; color:#c0c0e0; }
     .instr-btn {
-      padding:2px 9px; border-radius:12px; border:1px solid #1a1a30;
-      background:transparent; cursor:pointer; font-size:9.5px; color:#333350;
-      font-family:Georgia,serif; transition:all 0.25s; white-space:nowrap;
+      padding:2px 8px; border-radius:9px; border:1px solid #1a1a30;
+      background:transparent; cursor:pointer; font-size:11.5px; color:#707090;
+      font-family:Georgia,serif; transition:all 0.25s; white-space:nowrap; flex-shrink:0;
     }
-    .instr-btn:hover { border-color:#3a3a58; color:#7070a0; }
+    .instr-btn:hover { border-color:#4a4a70; color:#9090b8; }
     .instr-btn.active { background:#1e1e40; color:#9090c0; border-color:#3a3a60; }
     .link-flash circle { animation:flashCircle 0.7s ease-out forwards; }
     @keyframes flashCircle {
@@ -100,9 +97,9 @@
       100% { filter:none; }
     }
     .era-btn {
-      padding:3px 11px; border-radius:20px; border:1.5px solid;
-      background:transparent; cursor:pointer; font-size:10.5px;
-      font-family:Georgia,serif; transition:all 0.3s cubic-bezier(0.16,1,0.3,1); white-space:nowrap;
+      padding:2px 9px; border-radius:12px; border:1.5px solid;
+      background:transparent; cursor:pointer; font-size:11.5px;
+      font-family:Georgia,serif; transition:all 0.3s cubic-bezier(0.16,1,0.3,1); white-space:nowrap; flex-shrink:0;
     }
     .era-btn[data-era="all"]    { border-color:#3a3a50; color:#4a4a62; }
     .era-btn[data-era="early"]  { border-color:#e8952a; color:#e8952a; }
@@ -119,16 +116,16 @@
     #search-wrap { position:relative; margin-left:auto; }
     #search-box {
       padding:5px 16px; background:#0b0b1e; border:1px solid #282848;
-      border-radius:20px; color:#d0d0e8; font-size:12px;
+      border-radius:20px; color:#d0d0e8; font-size:11.5px;
       font-family:Georgia,serif; width:196px; outline:none;
       transition:border-color 0.25s ease, box-shadow 0.25s ease;
     }
     #search-box:focus { border-color:#38385a; box-shadow:0 0 0 3px rgba(200,160,80,0.07); }
     #search-box::placeholder { color:#484868; }
     #search-dropdown {
-      display:none; position:absolute; top:calc(100% + 7px); right:0;
+      display:none; position:fixed; top:0; right:0;
       width:278px; background:#0b0b20; border:1px solid #1e1e3a;
-      border-radius:10px; overflow:hidden; z-index:100;
+      border-radius:10px; overflow:hidden; z-index:1000;
       box-shadow:0 16px 48px rgba(0,0,0,0.85);
     }
     .drop-item { padding:9px 15px; cursor:pointer; border-bottom:1px solid #141428; transition:background 0.15s; }
@@ -138,25 +135,17 @@
     .drop-meta { font-size:10.5px; color:#363654; margin-top:2px; }
 
     /* ── GRAPH ── */
-    #svg-wrap { position:absolute; top:84px; left:0; right:0; bottom:34px; }
+    #svg-wrap { position:absolute; top:58px; left:0; right:0; bottom:0; }
     svg { width:100%; height:100%; }
 
     /* ── FIXED OVERLAYS ── */
-    #y-labels-container { position:absolute; left:0; top:84px; bottom:34px; pointer-events:none; z-index:4; }
+    #y-labels-container { position:absolute; left:0; top:58px; bottom:0; pointer-events:none; z-index:4; }
     .y-label { position:absolute; font-size:8px; color:#1e1e36; letter-spacing:1.5px; text-transform:uppercase; left:8px; transform:translateY(-50%); white-space:nowrap; }
 
-    #x-axis {
-      position:absolute; bottom:0; left:0; right:0; height:34px;
-      background:rgba(10,10,22,0.99); border-top:1px solid #141426;
-      z-index:4; pointer-events:none;
-    }
-    .x-mark { position:absolute; bottom:0; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; }
-    .x-tick  { width:1px; height:6px; background:#1c1c32; }
-    .x-year  { font-size:9px; color:#1e1e38; margin-top:2px; letter-spacing:0.5px; }
-    .x-era-label { position:absolute; top:5px; font-size:8px; letter-spacing:1.5px; text-transform:uppercase; transform:translateX(-50%); opacity:0.32; }
+
 
     /* ── LINKS ── */
-    .link { stroke-width:1.5px; }
+    .link { }
     .link.dimmed { stroke-opacity:0.02 !important; }
     .link.lit    { stroke-opacity:0.96 !important; }
 
@@ -171,6 +160,14 @@
     }
     .node text { pointer-events:none; text-shadow:0 0 8px #0d0d1a,0 0 8px #0d0d1a,0 0 8px #0d0d1a,0 0 8px #0d0d1a; }
     .node.dimmed { opacity:0.05; }
+    /* ── LINKS ── */
+    .link { cursor:pointer; pointer-events:visibleStroke; }
+    .link-hit { cursor:pointer; pointer-events:stroke; fill:none; }
+    .link.lit  { filter:drop-shadow(0 0 4px currentColor); }
+    #sb-link-header { font-size:11px; color:#505078; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; }
+    #sb-link-names  { font-size:18px; line-height:1.4; margin-bottom:8px; font-weight:normal; }
+    #sb-albums-head { font-size:9.5px; color:#505075; text-transform:uppercase; letter-spacing:2.5px; margin:14px 0 10px; }
+    #sb-albums li   { padding:7px 0; border-bottom:1px solid #0e0e22; font-size:13px; color:#c0c0e0; list-style:none; }
     .node.selected circle {
       stroke:#fff !important; stroke-width:2.5px;
       animation:selectedGlow 2.5s ease-in-out infinite;
@@ -182,7 +179,7 @@
 
     /* ── SIDEBAR ── */
     #sidebar {
-      position:absolute; right:0; top:84px; bottom:34px; width:320px;
+      position:absolute; right:0; top:58px; bottom:0; width:320px;
       background:rgba(7,7,18,0.99); border-left:1px solid #161628;
       padding:26px 22px; z-index:8; overflow-y:auto;
       transform:translateX(calc(100% + 24px));
@@ -237,13 +234,21 @@
       padding:28px 28px 22px; width:420px; max-width:92vw;
     }
     #feedback-box h3 { color:#c8a050; font-size:17px; font-weight:normal; letter-spacing:1px; margin-bottom:6px; }
-    #feedback-box p  { color:#404060; font-size:11px; margin-bottom:16px; }
+    #feedback-box p  { color:#9090b8; font-size:12px; margin-bottom:14px; }
+    #feedback-email {
+      width:100%; background:#0b0b22; border:1px solid #1e1e38;
+      border-radius:8px; color:#ccc; font-size:13px; font-family:Georgia,serif;
+      padding:9px 12px; outline:none; margin-bottom:10px;
+    }
+    #feedback-email::placeholder { color:#484868; }
+    #feedback-email:focus { border-color:#3a3a60; }
     #feedback-text {
-      width:100%; height:120px; background:#0b0b22; border:1px solid #1e1e38;
+      width:100%; height:110px; background:#0b0b22; border:1px solid #1e1e38;
       border-radius:8px; color:#ccc; font-size:13px; font-family:Georgia,serif;
       padding:10px 12px; resize:none; outline:none; margin-bottom:14px;
     }
     #feedback-text:focus { border-color:#3a3a60; }
+    #feedback-sent { color:#c8a050; font-size:15px; text-align:center; padding:22px 0 10px; display:none; letter-spacing:1px; }
     #feedback-actions { display:flex; gap:10px; justify-content:flex-end; }
     .fb-btn {
       padding:6px 18px; border-radius:20px; border:1px solid #2a2a48;
@@ -253,14 +258,79 @@
     .fb-btn:hover { border-color:#5a5a80; color:#ccc; }
     .fb-btn.primary { border-color:#c8a050; color:#c8a050; }
     .fb-btn.primary:hover { background:#c8a050; color:#0a0a16; }
-    /* ── COFFEE TOAST ── */
-    #coffee-toast {
-      position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
-      background:#07071e; border:1px solid #2a2a48; border-radius:24px;
-      padding:10px 22px; font-size:12.5px; color:#9090b8; z-index:200;
-      opacity:0; transition:opacity 0.4s, transform 0.4s; pointer-events:none; white-space:nowrap;
+
+
+    /* ── LEARN MORE MODAL ── */
+    #learn-modal {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.78); z-index:200;
+      align-items:center; justify-content:center;
     }
-    #coffee-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    #learn-modal.open { display:flex; }
+    #learn-box {
+      background:#07071a; border:1px solid #2a2a48; border-radius:16px;
+      padding:30px 30px 24px; width:460px; max-width:92vw; position:relative;
+    }
+    #learn-close {
+      position:absolute; top:14px; right:18px; background:none; border:none;
+      color:#484868; font-size:18px; cursor:pointer; transition:color 0.2s;
+    }
+    #learn-close:hover { color:#ccc; }
+    #learn-box h3 { color:#c8a050; font-size:18px; font-weight:normal; letter-spacing:0.5px; margin-bottom:16px; }
+    #learn-book {
+      display:flex; gap:18px; align-items:flex-start; margin-bottom:20px;
+      background:#0b0b22; border:1px solid #1e1e38; border-radius:10px; padding:16px;
+    }
+    #learn-cover-wrap {
+      width:70px; height:100px; border-radius:5px; flex-shrink:0; overflow:hidden;
+      background:linear-gradient(135deg,#1a1a3a,#2a1a4a);
+      display:flex; align-items:center; justify-content:center;
+    }
+    #learn-cover-wrap img { width:100%; height:100%; object-fit:cover; border-radius:4px; display:block; }
+    #learn-cover-fallback { font-size:8px; color:#6868a0; text-align:center; letter-spacing:1px; line-height:1.6; padding:4px; }
+    #learn-book-info h4 { color:#e0d0a0; font-size:15px; font-weight:normal; margin-bottom:3px; }
+    .learn-author { color:#9080a8; font-size:12px; margin-bottom:10px; }
+    #learn-book-info p { color:#8888b0; font-size:13px; line-height:1.75; }
+    #learn-link {
+      display:inline-block; padding:9px 24px; border-radius:22px;
+      background:linear-gradient(135deg,#c8a050,#e0b860); color:#07071a;
+      font-size:13px; font-family:Georgia,serif; text-decoration:none;
+      transition:opacity 0.2s; font-weight:normal;
+    }
+    #learn-link:hover { opacity:0.85; }
+    #learn-disclaimer { font-size:9px; color:#404060; margin-top:9px; }
+
+    /* ── KO-FI MODAL ── */
+    #kofi-modal {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.78); z-index:200;
+      align-items:center; justify-content:center;
+    }
+    #kofi-modal.open { display:flex; }
+    #kofi-box {
+      background:#07071a; border:1px solid #2a2a48; border-radius:16px;
+      width:480px; max-width:94vw; overflow:hidden; position:relative;
+    }
+    #kofi-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 18px; border-bottom:1px solid #1a1a34;
+    }
+    #kofi-header span { color:#c8a050; font-size:14px; letter-spacing:0.5px; }
+    #kofi-close {
+      background:none; border:none; color:#484868; font-size:18px;
+      cursor:pointer; transition:color 0.2s; line-height:1;
+    }
+    #kofi-close:hover { color:#ccc; }
+    #kofi-frame {
+      width:100%; height:520px; border:none; display:block;
+      background:#fff;
+    }
+    #kofi-fallback {
+      display:none; padding:24px; text-align:center;
+    }
+    #kofi-fallback p { color:#8888b0; font-size:13px; margin-bottom:16px; }
+    #kofi-fallback a {
+      display:inline-block; padding:10px 24px; border-radius:22px;
+      background:#FF5E5B; color:#fff; text-decoration:none; font-size:13px;
+    }
   </style>
 </head>
 <body>
@@ -280,44 +350,43 @@
 </div>
 
 <div id="header">
-  <div id="header-row1">
-    <div id="brand">
-      <div id="header-title">THE JAZZ MAP</div>
-      <div id="header-credit">by <a href="mailto:jamesgilchrist8@gmail.com">James Gilchrist</a> · 2026</div>
-    </div>
-    <div id="era-filters">
-      <button class="era-btn active" data-era="all">All Eras</button>
-      <button class="era-btn" data-era="early">Early / Swing</button>
-      <button class="era-btn" data-era="bebop">Bebop / Hard Bop</button>
-      <button class="era-btn" data-era="modal">Modal / Avant-Garde</button>
-      <button class="era-btn" data-era="fusion">Fusion / Modern</button>
-    </div>
-    <div id="header-spacer"></div>
-    <button class="action-btn" id="feedback-btn">💬 Feedback</button>
-    <button class="action-btn" id="coffee-btn">☕ Coffee</button>
-    <div id="search-wrap">
-      <input type="text" id="search-box" placeholder="Search artist…" autocomplete="off">
-      <div id="search-dropdown"></div>
-    </div>
+  <div id="brand">
+    <div id="header-title">THE JAZZ MAP</div>
+    <div id="header-credit">by <a href="mailto:james@thejazzmap.com">James Gilchrist</a> · 2026</div>
   </div>
-  <div id="header-row2">
-    <span class="instr-lbl">Instrument ·</span>
+  <div class="filter-sep"></div>
+  <div id="era-filters">
+    <button class="era-btn active" data-era="all">All</button>
+    <button class="era-btn" data-era="early">Early</button>
+    <button class="era-btn" data-era="bebop">Bebop</button>
+    <button class="era-btn" data-era="modal">Modal</button>
+    <button class="era-btn" data-era="fusion">Fusion</button>
+  </div>
+  <div class="filter-sep"></div>
+  <div id="instr-filters">
     <button class="instr-btn active" data-instr="all">All</button>
     <button class="instr-btn" data-instr="vocal">Vocals</button>
     <button class="instr-btn" data-instr="trumpet">Trumpet</button>
     <button class="instr-btn" data-instr="trombone">Trombone</button>
-    <button class="instr-btn" data-instr="sax">Sax / Clar</button>
+    <button class="instr-btn" data-instr="sax">Sax</button>
     <button class="instr-btn" data-instr="guitar">Guitar</button>
     <button class="instr-btn" data-instr="vibes">Vibes</button>
     <button class="instr-btn" data-instr="piano">Piano</button>
     <button class="instr-btn" data-instr="bass">Bass</button>
     <button class="instr-btn" data-instr="drums">Drums</button>
   </div>
+  <div id="header-spacer"></div>
+  <button class="action-btn" id="learn-btn">📖 Learn More</button>
+  <button class="action-btn" id="feedback-btn">💬 Feedback</button>
+  <button class="action-btn" id="coffee-btn">☕ Coffee</button>
+  <div id="search-wrap">
+    <input type="text" id="search-box" placeholder="Search artist…" autocomplete="off">
+    <div id="search-dropdown"></div>
+  </div>
 </div>
 
 <div id="y-labels-container"></div>
 <div id="svg-wrap"><svg id="graph"></svg></div>
-<div id="x-axis"></div>
 
 <div id="sidebar">
   <button id="close-sb">✕</button>
@@ -333,6 +402,16 @@
   </div>
   <div id="sb-heading">Played With</div>
   <ul id="sb-list"></ul>
+
+  <!-- Link mode content (hidden when showing a node) -->
+  <div id="sb-link-section" style="display:none">
+    <div id="sb-link-header">Connection</div>
+    <div id="sb-link-names"></div>
+    <div id="sb-link-desc" class="sb-ctx" style="font-size:13px;color:#8888b0;margin-bottom:8px"></div>
+    <div id="sb-link-strength"></div>
+    <div id="sb-albums-head" style="display:none">Key Recordings</div>
+    <ul id="sb-albums"></ul>
+  </div>
 </div>
 
 <div id="tooltip"></div>
@@ -342,57 +421,102 @@
 <div id="stats"></div>
 
 
-<div id="feedback-modal">
-  <div id="feedback-box">
-    <h3>Share Feedback</h3>
-    <p>Your thoughts on The Jazz Map — james@thejazzmap.com</p>
-    <textarea id="feedback-text" placeholder="What would you change, add, or fix?"></textarea>
-    <div id="feedback-actions">
-      <button class="fb-btn" id="fb-cancel">Cancel</button>
-      <button class="fb-btn primary" id="fb-send">Send via Email</button>
+<div id="learn-modal">
+  <div id="learn-box">
+    <button id="learn-close">✕</button>
+    <h3>Want to go deeper?</h3>
+    <div id="learn-book">
+      <div id="learn-cover-wrap">
+        <img id="learn-cover-img"
+             src="https://m.media-amazon.com/images/I/71xFta3EWIL._SY466_.jpg"
+             alt="How to Listen to Jazz"
+             onerror="this.style.display='none';document.getElementById('learn-cover-fallback').style.display='block'">
+        <div id="learn-cover-fallback" style="display:none">HOW TO<br>LISTEN<br>TO JAZZ</div>
+      </div>
+      <div id="learn-book-info">
+        <h4>How to Listen to Jazz</h4>
+        <div class="learn-author">Ted Gioia</div>
+        <p>If you want to learn more, I cannot more highly recommend Ted Gioia's <em>How to Listen to Jazz</em>. Ted's work is a gift to the jazz world and imperative reading for anyone who loves this music.</p>
+      </div>
+    </div>
+    <a id="learn-link" href="https://amzn.to/41jDdnQ" target="_blank" rel="noopener">Get the Book →</a>
+    <div id="learn-disclaimer">Affiliate link — costs you nothing extra.</div>
+  </div>
+</div>
+
+<div id="kofi-modal">
+  <div id="kofi-box">
+    <div id="kofi-header">
+      <span>☕ Support The Jazz Map</span>
+      <button id="kofi-close">✕</button>
+    </div>
+    <iframe id="kofi-frame"
+      src="https://ko-fi.com/T6T31WB3MF/?hidefeed=true&widget=true&embed=true&type=donation"
+      allow="payment"
+      onload="document.getElementById('kofi-fallback').style.display='none'"
+      onerror="this.style.display='none';document.getElementById('kofi-fallback').style.display='block'">
+    </iframe>
+    <div id="kofi-fallback">
+      <p>Ko-fi didn't load inline — click below to open it:</p>
+      <a href="https://ko-fi.com/T6T31WB3MF" target="_blank" rel="noopener">☕ Buy me a coffee</a>
     </div>
   </div>
 </div>
-<div id="coffee-toast">Thanks for the offer, but I'm fully caffeinated ☕</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js">
-// ─── FEEDBACK & COFFEE ───────────────────────────────────────────────────────
+<div id="feedback-modal">
+  <div id="feedback-box">
+    <h3>Share Feedback</h3>
+    <p>Got a suggestion, spotted a mistake, or want an artist added? Drop a note below.</p>
+    <input type="email" id="feedback-email" placeholder="Your email address (optional)">
+    <textarea id="feedback-text" placeholder="What would you change, add, or fix?"></textarea>
+    <div id="feedback-sent">Thank you.</div>
+    <div id="feedback-actions">
+      <button class="fb-btn" id="fb-cancel">Cancel</button>
+      <button class="fb-btn primary" id="fb-send">Send</button>
+    </div>
+  </div>
+</div>
 
-document.getElementById("feedback-btn").addEventListener("click", () => {
-  document.getElementById("feedback-modal").classList.add("open");
-  document.getElementById("feedback-text").value = "";
-});
-document.getElementById("fb-cancel").addEventListener("click", () => {
-  document.getElementById("feedback-modal").classList.remove("open");
-});
-document.getElementById("fb-send").addEventListener("click", () => {
-  const text = document.getElementById("feedback-text").value.trim();
-  if (text) {
-    window.location.href = "mailto:jamesgilchrist8@gmail.com?subject=Jazz+Map+Feedback&body=" + encodeURIComponent(text);
-  }
-  document.getElementById("feedback-modal").classList.remove("open");
-});
-document.getElementById("feedback-modal").addEventListener("click", e => {
-  if (e.target === document.getElementById("feedback-modal"))
-    document.getElementById("feedback-modal").classList.remove("open");
-});
-
-let coffeeTimer;
-document.getElementById("coffee-btn").addEventListener("click", () => {
-  const t = document.getElementById("coffee-toast");
-  t.classList.add("show");
-  clearTimeout(coffeeTimer);
-  coffeeTimer = setTimeout(() => t.classList.remove("show"), 3500);
-});
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
 
 // ─── INTRO FADEOUT ─────────────────────────────────────────────────────────
+let introGone = false;
+// Links start hidden too
 setTimeout(() => {
   const el = document.getElementById("intro");
   if (!el) return;
   el.classList.add("fade-out");
-  setTimeout(() => el.classList.add("gone"), 1200);
+  setTimeout(() => {
+    el.classList.add("gone");
+    introGone = true;
+    // Staggered era reveal L→R (early→bebop→modal→fusion)
+    ["early","bebop","modal","fusion"].forEach((era, i) => {
+      setTimeout(() => {
+        const sel = nodeSel.filter(n => n.era === era);
+        // Fade in the group
+        sel.transition().duration(450).style("opacity", null);
+        // Bounce each circle in with a slight stagger per node
+        sel.each(function(d, j) {
+          d3.select(this).select("circle")
+            .transition()
+            .delay(j * 18)
+            .duration(520)
+            .ease(d3.easeBackOut.overshoot(1.6))
+            .attr("r", rScale(degree[d.id]));
+        });
+      }, i * 200);
+    });
+    // Links fade in alongside, spread across the same window
+    linkSel.each(function(l, i) {
+      const era = (l.source && l.source.era) ? l.source.era : "early";
+      const eraIdx = ["early","bebop","modal","fusion"].indexOf(era);
+      const delay = Math.max(0, eraIdx) * 170;
+      d3.select(this).transition().delay(delay).duration(500)
+        .attr("stroke-opacity", wOpacity(l.weight));
+    });
+    setTimeout(() => applyFilters(), 800);
+  }, 1200);
 }, 4400);
 
 const ERA_COLOR = { early:"#e8952a", bebop:"#4a90e0", modal:"#9b60d8", fusion:"#38b870" };
@@ -806,6 +930,86 @@ const rawLinks = [
   { s:"lee-morgan",        t:"horace-silver",      c:"Blue Note sessions — Song for My Father etc.",    w:3 },
 ];
 
+// ─── KEY ALBUMS PER CONNECTION ───────────────────────────────────────────────
+
+const LINK_ALBUMS = {
+  "miles-davis:john-coltrane":       ["'Round About Midnight (1957)", "Milestones (1958)", "Kind of Blue (1959)"],
+  "miles-davis:paul-chambers":       ["'Round About Midnight (1957)", "Milestones (1958)", "Kind of Blue (1959)"],
+  "miles-davis:herbie-hancock":      ["E.S.P. (1965)", "Miles Smiles (1966)", "Nefertiti (1967)"],
+  "miles-davis:wayne-shorter":       ["E.S.P. (1965)", "Miles Smiles (1966)", "Nefertiti (1967)"],
+  "miles-davis:tony-williams":       ["E.S.P. (1965)", "Miles Smiles (1966)", "Nefertiti (1967)"],
+  "miles-davis:ron-carter":          ["E.S.P. (1965)", "Miles Smiles (1966)", "Nefertiti (1967)"],
+  "miles-davis:cannonball-adderley": ["Milestones (1958)", "Porgy and Bess (1958)", "Kind of Blue (1959)"],
+  "miles-davis:bill-evans":          ["Kind of Blue (1959)"],
+  "miles-davis:sonny-rollins":       ["Cookin' (1956)", "Workin' (1956)", "Relaxin' (1956)"],
+  "miles-davis:wynton-kelly":        ["Someday My Prince Will Come (1961)", "In Person at the Blackhawk (1961)"],
+  "miles-davis:jack-dejohnette":     ["Bitches Brew (1970)", "Live-Evil (1971)"],
+  "miles-davis:chick-corea":         ["In a Silent Way (1969)", "Bitches Brew (1970)"],
+  "miles-davis:dave-holland":        ["In a Silent Way (1969)", "Bitches Brew (1970)"],
+  "john-coltrane:mccoy-tyner":       ["My Favorite Things (1961)", "Crescent (1964)", "A Love Supreme (1965)"],
+  "john-coltrane:elvin-jones":       ["Live at the Village Vanguard (1961)", "Crescent (1964)", "A Love Supreme (1965)"],
+  "john-coltrane:jimmy-garrison":    ["Crescent (1964)", "A Love Supreme (1965)", "Meditations (1966)"],
+  "john-coltrane:eric-dolphy":       ["Olé Coltrane (1961)", "Africa/Brass (1961)", "Live at the Village Vanguard (1961)"],
+  "thelonious-monk:john-coltrane":   ["Thelonious Monk with John Coltrane (1957)", "Monk's Music (1957)"],
+  "thelonious-monk:sonny-rollins":   ["Thelonious Monk / Sonny Rollins (1954)", "Monk's Music (1957)"],
+  "thelonious-monk:art-blakey":      ["Art Blakey's Jazz Messengers with Thelonious Monk (1957)"],
+  "bill-evans:scott-lafaro":         ["Portrait in Jazz (1959)", "Waltz for Debby (1961)", "Sunday at the Village Vanguard (1961)"],
+  "bill-evans:paul-motian":          ["Portrait in Jazz (1959)", "Waltz for Debby (1961)"],
+  "bill-evans:eddie-gomez":          ["At the Montreux Jazz Festival (1968)", "Intuition (1974)", "You Must Believe in Spring (1977)"],
+  "jim-hall:bill-evans":             ["Undercurrent (1962)", "Intermodulation (1966)"],
+  "jim-hall:sonny-rollins":          ["The Bridge (1962)"],
+  "ornette-coleman:don-cherry":      ["The Shape of Jazz to Come (1959)", "Change of the Century (1959)", "Free Jazz (1960)"],
+  "ornette-coleman:charlie-haden":   ["The Shape of Jazz to Come (1959)", "Change of the Century (1959)", "Free Jazz (1960)"],
+  "ornette-coleman:billy-higgins":   ["The Shape of Jazz to Come (1959)", "Change of the Century (1959)"],
+  "ornette-coleman:ed-blackwell":    ["This Is Our Music (1960)", "Free Jazz (1960)"],
+  "ornette-coleman:eric-dolphy":     ["Free Jazz (1960)"],
+  "charles-mingus:dannie-richmond":  ["Mingus Ah Um (1959)", "The Black Saint and the Sinner Lady (1963)", "Let My Children Hear Music (1972)"],
+  "charles-mingus:eric-dolphy":      ["Oh Yeah (1962)", "The Black Saint and the Sinner Lady (1963)"],
+  "charles-mingus:max-roach":        ["Jazz at Massey Hall (1953)"],
+  "clifford-brown:max-roach":        ["Clifford Brown & Max Roach (1954)", "Study in Brown (1955)", "At Basin Street (1956)"],
+  "clifford-brown:sonny-rollins":    ["At Basin Street (1956)"],
+  "dave-brubeck:paul-desmond":       ["Jazz Goes to College (1954)", "Time Out (1959)", "Carnegie Hall Concert (1963)"],
+  "oscar-peterson:ray-brown":        ["The Trio (1961)", "Night Train (1962)", "We Get Requests (1964)"],
+  "oscar-peterson:joe-pass":         ["The Trio (1973)", "Oscar Peterson & Joe Pass à Salle Pleyel (1975)"],
+  "oscar-peterson:ella-fitzgerald":  ["Ella and Oscar (1975)"],
+  "oscar-peterson:stan-getz":        ["Stan Getz & Oscar Peterson (1957)"],
+  "joe-pass:ella-fitzgerald":        ["Take Love Easy (1973)", "Easy Living (1974)", "Fitzgerald and Pass... Again (1976)"],
+  "joe-zawinul:wayne-shorter":       ["Weather Report (1971)", "Mysterious Traveller (1974)", "Heavy Weather (1977)"],
+  "joe-zawinul:jaco-pastorius":      ["Black Market (1976)", "Heavy Weather (1977)", "Mr. Gone (1978)"],
+  "cannonball-adderley:joe-zawinul": ["Mercy, Mercy, Mercy! Live at 'The Club' (1966)", "74 Miles Away (1967)"],
+  "cannonball-adderley:bill-evans":  ["Kind of Blue (1959)"],
+  "chick-corea:stanley-clarke":      ["Return to Forever (1972)", "Light as a Feather (1972)", "Romantic Warrior (1976)"],
+  "chick-corea:lenny-white":         ["Romantic Warrior (1976)", "Musicmagic (1977)"],
+  "chick-corea:al-di-meola":         ["Romantic Warrior (1976)", "Musicmagic (1977)"],
+  "milt-jackson:john-lewis":         ["Django (1955)", "Fontessa (1956)", "Blues on Bach (1974)"],
+  "milt-jackson:percy-heath":        ["Django (1955)", "Fontessa (1956)"],
+  "milt-jackson:connie-kay":         ["Django (1955)", "Fontessa (1956)"],
+  "pat-metheny:lyle-mays":           ["Pat Metheny Group (1978)", "Offramp (1982)", "Still Life (Talking) (1987)"],
+  "pat-metheny:charlie-haden":       ["Rejoicing (1983)"],
+  "pat-metheny:brad-mehldau":        ["Metheny / Mehldau (2006)"],
+  "keith-jarrett:gary-peacock":      ["Standards Vol. 1 (1983)", "Standards Live (1985)", "At the Blue Note (1994)"],
+  "keith-jarrett:jack-dejohnette":   ["Standards Vol. 1 (1983)", "Standards Live (1985)", "At the Blue Note (1994)"],
+  "keith-jarrett:charlie-haden":     ["Treasure Island (1974)", "The Survivors' Suite (1977)"],
+  "keith-jarrett:paul-motian":       ["Treasure Island (1974)", "The Survivors' Suite (1977)"],
+  "chet-baker:gerry-mulligan":       ["Gerry Mulligan Quartet with Chet Baker (1953)", "Carnegie Hall Concert (1974)"],
+  "stan-getz:gerry-mulligan":        ["Stan Meets Getz (1957)"],
+  "lee-konitz:gerry-mulligan":       ["Birth of the Cool (1949–50)", "Gerry Mulligan & Lee Konitz (1953)"],
+  "herbie-hancock:wayne-shorter":    ["V.S.O.P. (1977)", "1+1 (1997)"],
+  "herbie-hancock:tony-williams":    ["Empyrean Isles (1964)", "Maiden Voyage (1965)"],
+  "herbie-hancock:ron-carter":       ["Empyrean Isles (1964)", "Maiden Voyage (1965)"],
+  "herbie-hancock:freddie-hubbard":  ["Maiden Voyage (1965)", "V.S.O.P. (1977)"],
+  "art-blakey:wayne-shorter":        ["The Big Beat (1960)", "Witch Doctor (1961)", "Free for All (1964)"],
+  "art-blakey:lee-morgan":           ["Moanin' (1958)", "A Night in Tunisia (1960)"],
+  "art-blakey:freddie-hubbard":      ["Mosaic (1961)", "Ugetsu (1963)"],
+  "art-blakey:horace-silver":        ["Horace Silver and the Jazz Messengers (1955)"],
+  "wes-montgomery:wynton-kelly":     ["Smokin' at the Half Note (1965)"],
+  "john-mclaughlin:billy-cobham":    ["The Inner Mounting Flame (1971)", "Birds of Fire (1973)"],
+  "joe-henderson:freddie-hubbard":   ["Ready for Freddie (1961)", "Hub-Tones (1962)"],
+  "charlie-parker:dizzy-gillespie":  ["Bird and Diz (1950)", "Jazz at Massey Hall (1953)"],
+  "sonny-rollins:max-roach":         ["Work Time (1955)", "Saxophone Colossus (1956)"],
+  "elvin-jones:joe-henderson":       ["Poly-Currents (1969)", "Coalition (1970)"],
+};
+
 // ─── PRE-PROCESS ─────────────────────────────────────────────────────────────
 
 const graphLinks = rawLinks.map(l => ({ source:l.s, target:l.t, label:l.c, weight:l.w }));
@@ -825,15 +1029,16 @@ const nodeMap = {};
 nodes.forEach(n => { nodeMap[n.id] = n; });
 
 const maxDeg = d3.max(Object.values(degree));
-const rScale = d3.scaleSqrt().domain([0, maxDeg]).range([6, 34]);
+const rScale = d3.scaleSqrt().domain([0, maxDeg]).range([7, 42]);
 
 // Opacity only — no width variation
-const wOpacity = d3.scaleLinear().domain([1,5]).range([0.10, 0.62]);
+function wOpacity(w) { return [0, 0.10, 0.24, 0.44, 0.68, 0.90][w] || 0.15; }
+function wWidth(w)   { return [0, 1.0,  1.6,  2.4,  3.6,  5.2][w] || 1.5; }
 
 // ─── SVG & ZOOM ──────────────────────────────────────────────────────────────
 
 const W = window.innerWidth;
-const H = window.innerHeight - 84 - 34;
+const H = window.innerHeight - 58;
 
 const svg = d3.select("#graph").attr("viewBox", [0, 0, W, H]);
 const g   = svg.append("g");
@@ -878,7 +1083,17 @@ const zoomBehavior = d3.zoom()
     updateLabelVisibility();
   });
 svg.call(zoomBehavior);
-svg.on("click", () => { resetHighlight(); closeSidebar(); });
+svg.on("click", () => {
+  resetHighlight(); closeSidebar();
+  if (activeEra !== "all" || activeInstr !== "all") {
+    activeEra = "all"; activeInstr = "all";
+    document.querySelectorAll(".era-btn").forEach(b =>
+      b.classList.toggle("active", b.dataset.era === "all"));
+    document.querySelectorAll(".instr-btn").forEach(b =>
+      b.classList.toggle("active", b.dataset.instr === "all"));
+    applyFilters();
+  }
+});
 
 // Era column headers
 Object.entries(ERA_X).forEach(([era, x]) => {
@@ -908,8 +1123,18 @@ const linkSel = g.append("g")
     const srcEra = nodeMap[l.source]?.era || nodeMap[l.source?.id]?.era;
     return ERA_COLOR[srcEra] || "#8888aa";
   })
-  .attr("stroke-width", 1.5)
-  .attr("stroke-opacity", l => wOpacity(l.weight));
+  .attr("stroke-width", l => wWidth(l.weight))
+  .attr("stroke-linecap", "round")
+  .attr("stroke-opacity", 0);  // revealed after intro fades
+
+// Invisible wide hit-targets so thin links are easy to click
+const linkHitSel = g.append("g")
+  .selectAll("line")
+  .data(graphLinks)
+  .join("line")
+  .attr("class","link-hit")
+  .attr("stroke","transparent")
+  .attr("stroke-width", l => Math.max(wWidth(l.weight) * 2.5, 14));
 
 // ─── NODES ───────────────────────────────────────────────────────────────────
 
@@ -927,10 +1152,11 @@ const nodeSel = g.append("g")
   .on("mouseover", onHover)
   .on("mousemove", onMove)
   .on("mouseout",  onOut)
-  .on("click",     onSelect);
+  .on("click",     onSelect)
+  .style("opacity", 0);  // revealed after intro fades
 
 nodeSel.append("circle")
-  .attr("r", d => rScale(degree[d.id]))
+  .attr("r", 0)  // animated to full size after intro
   .attr("fill", d => ERA_COLOR[d.era])
   .attr("fill-opacity", 0.82)
   .attr("stroke", d => ERA_COLOR[d.era])
@@ -942,7 +1168,7 @@ nodeSel.append("text")
   .attr("text-anchor","middle")
   .attr("font-family","Georgia")
   .attr("font-size", d => { const r=rScale(degree[d.id]); return r>24?12:r>16?10.5:9; })
-  .attr("fill", d => degree[d.id]>=8 ? "#d0d0d0" : "#888888")
+  .attr("fill", "#e8e8f0")
   .text(d => d.name);
 
 // ─── SIMULATION ──────────────────────────────────────────────────────────────
@@ -959,6 +1185,9 @@ const sim = d3.forceSimulation(nodes)
 
 sim.on("tick", () => {
   linkSel
+    .attr("x1", d=>d.source.x).attr("y1", d=>d.source.y)
+    .attr("x2", d=>d.target.x).attr("y2", d=>d.target.y);
+  linkHitSel
     .attr("x1", d=>d.source.x).attr("y1", d=>d.source.y)
     .attr("x2", d=>d.target.x).attr("y2", d=>d.target.y);
   nodeSel.attr("transform", d=>`translate(${d.x},${d.y})`);
@@ -1007,9 +1236,11 @@ function onOut()    { tip.classed("visible", false); }
 // ─── SELECT / HIGHLIGHT / ZOOM ───────────────────────────────────────────────
 
 let activeNode = null;
+let activeLink = null;
 
 function onSelect(e, d) {
   e.stopPropagation();
+  activeLink = null;
   if (activeNode === d.id) { resetHighlight(); closeSidebar(); return; }
   activeNode = d.id;
 
@@ -1036,10 +1267,24 @@ function zoomToNode(d) {
      .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
 }
 
+function zoomToLink(l) {
+  const sbW   = 320;
+  const cx    = (W - sbW) / 2;
+  const mx    = (l.source.x + l.target.x) / 2;
+  const my    = (l.source.y + l.target.y) / 2;
+  const scale = Math.max(currentTransform.k, 1.8);
+  const tx    = cx - mx * scale;
+  const ty    = H/2 - my * scale;
+  svg.transition().duration(800).ease(d3.easeCubicInOut)
+     .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
 function resetHighlight() {
   activeNode = null;
+  activeLink = null;
   nodeSel.classed("dimmed", false).classed("selected", false);
   linkSel.classed("dimmed", false).classed("lit", false)
+    .attr("stroke-width", l => wWidth(l.weight))
     .attr("stroke-opacity", l => wOpacity(l.weight));
   applyFilters();
 }
@@ -1047,6 +1292,12 @@ function resetHighlight() {
 // ─── SIDEBAR ─────────────────────────────────────────────────────────────────
 
 function populateSidebar(d) {
+  // Restore node-mode visibility
+  document.getElementById("sb-link-section").style.display = "none";
+  ["sb-name","sb-nickname","sb-instr","sb-years","sb-era-tag","sb-count","sb-links","sb-heading","sb-list"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "";
+  });
   document.getElementById("sb-name").textContent  = d.name;
 
   const nickEl = document.getElementById("sb-nickname");
@@ -1089,6 +1340,51 @@ function populateSidebar(d) {
   document.getElementById("sidebar").classList.add("open");
 }
 
+function populateLinkSidebar(l) {
+  const src = l.source, tgt = l.target;
+  // Hide node-mode elements
+  ["sb-name","sb-nickname","sb-instr","sb-years","sb-era-tag","sb-count","sb-links","sb-heading","sb-list"].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = "none";
+  });
+
+  // Show link-mode section
+  document.getElementById("sb-link-section").style.display = "block";
+
+  // Both artist names in era colours
+  document.getElementById("sb-link-names").innerHTML =
+    `<span style="color:${ERA_COLOR[src.era]}">${src.name}</span>` +
+    `<span style="color:#404060"> &amp; </span>` +
+    `<span style="color:${ERA_COLOR[tgt.era]}">${tgt.name}</span>`;
+
+  document.getElementById("sb-link-desc").textContent = l.label;
+
+  // Strength dots
+  document.getElementById("sb-link-strength").innerHTML =
+    `<span style="color:${ERA_COLOR[src.era]}99">${weightDots(l.weight)}</span>` +
+    ` <span style="color:#8888b8;font-size:12px">${weightLabel(l.weight)}</span>`;
+
+  // Albums lookup — try both directions
+  const key1 = `${src.id}:${tgt.id}`, key2 = `${tgt.id}:${src.id}`;
+  const albums = LINK_ALBUMS[key1] || LINK_ALBUMS[key2] || [];
+
+  const albumsHead = document.getElementById("sb-albums-head");
+  const albumsList = document.getElementById("sb-albums");
+  albumsList.innerHTML = "";
+
+  if (albums.length) {
+    albumsHead.style.display = "block";
+    albums.forEach(a => {
+      const li = document.createElement("li");
+      li.textContent = a;
+      albumsList.appendChild(li);
+    });
+  } else {
+    albumsHead.style.display = "none";
+  }
+
+  document.getElementById("sidebar").classList.add("open");
+}
+
 function closeSidebar() { document.getElementById("sidebar").classList.remove("open"); }
 document.getElementById("close-sb").addEventListener("click", () => { resetHighlight(); closeSidebar(); });
 
@@ -1097,6 +1393,7 @@ document.getElementById("close-sb").addEventListener("click", () => { resetHighl
 let activeEra = "all";
 
 function applyFilters() {
+  if (!introGone) return; // don't fight the era fade-in animation
   // Compute visible node set
   const vis = new Set();
   nodes.forEach(n => {
@@ -1115,7 +1412,7 @@ function applyFilters() {
     const wo     = wOpacity(l.weight);
 
     if (srcVis && tgtVis) {
-      d3.select(this).attr("stroke", col).attr("stroke-opacity", wo).classed("dimmed",false);
+      d3.select(this).attr("stroke", col).attr("stroke-width", wWidth(l.weight)).attr("stroke-opacity", wo).classed("dimmed",false);
     } else if (!srcVis && !tgtVis) {
       d3.select(this).attr("stroke","#111122").attr("stroke-opacity",0.015).classed("dimmed",true);
     } else {
@@ -1137,6 +1434,33 @@ function applyFilters() {
     setTimeout(() => nodeSel.filter(n => n.id === dimmedId).classed("link-flash", false), 700);
   });
 }
+
+// ─── LINK INTERACTION ────────────────────────────────────────────────────────
+
+function onLinkClick(e, l) {
+  e.stopPropagation();
+  activeNode = null;
+  if (activeLink === l) { resetHighlight(); closeSidebar(); return; }
+  activeLink = l;
+  nodeSel.classed("dimmed",   n => n.id !== l.source.id && n.id !== l.target.id);
+  nodeSel.classed("selected", false);
+  linkSel.classed("dimmed", ll => ll !== l).classed("lit", ll => ll === l);
+  populateLinkSidebar(l);
+  zoomToLink(l);
+}
+
+linkHitSel
+  .on("click", onLinkClick)
+  .on("mouseover", function(e, l) {
+    if (activeLink === l) return;
+    d3.select(linkSel.nodes()[linkHitSel.nodes().indexOf(this)])
+      .attr("stroke-width", wWidth(l.weight) * 2.2);
+  })
+  .on("mouseout", function(e, l) {
+    if (activeLink === l) return;
+    d3.select(linkSel.nodes()[linkHitSel.nodes().indexOf(this)])
+      .attr("stroke-width", wWidth(l.weight));
+  });
 
 document.querySelectorAll(".era-btn").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -1199,6 +1523,9 @@ function showDropdown(q) {
     });
     searchDropdown.appendChild(item);
   });
+  const rect = searchBox.getBoundingClientRect();
+  searchDropdown.style.top   = (rect.bottom + 6) + "px";
+  searchDropdown.style.right = (window.innerWidth - rect.right) + "px";
   searchDropdown.style.display = "block";
 }
 
@@ -1241,41 +1568,7 @@ yBands.forEach(b => {
   yContainer.appendChild(el);
 });
 
-// ─── FIXED X-AXIS TIMELINE ───────────────────────────────────────────────────
-
-const xAxisEl = document.getElementById("x-axis");
-
-const xEraLabels = [
-  { label:ERA_LABEL.early,  color:ERA_COLOR.early,  pos:ERA_X.early  },
-  { label:ERA_LABEL.bebop,  color:ERA_COLOR.bebop,  pos:ERA_X.bebop  },
-  { label:ERA_LABEL.modal,  color:ERA_COLOR.modal,  pos:ERA_X.modal  },
-  { label:ERA_LABEL.fusion, color:ERA_COLOR.fusion, pos:ERA_X.fusion },
-];
-const xYearMarks = [
-  { year:"1900s", pos:0.04  },
-  { year:"~1945", pos:0.245 },
-  { year:"~1955", pos:0.37  },
-  { year:"~1960", pos:0.49  },
-  { year:"~1968", pos:0.62  },
-  { year:"~1972", pos:0.73  },
-  { year:"1985+",  pos:0.92 },
-];
-
-xEraLabels.forEach(d => {
-  const el = document.createElement("span");
-  el.className = "x-era-label";
-  el.textContent = d.label.toUpperCase();
-  el.style.left  = (d.pos * 100) + "%";
-  el.style.color = d.color;
-  xAxisEl.appendChild(el);
-});
-xYearMarks.forEach(d => {
-  const wrap = document.createElement("div");
-  wrap.className = "x-mark";
-  wrap.style.left = (d.pos * 100) + "%";
-  wrap.innerHTML  = `<div class="x-tick"></div><div class="x-year">${d.year}</div>`;
-  xAxisEl.appendChild(wrap);
-});
+// (x-axis removed)
 
 // ─── STATS ───────────────────────────────────────────────────────────────────
 
@@ -1286,6 +1579,81 @@ document.getElementById("stats").textContent =
 // Call once after a short delay to ensure initial positions are set
 setTimeout(updateLabelVisibility, 100);
 
+
+// ─── BUTTONS ──────────────────────────────────────────────────────────────────
+
+// Feedback
+document.getElementById("feedback-btn").addEventListener("click", () => {
+  document.getElementById("feedback-modal").classList.add("open");
+  document.getElementById("feedback-text").value = "";
+});
+document.getElementById("fb-cancel").addEventListener("click", () => {
+  document.getElementById("feedback-modal").classList.remove("open");
+});
+document.getElementById("fb-send").addEventListener("click", () => {
+  const email = document.getElementById("feedback-email").value.trim();
+  const text  = document.getElementById("feedback-text").value.trim();
+  if (!text) return;
+  const sendBtn = document.getElementById("fb-send");
+  sendBtn.textContent = "Sending…";
+  sendBtn.disabled = true;
+  fetch("https://formspree.io/f/mojkbkgy", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify({ email: email || "anonymous", message: text })
+  })
+  .then(r => r.json())
+  .then(() => {
+    document.getElementById("feedback-sent").style.display = "block";
+    document.getElementById("feedback-email").style.display = "none";
+    document.getElementById("feedback-text").style.display  = "none";
+    document.getElementById("feedback-actions").style.display = "none";
+    setTimeout(() => {
+      document.getElementById("feedback-modal").classList.remove("open");
+      setTimeout(() => {
+        document.getElementById("feedback-sent").style.display = "none";
+        document.getElementById("feedback-email").style.display = "";
+        document.getElementById("feedback-text").style.display  = "";
+        document.getElementById("feedback-actions").style.display = "";
+        document.getElementById("feedback-email").value = "";
+        document.getElementById("feedback-text").value  = "";
+        sendBtn.textContent = "Send"; sendBtn.disabled = false;
+      }, 400);
+    }, 1800);
+  })
+  .catch(() => {
+    sendBtn.textContent = "Send"; sendBtn.disabled = false;
+    window.open("mailto:james@thejazzmap.com?subject=The+Jazz+Map+Feedback&body=" + encodeURIComponent(text));
+  });
+});
+document.getElementById("feedback-modal").addEventListener("click", e => {
+  if (e.target === document.getElementById("feedback-modal"))
+    document.getElementById("feedback-modal").classList.remove("open");
+});
+
+// Ko-fi
+document.getElementById("coffee-btn").addEventListener("click", () => {
+  document.getElementById("kofi-modal").classList.add("open");
+});
+document.getElementById("kofi-close").addEventListener("click", () => {
+  document.getElementById("kofi-modal").classList.remove("open");
+});
+document.getElementById("kofi-modal").addEventListener("click", e => {
+  if (e.target === document.getElementById("kofi-modal"))
+    document.getElementById("kofi-modal").classList.remove("open");
+});
+
+// Learn More
+document.getElementById("learn-btn").addEventListener("click", () => {
+  document.getElementById("learn-modal").classList.add("open");
+});
+document.getElementById("learn-close").addEventListener("click", () => {
+  document.getElementById("learn-modal").classList.remove("open");
+});
+document.getElementById("learn-modal").addEventListener("click", e => {
+  if (e.target === document.getElementById("learn-modal"))
+    document.getElementById("learn-modal").classList.remove("open");
+});
 </script>
 </body>
 </html>
