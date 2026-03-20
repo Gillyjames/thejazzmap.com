@@ -167,7 +167,9 @@
     #sb-link-header { font-size:11px; color:#505078; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; }
     #sb-link-names  { font-size:18px; line-height:1.4; margin-bottom:8px; font-weight:normal; }
     #sb-albums-head { font-size:9.5px; color:#505075; text-transform:uppercase; letter-spacing:2.5px; margin:14px 0 10px; }
-    #sb-albums li   { padding:7px 0; border-bottom:1px solid #0e0e22; font-size:13px; color:#c0c0e0; list-style:none; }
+    #sb-albums li   { padding:6px 0; border-bottom:1px solid #0e0e22; font-size:13px; color:#c0c0e0; list-style:none; display:flex; align-items:center; gap:10px; }
+    .album-thumb    { width:68px; height:68px; border-radius:5px; flex-shrink:0; object-fit:cover; background:#0d0d20; opacity:0; transition:opacity 0.4s; }
+    .album-title    { line-height:1.4; }
     .node.selected circle {
       stroke:#fff !important; stroke-width:2.5px;
       animation:selectedGlow 2.5s ease-in-out infinite;
@@ -320,7 +322,7 @@
     }
     #kofi-close:hover { color:#ccc; }
     #kofi-frame {
-      width:100%; height:520px; border:none; display:block;
+      width:100%; height:548px; border:none; display:block;
       background:#fff;
     }
     #kofi-fallback {
@@ -504,7 +506,14 @@ setTimeout(() => {
             .duration(520)
             .ease(d3.easeBackOut.overshoot(1.6))
             .attr("r", rScale(degree[d.id]));
+          // Give each node a unique random velocity so they drift independently
+          const angle = Math.random() * 2 * Math.PI;
+          const speed = 2.5 + Math.random() * 4.5;
+          d.vx = (d.vx || 0) + Math.cos(angle) * speed;
+          d.vy = (d.vy || 0) + Math.sin(angle) * speed;
         });
+        // Kick the sim so it processes the new velocities
+        sim.alpha(Math.max(sim.alpha(), 0.25)).restart();
       }, i * 200);
     });
     // Links fade in alongside, spread across the same window
@@ -1008,6 +1017,151 @@ const LINK_ALBUMS = {
   "charlie-parker:dizzy-gillespie":  ["Bird and Diz (1950)", "Jazz at Massey Hall (1953)"],
   "sonny-rollins:max-roach":         ["Work Time (1955)", "Saxophone Colossus (1956)"],
   "elvin-jones:joe-henderson":       ["Poly-Currents (1969)", "Coalition (1970)"],
+
+  // Louis Armstrong
+  "louis-armstrong:earl-hines":      ["Louis Armstrong & Earl Hines (1928)", "Satch Plays Fats (1955)", "Louis Armstrong Plays W.C. Handy (1954)"],
+  "louis-armstrong:kid-ory":         ["The Complete Hot Five & Hot Seven Recordings (1925–28)", "Louis Armstrong Vol. III–IV (1925–27)"],
+  "louis-armstrong:jack-teagarden":  ["Satchmo at Symphony Hall (1947)", "Louis Armstrong Plays W.C. Handy (1954)", "Jazz Reunion (1958)"],
+  "louis-armstrong:ella-fitzgerald": ["Ella and Louis (1956)", "Ella and Louis Again (1957)", "Porgy and Bess (1957)"],
+  "louis-armstrong:billie-holiday":  ["Billie Holiday & Friends (1944)", "Esquire All American Hot Jazz Concert (1944)"],
+  "louis-armstrong:sidney-bechet":   ["Clarence Williams Blue Five Sessions (1924–25)"],
+
+  // Duke Ellington
+  "duke-ellington:billy-strayhorn":  ["...And His Mother Called Him Bill (1967)", "The Far East Suite (1967)", "Such Sweet Thunder (1957)"],
+  "duke-ellington:johnny-hodges":    ["Ellington at Newport (1956)", "Such Sweet Thunder (1957)", "The Far East Suite (1967)"],
+  "duke-ellington:ben-webster":      ["The Blanton–Webster Band (1940–42)", "Duke Ellington Presents... (1956)"],
+  "duke-ellington:cootie-williams":  ["The Blanton–Webster Band (1940–42)", "The Duke's Men: Small Groups Vol. 1 (1936–38)"],
+  "duke-ellington:john-coltrane":    ["Duke Ellington & John Coltrane (1962)"],
+  "duke-ellington:kenny-burrell":    ["Guitar Ambitions (1969)"],
+
+  // Count Basie
+  "count-basie:lester-young":        ["The Original American Decca Recordings (1937–39)", "One O'Clock Jump (1937)", "Lester Leaps In (1939)"],
+  "count-basie:jo-jones":            ["The Original American Decca Recordings (1937–39)", "Count Basie at Newport (1957)", "April in Paris (1956)"],
+  "count-basie:buck-clayton":        ["The Original American Decca Recordings (1937–39)", "The Complete Atomic Basie (1957)"],
+  "count-basie:ella-fitzgerald":     ["Ella and Basie! (1963)"],
+  "count-basie:oscar-peterson":      ["Oscar Peterson & Count Basie: Satch and Josh (1974)"],
+
+  // Benny Goodman
+  "benny-goodman:gene-krupa":        ["The Famous 1938 Carnegie Hall Jazz Concert (1938)", "Stompin' at the Savoy (1935)"],
+  "benny-goodman:lionel-hampton":    ["The Famous 1938 Carnegie Hall Jazz Concert (1938)", "Benny Goodman Quartet (1937)"],
+  "benny-goodman:teddy-wilson":      ["The Famous 1938 Carnegie Hall Jazz Concert (1938)", "After You've Gone (1935)", "Benny Goodman Trio (1935)"],
+  "benny-goodman:charlie-christian": ["Solo Flight: The Genius of Charlie Christian (1939–41)", "After You've Gone (1940)"],
+
+  // Billie Holiday
+  "billie-holiday:lester-young":     ["The Quintessential Billie Holiday Vol. 3 (1936–37)", "The Quintessential Billie Holiday Vol. 5 (1937–38)", "The Complete Commodore Recordings (1939)"],
+  "billie-holiday:teddy-wilson":     ["The Quintessential Billie Holiday Vol. 1 (1933–35)", "The Quintessential Billie Holiday Vol. 2 (1936)", "A Fine Romance (1936)"],
+  "billie-holiday:buck-clayton":     ["The Quintessential Billie Holiday Vol. 4 (1937)", "The Quintessential Billie Holiday Vol. 6 (1938)"],
+
+  // Charlie Parker
+  "charlie-parker:miles-davis":      ["The Charlie Parker Story (1945)", "Bird: The Dial Recordings (1946)", "Charlie Parker with Strings (1950)"],
+  "charlie-parker:max-roach":        ["The Charlie Parker Story (1945)", "The Verve Years (1950–51)", "Jazz at Massey Hall (1953)"],
+  "charlie-parker:thelonious-monk":  ["The Complete Savoy & Dial Studio Recordings (1944–48)", "Bird & Monk at Minton's (1941)"],
+  "charlie-parker:bud-powell":       ["Jazz at Massey Hall (1953)", "The Complete Verve Recordings (1950)"],
+  "charlie-parker:red-rodney":       ["Red Rodney with the Charlie Parker Quintet (1949–51)", "Bird and Red (1949)"],
+
+  // Dizzy Gillespie
+  "dizzy-gillespie:miles-davis":     ["Dizzy Gillespie Big Band (1945–46)", "Development of an American Artist (1940–46)"],
+  "dizzy-gillespie:thelonious-monk": ["Shaw 'Nuff (1945)", "Groovin' High (1945)", "In the Beginning (1946)"],
+  "dizzy-gillespie:milt-jackson":    ["Dizzy Gillespie Sextet (1946)", "Groovin' High (1945)"],
+  "dizzy-gillespie:ray-brown":       ["Shaw 'Nuff (1945)", "Dizzy Gillespie & His Orchestra (1946)", "This Is Jazz (1947)"],
+  "dizzy-gillespie:sarah-vaughan":   ["Dizzy Gillespie & Sarah Vaughan (Musicraft, 1945)"],
+  "dizzy-gillespie:dexter-gordon":   ["Dizzy Gillespie Big Band (1945–46)"],
+  "dizzy-gillespie:bud-powell":      ["Jazz at Massey Hall (1953)", "One Bass Hit (1946)"],
+
+  // Miles Davis First Quintet
+  "miles-davis:red-garland":         ["Cookin' with the Miles Davis Quintet (1956)", "Relaxin' with the Miles Davis Quintet (1956)", "Workin' with the Miles Davis Quintet (1956)"],
+  "miles-davis:philly-joe-jones":    ["Cookin' with the Miles Davis Quintet (1956)", "Relaxin' with the Miles Davis Quintet (1956)", "Milestones (1958)"],
+  "miles-davis:thelonious-monk":     ["Bags' Groove (1954)", "Miles Davis & the Modern Jazz Giants (1954)"],
+  "miles-davis:john-mclaughlin":     ["In a Silent Way (1969)", "Bitches Brew (1970)"],
+  "miles-davis:keith-jarrett":       ["Live-Evil (1971)", "Miles Davis at Fillmore (1970)"],
+  "miles-davis:joe-zawinul":         ["In a Silent Way (1969)", "Bitches Brew (1970)"],
+  "miles-davis:lee-konitz":          ["Birth of the Cool (1949–50)"],
+  "miles-davis:gerry-mulligan":      ["Birth of the Cool (1949–50)"],
+  "miles-davis:max-roach":           ["Birth of the Cool (1949–50)", "Bags' Groove (1954)"],
+
+  // Art Blakey
+  "art-blakey:benny-golson":         ["Moanin' (1958)", "Jazz Messengers!! (1959)", "At the Jazz Corner of the World (1959)"],
+  "art-blakey:cedar-walton":         ["Buhaina's Delight (1961)", "Ugetsu (1963)", "Kyoto (1964)"],
+  "art-blakey:bobby-timmons":        ["Moanin' (1958)", "At the Jazz Corner of the World (1959)"],
+  "art-blakey:wynton-marsalis":      ["Wynton Marsalis (1982)", "Think of One (1983)", "Straight, No Chaser (1987)"],
+  "art-blakey:clifford-brown":       ["A Night at Birdland Vol. 1 & 2 (1954)", "Clifford Brown with Max Roach (1954)"],
+  "art-blakey:jackie-mclean":        ["A Night at Birdland Vol. 1 & 2 (1954)", "Hard Bop (1956)"],
+
+  // Charles Mingus
+  "charles-mingus:booker-ervin":     ["Mingus Ah Um (1959)", "Blues and Roots (1960)", "Oh Yeah (1962)"],
+  "charles-mingus:jaki-byard":       ["Mingus Mingus Mingus Mingus Mingus (1963)", "Right Now: Live at the Jazz Workshop (1964)", "Let My Children Hear Music (1972)"],
+  "charles-mingus:jackie-mclean":    ["Pithecanthropus Erectus (1956)", "Jazz Perspectives (1957)"],
+
+  // MJQ
+  "john-lewis:percy-heath":          ["Django (1955)", "Fontessa (1956)", "The Modern Jazz Quartet (1957)"],
+  "john-lewis:connie-kay":           ["Django (1955)", "Fontessa (1956)", "Blues on Bach (1974)"],
+
+  // Ornette / Free Jazz inner connections
+  "don-cherry:charlie-haden":        ["Old and New Dreams (1979)", "Old and New Dreams: Playing (1980)"],
+  "don-cherry:ed-blackwell":         ["Old and New Dreams (1979)", "Mu First Part / Second Part (1969)"],
+  "charlie-haden:billy-higgins":     ["The Shape of Jazz to Come (1959)", "Change of the Century (1959)", "Liberation Music Orchestra (1969)"],
+
+  // Weather Report
+  "joe-zawinul:miroslav-vitous":     ["Weather Report (1971)", "I Sing the Body Electric (1972)", "Sweetnighter (1973)"],
+
+  // Chick Corea
+  "chick-corea:airto-moreira":       ["Return to Forever (1972)", "Light as a Feather (1972)"],
+  "chick-corea:dave-holland":        ["Circle: Paris Concert (1971)", "Circling In (1968)"],
+
+  // Mahavishnu / Lifetime
+  "john-mclaughlin:tony-williams":   ["Emergency! (1969)", "Turn It Over (1970)"],
+
+  // Elvin Jones
+  "elvin-jones:woody-shaw":          ["New Agenda (1975)", "The Elvin Jones Jazz Machine (1973)"],
+  "elvin-jones:freddie-hubbard":     ["Blue Spirits (1966)", "Ready for Freddie (1961)"],
+
+  // Wayne Shorter / Lee Morgan
+  "wayne-shorter:lee-morgan":        ["The Big Beat (1960)", "Free for All (1964)"],
+
+  // Freddie Hubbard
+  "freddie-hubbard:wayne-shorter":   ["Speak No Evil (1964)", "Night of the Cookers (1965)"],
+  "freddie-hubbard:ron-carter":      ["Red Clay (1970)", "Straight Life (1970)"],
+
+  // Wes Montgomery
+  "wes-montgomery:ron-carter":       ["Full House (1962)", "Movin' Wes (1964)"],
+
+  // Joe Henderson
+  "joe-henderson:herbie-hancock":    ["Empyrean Isles (1964)", "Inner Urge (1964)"],
+  "joe-henderson:kenny-burrell":     ["Kenny Burrell & John Coltrane (1958)", "Blues — The Common Ground (1968)"],
+
+  // Cannonball
+  "cannonball-adderley:wynton-kelly": ["Somethin' Else (1958)", "Cannonball's Shout (1958)"],
+
+  // Paul Chambers
+  "paul-chambers:wynton-kelly":      ["Wynton Kelly! (1958)", "Smokin' at the Half Note (1965)", "Kelly Great (1959)"],
+
+  // Sarah Vaughan
+  "sarah-vaughan:earl-hines":        ["Sarah Vaughan with Earl Hines Orchestra (1944)", "Lover Man (1944)"],
+
+  // Jim Hall
+  "jim-hall:lee-konitz":             ["Lee Konitz with Warne Marsh (1955)", "Tranquility (1959)"],
+  "jim-hall:chet-baker":             ["Chet (1959)"],
+
+  // Oscar Peterson
+  "oscar-peterson:sarah-vaughan":    ["How Long Has This Been Going On? (1978)", "Sarah Vaughan (1954)"],
+
+  // Wynton Marsalis
+  "wynton-marsalis:branford-marsalis": ["Scenes in the City (1984)", "Think of One (1983)", "Royal Garden Blues (1986)"],
+  "wynton-marsalis:herbie-hancock":  ["VSOP: The Quintet (1977)", "Quartet (1982)"],
+
+  // Joshua Redman / Brad Mehldau
+  "joshua-redman:brad-mehldau":      ["MoodSwing (1994)", "Joshua Redman (1993)", "Wish (1993)"],
+
+  // Chris Potter / Dave Holland
+  "chris-potter:dave-holland":       ["Extensions (1989)", "Prime Directive (1998)", "Overtime (2005)"],
+
+  // Thelonious Monk
+  "thelonious-monk:max-roach":       ["Thelonious Monk Quintet (1954)", "Monk's Music (1957)"],
+  "thelonious-monk:milt-jackson":    ["Blue Note Sessions (1948)", "Thelonious Monk Quintet (1954)"],
+  "coleman-hawkins:thelonious-monk": ["'Round Midnight (1944)", "Rainbow Mist (1944)"],
+
+  // Sonny Rollins
+  "sonny-rollins:horace-silver":     ["Horace Silver and the Jazz Messengers (1955)", "Sonny Rollins Vol. 1 (1956)"],
 };
 
 // ─── PRE-PROCESS ─────────────────────────────────────────────────────────────
@@ -1244,6 +1398,13 @@ function onSelect(e, d) {
   if (activeNode === d.id) { resetHighlight(); closeSidebar(); return; }
   activeNode = d.id;
 
+  // Small bounce kick on the selected node
+  const kickAngle = Math.random() * 2 * Math.PI;
+  const kickSpeed = 1.8 + Math.random() * 1.8;
+  d.vx = (d.vx || 0) + Math.cos(kickAngle) * kickSpeed;
+  d.vy = (d.vy || 0) + Math.sin(kickAngle) * kickSpeed;
+  sim.alpha(Math.max(sim.alpha(), 0.12)).restart();
+
   const connected = new Set([d.id]);
   adj[d.id].forEach(a => connected.add(a.id));
 
@@ -1375,8 +1536,42 @@ function populateLinkSidebar(l) {
     albumsHead.style.display = "block";
     albums.forEach(a => {
       const li = document.createElement("li");
-      li.textContent = a;
+
+      // Thumbnail placeholder
+      const img = document.createElement("img");
+      img.className = "album-thumb";
+      img.alt = "";
+
+      // Title span
+      const span = document.createElement("span");
+      span.className = "album-title";
+      span.textContent = a;
+
+      li.appendChild(img);
+      li.appendChild(span);
       albumsList.appendChild(li);
+
+      // Fetch artwork from iTunes Search API (no key needed, CORS-open)
+      const rawTitle = a.replace(/\s*\(\d{4}\).*$/, "").trim(); // strip year
+      const query = encodeURIComponent(`${rawTitle} ${src.name}`);
+      fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=4`)
+        .then(r => r.json())
+        .then(data => {
+          // Try to find a result whose album name is a close match
+          const results = data.results || [];
+          const match = results.find(r =>
+            r.collectionName && r.collectionName.toLowerCase().includes(rawTitle.toLowerCase().split(" ")[0])
+          ) || results[0];
+          if (match && match.artworkUrl100) {
+            // Use 60×60 artwork
+            img.src = match.artworkUrl100;
+            img.onload  = () => { img.style.opacity = "1"; };
+            img.onerror = () => { img.style.display = "none"; };
+          } else {
+            img.style.display = "none";
+          }
+        })
+        .catch(() => { img.style.display = "none"; });
     });
   } else {
     albumsHead.style.display = "none";
@@ -1478,6 +1673,7 @@ document.querySelectorAll(".instr-btn").forEach(btn => {
     btn.classList.add("active");
     activeInstr = btn.dataset.instr;
     resetHighlight(); closeSidebar(); applyFilters();
+    sim.alpha(0.3).restart();
   });
 });
 
