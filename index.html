@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Jazz Map</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0d0d1a; color:#e0e0e0; font-family:'Georgia',serif; overflow:hidden; height:100vh; width:100vw; }
+
+    /* ── INTRO OVERLAY ── */
+    #intro {
+      position:fixed; inset:0; z-index:500;
+      background:radial-gradient(ellipse at 50% 42%, #0f0f28 0%, #050510 100%);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      pointer-events:none; will-change:opacity,transform;
+    }
+    #intro.fade-out {
+      opacity:0; transform:scale(1.04);
+      transition:opacity 1.1s cubic-bezier(0.4,0,0.2,1), transform 1.6s cubic-bezier(0.4,0,0.2,1);
+    }
+    #intro.gone { display:none; }
+
+    #intro-title {
+      font-size:52px; color:#f0c060; letter-spacing:12px;
+      font-family:'Georgia',serif; text-align:center;
+      opacity:0; filter:blur(18px);
+      animation: titleReveal 1.7s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
+    }
+    #intro-rule {
+      width:300px; height:1px;
+      background:linear-gradient(90deg,transparent,#c8a050 38%,#f0c060 50%,#c8a050 62%,transparent);
+      margin:22px 0 20px; transform:scaleX(0); opacity:0; transform-origin:center;
+      animation: ruleReveal 0.95s cubic-bezier(0.16,1,0.3,1) 1.2s forwards;
+    }
+    #intro-sub {
+      font-size:12.5px; color:#484862; letter-spacing:3.5px; text-align:center; line-height:2.3;
+      opacity:0;
+      animation: softReveal 0.85s ease 1.6s forwards;
+    }
+    #intro-eras { display:flex; gap:30px; margin-top:28px; }
+    .intro-era { font-size:10px; letter-spacing:2.5px; text-transform:uppercase; opacity:0; }
+    .intro-era:nth-child(1) { animation: softReveal 0.6s ease 2.15s forwards; }
+    .intro-era:nth-child(2) { animation: softReveal 0.6s ease 2.38s forwards; }
+    .intro-era:nth-child(3) { animation: softReveal 0.6s ease 2.61s forwards; }
+    .intro-era:nth-child(4) { animation: softReveal 0.6s ease 2.84s forwards; }
+    #intro-hint {
+      position:absolute; bottom:62px; font-size:10.5px; color:#242436; letter-spacing:2.5px;
+      opacity:0; animation: softReveal 0.7s ease 3.4s forwards;
+    }
+
+    @keyframes titleReveal {
+      from { opacity:0; filter:blur(18px); letter-spacing:26px; }
+      to   { opacity:1; filter:blur(0);   letter-spacing:12px; }
+    }
+    @keyframes ruleReveal {
+      from { transform:scaleX(0); opacity:0; }
+      to   { transform:scaleX(1); opacity:1; }
+    }
+    @keyframes softReveal {
+      from { opacity:0; transform:translateY(8px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── HEADER ── */
+    #header {
+      position:absolute; top:0; left:0; right:0;
+      background:rgba(10,10,22,0.99);
+      border-bottom:1px solid #181830; z-index:10;
+      display:flex; flex-direction:column;
+    }
+    #header-row1 {
+      height:50px; display:flex; align-items:center; gap:10px; padding:0 18px;
+      border-bottom:1px solid #0d0d22;
+    }
+    #header-row2 {
+      height:34px; display:flex; align-items:center; gap:5px; padding:0 18px;
+    }
+    #brand { display:flex; flex-direction:column; justify-content:center; gap:2px; white-space:nowrap; }
+    #header-title { font-size:13px; color:#c8a050; letter-spacing:3.5px; font-weight:normal; }
+    #header-credit { font-size:8px; color:#30304e; }
+    #header-credit a { color:#806830; text-decoration:none; }
+    #header-spacer { flex:1; }
+    .action-btn {
+      padding:3px 12px; border-radius:16px; border:1px solid #1e1e38;
+      background:transparent; cursor:pointer; font-size:10px; color:#444460;
+      font-family:Georgia,serif; transition:all 0.25s; white-space:nowrap;
+    }
+    .action-btn:hover { border-color:#3a3a60; color:#aaaacc; }
+    .instr-lbl { font-size:8px; color:#252540; letter-spacing:1.5px; text-transform:uppercase; margin-right:4px; white-space:nowrap; }
+    .instr-btn {
+      padding:2px 9px; border-radius:12px; border:1px solid #1a1a30;
+      background:transparent; cursor:pointer; font-size:9.5px; color:#333350;
+      font-family:Georgia,serif; transition:all 0.25s; white-space:nowrap;
+    }
+    .instr-btn:hover { border-color:#3a3a58; color:#7070a0; }
+    .instr-btn.active { background:#1e1e40; color:#9090c0; border-color:#3a3a60; }
+    .link-flash circle { animation:flashCircle 0.7s ease-out forwards; }
+    @keyframes flashCircle {
+      0%   { filter:drop-shadow(0 0 18px rgba(255,255,255,0.9)); }
+      100% { filter:none; }
+    }
+    .era-btn {
+      padding:3px 11px; border-radius:20px; border:1.5px solid;
+      background:transparent; cursor:pointer; font-size:10.5px;
+      font-family:Georgia,serif; transition:all 0.3s cubic-bezier(0.16,1,0.3,1); white-space:nowrap;
+    }
+    .era-btn[data-era="all"]    { border-color:#3a3a50; color:#4a4a62; }
+    .era-btn[data-era="early"]  { border-color:#e8952a; color:#e8952a; }
+    .era-btn[data-era="bebop"]  { border-color:#4a90e0; color:#4a90e0; }
+    .era-btn[data-era="modal"]  { border-color:#9b60d8; color:#9b60d8; }
+    .era-btn[data-era="fusion"] { border-color:#38b870; color:#38b870; }
+    .era-btn.active[data-era="all"]    { background:#4a4a62; color:#0a0a16; }
+    .era-btn.active[data-era="early"]  { background:#e8952a; color:#0a0a16; }
+    .era-btn.active[data-era="bebop"]  { background:#4a90e0; color:#0a0a16; }
+    .era-btn.active[data-era="modal"]  { background:#9b60d8; color:#0a0a16; }
+    .era-btn.active[data-era="fusion"] { background:#38b870; color:#0a0a16; }
+
+    /* ── SEARCH ── */
+    #search-wrap { position:relative; margin-left:auto; }
+    #search-box {
+      padding:5px 16px; background:#0b0b1e; border:1px solid #282848;
+      border-radius:20px; color:#d0d0e8; font-size:12px;
+      font-family:Georgia,serif; width:196px; outline:none;
+      transition:border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    #search-box:focus { border-color:#38385a; box-shadow:0 0 0 3px rgba(200,160,80,0.07); }
+    #search-box::placeholder { color:#484868; }
+    #search-dropdown {
+      display:none; position:absolute; top:calc(100% + 7px); right:0;
+      width:278px; background:#0b0b20; border:1px solid #1e1e3a;
+      border-radius:10px; overflow:hidden; z-index:100;
+      box-shadow:0 16px 48px rgba(0,0,0,0.85);
+    }
+    .drop-item { padding:9px 15px; cursor:pointer; border-bottom:1px solid #141428; transition:background 0.15s; }
+    .drop-item:last-child { border-bottom:none; }
+    .drop-item:hover,.drop-item.focused { background:#161632; }
+    .drop-name { font-size:13.5px; }
+    .drop-meta { font-size:10.5px; color:#363654; margin-top:2px; }
+
+    /* ── GRAPH ── */
+    #svg-wrap { position:absolute; top:84px; left:0; right:0; bottom:34px; }
+    svg { width:100%; height:100%; }
+
+    /* ── FIXED OVERLAYS ── */
+    #y-labels-container { position:absolute; left:0; top:84px; bottom:34px; pointer-events:none; z-index:4; }
+    .y-label { position:absolute; font-size:8px; color:#1e1e36; letter-spacing:1.5px; text-transform:uppercase; left:8px; transform:translateY(-50%); white-space:nowrap; }
+
+    #x-axis {
+      position:absolute; bottom:0; left:0; right:0; height:34px;
+      background:rgba(10,10,22,0.99); border-top:1px solid #141426;
+      z-index:4; pointer-events:none;
+    }
+    .x-mark { position:absolute; bottom:0; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; }
+    .x-tick  { width:1px; height:6px; background:#1c1c32; }
+    .x-year  { font-size:9px; color:#1e1e38; margin-top:2px; letter-spacing:0.5px; }
+    .x-era-label { position:absolute; top:5px; font-size:8px; letter-spacing:1.5px; text-transform:uppercase; transform:translateX(-50%); opacity:0.32; }
+
+    /* ── LINKS ── */
+    .link { stroke-width:1.5px; }
+    .link.dimmed { stroke-opacity:0.02 !important; }
+    .link.lit    { stroke-opacity:0.96 !important; }
+
+    /* ── NODES ── */
+    .node circle {
+      cursor:pointer;
+      transition:stroke-width 0.22s ease, filter 0.22s ease;
+    }
+    .node:hover circle {
+      stroke-width:2.5px !important;
+      filter:drop-shadow(0 0 10px var(--era-color, #aaa));
+    }
+    .node text { pointer-events:none; text-shadow:0 0 8px #0d0d1a,0 0 8px #0d0d1a,0 0 8px #0d0d1a,0 0 8px #0d0d1a; }
+    .node.dimmed { opacity:0.05; }
+    .node.selected circle {
+      stroke:#fff !important; stroke-width:2.5px;
+      animation:selectedGlow 2.5s ease-in-out infinite;
+    }
+    @keyframes selectedGlow {
+      0%,100% { filter:drop-shadow(0 0 7px rgba(255,255,255,0.5)); }
+      50%      { filter:drop-shadow(0 0 22px rgba(255,255,255,0.9)); }
+    }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      position:absolute; right:0; top:84px; bottom:34px; width:320px;
+      background:rgba(7,7,18,0.99); border-left:1px solid #161628;
+      padding:26px 22px; z-index:8; overflow-y:auto;
+      transform:translateX(calc(100% + 24px));
+      transition:transform 0.55s cubic-bezier(0.16,1,0.3,1), box-shadow 0.55s cubic-bezier(0.16,1,0.3,1);
+      box-shadow:none;
+    }
+    #sidebar.open { transform:translateX(0); box-shadow:-28px 0 70px rgba(0,0,0,0.65); }
+    #close-sb { position:absolute; top:18px; right:18px; background:none; border:none; color:#282840; font-size:16px; cursor:pointer; transition:color 0.22s; }
+    #close-sb:hover { color:#999; }
+    #sb-name     { font-size:24px; color:#f0e0a0; margin-bottom:2px; padding-right:24px; line-height:1.2; font-weight:normal; }
+    #sb-nickname { font-size:14px; color:#a08040; font-style:italic; margin-bottom:10px; letter-spacing:0.4px; }
+    #sb-instr    { font-size:14px; color:#9898bc; margin-bottom:4px; }
+    #sb-years    { font-size:13px; color:#7878a8; margin-bottom:10px; }
+    #sb-era-tag  { display:inline-block; padding:3px 12px; border-radius:12px; font-size:11.5px; margin-bottom:8px; }
+    #sb-count    { font-size:12px; color:#606090; margin-bottom:16px; }
+    #sb-links    { display:flex; gap:10px; margin-bottom:18px; }
+    .sb-link {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 14px; border-radius:20px; border:1px solid #1e1e38;
+      font-size:12px; color:#555; text-decoration:none;
+      transition:all 0.25s ease; font-family:Georgia,serif;
+    }
+    .sb-link:hover { border-color:#484860; color:#ccc; background:#0e0e24; }
+    #sb-heading  { font-size:9.5px; color:#505075; text-transform:uppercase; letter-spacing:2.5px; margin-bottom:11px; }
+    #sb-list     { list-style:none; }
+    #sb-list li  { padding:9px 0; border-bottom:1px solid #0e0e22; cursor:pointer; font-size:14px; line-height:1.5; }
+    #sb-list li:hover .sb-nm { text-decoration:underline; }
+    .sb-ctx      { font-size:11.5px; color:#6868a0; margin-top:3px; }
+    .sb-weight   { font-size:11.5px; color:#7878a8; margin-top:3px; }
+
+    /* ── TOOLTIP ── */
+    #tooltip {
+      position:absolute; background:rgba(5,5,16,0.97); border:1px solid #1c1c34;
+      border-radius:9px; padding:11px 15px; font-size:13px;
+      pointer-events:none; z-index:30; max-width:230px; line-height:1.65;
+      opacity:0; transform:translateY(5px);
+      transition:opacity 0.2s ease, transform 0.2s ease;
+      will-change:opacity,transform;
+    }
+    #tooltip.visible { opacity:1; transform:translateY(0); }
+
+    #stats { position:absolute; bottom:40px; right:14px; color:#141428; font-size:10px; z-index:5; text-align:right; }
+
+    /* ── FEEDBACK MODAL ── */
+    #feedback-modal {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200;
+      align-items:center; justify-content:center;
+    }
+    #feedback-modal.open { display:flex; }
+    #feedback-box {
+      background:#07071a; border:1px solid #1e1e38; border-radius:14px;
+      padding:28px 28px 22px; width:420px; max-width:92vw;
+    }
+    #feedback-box h3 { color:#c8a050; font-size:17px; font-weight:normal; letter-spacing:1px; margin-bottom:6px; }
+    #feedback-box p  { color:#404060; font-size:11px; margin-bottom:16px; }
+    #feedback-text {
+      width:100%; height:120px; background:#0b0b22; border:1px solid #1e1e38;
+      border-radius:8px; color:#ccc; font-size:13px; font-family:Georgia,serif;
+      padding:10px 12px; resize:none; outline:none; margin-bottom:14px;
+    }
+    #feedback-text:focus { border-color:#3a3a60; }
+    #feedback-actions { display:flex; gap:10px; justify-content:flex-end; }
+    .fb-btn {
+      padding:6px 18px; border-radius:20px; border:1px solid #2a2a48;
+      background:transparent; cursor:pointer; font-size:12px; color:#666;
+      font-family:Georgia,serif; transition:all 0.2s;
+    }
+    .fb-btn:hover { border-color:#5a5a80; color:#ccc; }
+    .fb-btn.primary { border-color:#c8a050; color:#c8a050; }
+    .fb-btn.primary:hover { background:#c8a050; color:#0a0a16; }
+    /* ── COFFEE TOAST ── */
+    #coffee-toast {
+      position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:#07071e; border:1px solid #2a2a48; border-radius:24px;
+      padding:10px 22px; font-size:12.5px; color:#9090b8; z-index:200;
+      opacity:0; transition:opacity 0.4s, transform 0.4s; pointer-events:none; white-space:nowrap;
+    }
+    #coffee-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro">
+  <div id="intro-title">THE JAZZ MAP</div>
+  <div id="intro-rule"></div>
+  <div id="intro-sub">A century of musical connections<br>112 artists · 183+ documented collaborations</div>
+  <div id="intro-eras">
+    <span class="intro-era" style="color:#e8952a">Early · Swing</span>
+    <span class="intro-era" style="color:#4a90e0">Bebop · Hard Bop</span>
+    <span class="intro-era" style="color:#9b60d8">Modal · Avant-Garde</span>
+    <span class="intro-era" style="color:#38b870">Fusion · Modern</span>
+  </div>
+  <div id="intro-hint">Click any musician to explore their world</div>
+</div>
+
+<div id="header">
+  <div id="header-row1">
+    <div id="brand">
+      <div id="header-title">THE JAZZ MAP</div>
+      <div id="header-credit">by <a href="mailto:jamesgilchrist8@gmail.com">James Gilchrist</a> · 2026</div>
+    </div>
+    <div id="era-filters">
+      <button class="era-btn active" data-era="all">All Eras</button>
+      <button class="era-btn" data-era="early">Early / Swing</button>
+      <button class="era-btn" data-era="bebop">Bebop / Hard Bop</button>
+      <button class="era-btn" data-era="modal">Modal / Avant-Garde</button>
+      <button class="era-btn" data-era="fusion">Fusion / Modern</button>
+    </div>
+    <div id="header-spacer"></div>
+    <button class="action-btn" id="feedback-btn">💬 Feedback</button>
+    <button class="action-btn" id="coffee-btn">☕ Coffee</button>
+    <div id="search-wrap">
+      <input type="text" id="search-box" placeholder="Search artist…" autocomplete="off">
+      <div id="search-dropdown"></div>
+    </div>
+  </div>
+  <div id="header-row2">
+    <span class="instr-lbl">Instrument ·</span>
+    <button class="instr-btn active" data-instr="all">All</button>
+    <button class="instr-btn" data-instr="vocal">Vocals</button>
+    <button class="instr-btn" data-instr="trumpet">Trumpet</button>
+    <button class="instr-btn" data-instr="trombone">Trombone</button>
+    <button class="instr-btn" data-instr="sax">Sax / Clar</button>
+    <button class="instr-btn" data-instr="guitar">Guitar</button>
+    <button class="instr-btn" data-instr="vibes">Vibes</button>
+    <button class="instr-btn" data-instr="piano">Piano</button>
+    <button class="instr-btn" data-instr="bass">Bass</button>
+    <button class="instr-btn" data-instr="drums">Drums</button>
+  </div>
+</div>
+
+<div id="y-labels-container"></div>
+<div id="svg-wrap"><svg id="graph"></svg></div>
+<div id="x-axis"></div>
+
+<div id="sidebar">
+  <button id="close-sb">✕</button>
+  <div id="sb-name"></div>
+  <div id="sb-nickname"></div>
+  <div id="sb-instr"></div>
+  <div id="sb-years"></div>
+  <span id="sb-era-tag"></span>
+  <div id="sb-count"></div>
+  <div id="sb-links">
+    <a id="sb-wiki"    class="sb-link" href="" target="_blank" rel="noopener">📖 Wikipedia</a>
+    <a id="sb-spotify" class="sb-link" href="" target="_blank" rel="noopener">🎵 Spotify</a>
+  </div>
+  <div id="sb-heading">Played With</div>
+  <ul id="sb-list"></ul>
+</div>
+
+<div id="tooltip"></div>
+
+
+
+<div id="stats"></div>
+
+
+<div id="feedback-modal">
+  <div id="feedback-box">
+    <h3>Share Feedback</h3>
+    <p>Your thoughts on The Jazz Map — james@thejazzmap.com</p>
+    <textarea id="feedback-text" placeholder="What would you change, add, or fix?"></textarea>
+    <div id="feedback-actions">
+      <button class="fb-btn" id="fb-cancel">Cancel</button>
+      <button class="fb-btn primary" id="fb-send">Send via Email</button>
+    </div>
+  </div>
+</div>
+<div id="coffee-toast">Thanks for the offer, but I'm fully caffeinated ☕</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js">
+// ─── FEEDBACK & COFFEE ───────────────────────────────────────────────────────
+
+document.getElementById("feedback-btn").addEventListener("click", () => {
+  document.getElementById("feedback-modal").classList.add("open");
+  document.getElementById("feedback-text").value = "";
+});
+document.getElementById("fb-cancel").addEventListener("click", () => {
+  document.getElementById("feedback-modal").classList.remove("open");
+});
+document.getElementById("fb-send").addEventListener("click", () => {
+  const text = document.getElementById("feedback-text").value.trim();
+  if (text) {
+    window.location.href = "mailto:jamesgilchrist8@gmail.com?subject=Jazz+Map+Feedback&body=" + encodeURIComponent(text);
+  }
+  document.getElementById("feedback-modal").classList.remove("open");
+});
+document.getElementById("feedback-modal").addEventListener("click", e => {
+  if (e.target === document.getElementById("feedback-modal"))
+    document.getElementById("feedback-modal").classList.remove("open");
+});
+
+let coffeeTimer;
+document.getElementById("coffee-btn").addEventListener("click", () => {
+  const t = document.getElementById("coffee-toast");
+  t.classList.add("show");
+  clearTimeout(coffeeTimer);
+  coffeeTimer = setTimeout(() => t.classList.remove("show"), 3500);
+});
+</script>
+<script>
+
+// ─── INTRO FADEOUT ─────────────────────────────────────────────────────────
+setTimeout(() => {
+  const el = document.getElementById("intro");
+  if (!el) return;
+  el.classList.add("fade-out");
+  setTimeout(() => el.classList.add("gone"), 1200);
+}, 4400);
+
+const ERA_COLOR = { early:"#e8952a", bebop:"#4a90e0", modal:"#9b60d8", fusion:"#38b870" };
+const ERA_LABEL = { early:"Early / Swing", bebop:"Bebop / Hard Bop", modal:"Modal / Avant-Garde", fusion:"Fusion & Modern" };
+const ERA_X     = { early:0.13, bebop:0.37, modal:0.62, fusion:0.86 };
+
+function instrBand(instr) {
+  const s = (instr||"").toLowerCase();
+  if (s.includes("vocal"))                               return 0.09;
+  if (s.includes("trumpet"))                             return 0.21;
+  if (s.includes("trombone"))                            return 0.29;
+  if (s.includes("clarinet") && !s.includes("bass cl")) return 0.34;
+  if (s.includes("sax") || s.includes("bass clarinet")) return 0.43;
+  if (s.includes("vibraphone"))                          return 0.52;
+  if (s.includes("guitar"))                              return 0.56;
+  if (s.includes("piano") || s.includes("keyboard"))    return 0.63;
+  if (s.includes("bass"))                                return 0.76;
+  if (s.includes("drum") || s.includes("percussion"))   return 0.88;
+  return 0.50;
+}
+
+function weightLabel(w) {
+  return ["","Session work","Several recordings","Significant collab","Multi-year band","Lifetime partners"][w]||"";
+}
+function weightDots(w) { return "●".repeat(w)+"○".repeat(5-w); }
+
+// ─── NODES ───────────────────────────────────────────────────────────────────
+const nodes = [
+  // Early / Swing
+  { id:"louis-armstrong",   name:"Louis Armstrong",    nick:'"Satchmo" · "Pops"',              era:"early",  instr:"Trumpet / Vocals",       years:"1923–1971", wiki:"Louis_Armstrong" },
+  { id:"duke-ellington",    name:"Duke Ellington",     nick:'"The Duke" (born Edward Kennedy)', era:"early",  instr:"Piano / Bandleader",     years:"1923–1974", wiki:"Duke_Ellington" },
+  { id:"count-basie",       name:"Count Basie",        nick:'"The Count" (born William Basie)', era:"early",  instr:"Piano / Bandleader",     years:"1935–1984", wiki:"Count_Basie" },
+  { id:"benny-goodman",     name:"Benny Goodman",      nick:'"The King of Swing"',             era:"early",  instr:"Clarinet",               years:"1926–1986", wiki:"Benny_Goodman" },
+  { id:"lester-young",      name:"Lester Young",       nick:'"Prez" (The President)',          era:"early",  instr:"Tenor Sax",              years:"1936–1959", wiki:"Lester_Young" },
+  { id:"coleman-hawkins",   name:"Coleman Hawkins",    nick:'"Hawk" · "Bean"',                 era:"early",  instr:"Tenor Sax",              years:"1923–1969", wiki:"Coleman_Hawkins" },
+  { id:"art-tatum",         name:"Art Tatum",          era:"early",  instr:"Piano",                          years:"1932–1956", wiki:"Art_Tatum" },
+  { id:"earl-hines",        name:"Earl Hines",         nick:'"Fatha"',                         era:"early",  instr:"Piano",                  years:"1927–1983", wiki:"Earl_Hines" },
+  { id:"billie-holiday",    name:"Billie Holiday",     nick:'"Lady Day"',                      era:"early",  instr:"Vocals",                 years:"1933–1959", wiki:"Billie_Holiday" },
+  { id:"ella-fitzgerald",   name:"Ella Fitzgerald",    nick:'"The First Lady of Song"',        era:"early",  instr:"Vocals",                 years:"1935–1993", wiki:"Ella_Fitzgerald" },
+  { id:"gene-krupa",        name:"Gene Krupa",         era:"early",  instr:"Drums",                          years:"1927–1973", wiki:"Gene_Krupa" },
+  { id:"lionel-hampton",    name:"Lionel Hampton",     nick:'"Hamp"',                          era:"early",  instr:"Vibraphone",             years:"1930–2002", wiki:"Lionel_Hampton" },
+  { id:"teddy-wilson",      name:"Teddy Wilson",       era:"early",  instr:"Piano",                          years:"1933–1986", wiki:"Teddy_Wilson" },
+  { id:"charlie-christian", name:"Charlie Christian",  era:"early",  instr:"Guitar",                         years:"1939–1942", wiki:"Charlie_Christian" },
+  { id:"johnny-hodges",     name:"Johnny Hodges",      nick:'"Rabbit" · "Jeep"',               era:"early",  instr:"Alto Sax",               years:"1928–1970", wiki:"Johnny_Hodges" },
+  { id:"ben-webster",       name:"Ben Webster",        nick:'"The Brute" · "Frog"',            era:"early",  instr:"Tenor Sax",              years:"1936–1973", wiki:"Ben_Webster" },
+  { id:"cootie-williams",   name:"Cootie Williams",    nick:'"Cootie" (born Charles Williams)', era:"early",  instr:"Trumpet",               years:"1929–1985", wiki:"Cootie_Williams" },
+  { id:"billy-strayhorn",   name:"Billy Strayhorn",    nick:'"Sweet Pea"',                     era:"early",  instr:"Piano / Composer",       years:"1939–1967", wiki:"Billy_Strayhorn" },
+  { id:"jo-jones",          name:"Jo Jones",           nick:'"Papa Jo"',                        era:"early",  instr:"Drums",                  years:"1935–1982", wiki:"Jo_Jones" },
+  { id:"buck-clayton",      name:"Buck Clayton",       era:"early",  instr:"Trumpet",                        years:"1936–1987", wiki:"Buck_Clayton" },
+  { id:"sidney-bechet",     name:"Sidney Bechet",      era:"early",  instr:"Soprano Sax / Clarinet",         years:"1916–1959", wiki:"Sidney_Bechet" },
+  { id:"kid-ory",           name:"Kid Ory",            nick:'"Kid" (born Edward Ory)',          era:"early",  instr:"Trombone",              years:"1912–1966", wiki:"Kid_Ory" },
+  { id:"jack-teagarden",    name:"Jack Teagarden",     nick:'"Big T" · "Mr. T-Bone"',          era:"early",  instr:"Trombone / Vocals",      years:"1921–1964", wiki:"Jack_Teagarden" },
+  { id:"jelly-roll-morton", name:"Jelly Roll Morton",  nick:"Born Ferdinand LaMothe",          era:"early",  instr:"Piano / Composer",       years:"1918–1940", wiki:"Jelly_Roll_Morton" },
+
+  // Bebop / Hard Bop
+  { id:"charlie-parker",     name:"Charlie Parker",     nick:'"Bird" · "Yardbird"',              era:"bebop", instr:"Alto Sax",               years:"1943–1955", wiki:"Charlie_Parker" },
+  { id:"dizzy-gillespie",    name:"Dizzy Gillespie",    nick:'"Dizzy" (born John Birks)',        era:"bebop", instr:"Trumpet",                years:"1942–1992", wiki:"Dizzy_Gillespie" },
+  { id:"miles-davis",        name:"Miles Davis",        era:"bebop", instr:"Trumpet",                        years:"1944–1991", wiki:"Miles_Davis" },
+  { id:"thelonious-monk",    name:"Thelonious Monk",    nick:'"High Priest of Bebop"',           era:"bebop", instr:"Piano",                  years:"1941–1976", wiki:"Thelonious_Monk" },
+  { id:"bud-powell",         name:"Bud Powell",         era:"bebop", instr:"Piano",                          years:"1944–1966", wiki:"Bud_Powell" },
+  { id:"max-roach",          name:"Max Roach",          era:"bebop", instr:"Drums",                          years:"1944–2007", wiki:"Max_Roach" },
+  { id:"kenny-clarke",       name:"Kenny Clarke",       nick:'"Klook"',                          era:"bebop", instr:"Drums",                  years:"1943–1985", wiki:"Kenny_Clarke" },
+  { id:"art-blakey",         name:"Art Blakey",         nick:'"Bu" (Abdullah Ibn Buhaina)',      era:"bebop", instr:"Drums / Bandleader",     years:"1944–1990", wiki:"Art_Blakey" },
+  { id:"clifford-brown",     name:"Clifford Brown",     nick:'"Brownie"',                        era:"bebop", instr:"Trumpet",                years:"1952–1956", wiki:"Clifford_Brown" },
+  { id:"sonny-rollins",      name:"Sonny Rollins",      nick:'"Newk" · "Saxophone Colossus"',   era:"bebop", instr:"Tenor Sax",              years:"1949–2012", wiki:"Sonny_Rollins" },
+  { id:"horace-silver",      name:"Horace Silver",      era:"bebop", instr:"Piano",                          years:"1950–2014", wiki:"Horace_Silver" },
+  { id:"lee-morgan",         name:"Lee Morgan",         era:"bebop", instr:"Trumpet",                        years:"1956–1972", wiki:"Lee_Morgan" },
+  { id:"freddie-hubbard",    name:"Freddie Hubbard",    era:"bebop", instr:"Trumpet",                        years:"1958–2008", wiki:"Freddie_Hubbard" },
+  { id:"wayne-shorter",      name:"Wayne Shorter",      era:"bebop", instr:"Tenor / Soprano Sax",            years:"1959–2022", wiki:"Wayne_Shorter" },
+  { id:"benny-golson",       name:"Benny Golson",       era:"bebop", instr:"Tenor Sax",                      years:"1951–present", wiki:"Benny_Golson" },
+  { id:"cedar-walton",       name:"Cedar Walton",       era:"bebop", instr:"Piano",                          years:"1955–2013", wiki:"Cedar_Walton" },
+  { id:"bobby-timmons",      name:"Bobby Timmons",      era:"bebop", instr:"Piano",                          years:"1956–1974", wiki:"Bobby_Timmons" },
+  { id:"donald-byrd",        name:"Donald Byrd",        era:"bebop", instr:"Trumpet",                        years:"1955–1982", wiki:"Donald_Byrd" },
+  { id:"jackie-mclean",      name:"Jackie McLean",      era:"bebop", instr:"Alto Sax",                       years:"1955–2006", wiki:"Jackie_McLean" },
+  { id:"woody-shaw",         name:"Woody Shaw",         era:"bebop", instr:"Trumpet",                        years:"1964–1989", wiki:"Woody_Shaw" },
+  { id:"red-garland",        name:"Red Garland",        era:"bebop", instr:"Piano",                          years:"1955–1980", wiki:"Red_Garland" },
+  { id:"paul-chambers",      name:"Paul Chambers",      nick:'"Mr. PC"',                         era:"bebop", instr:"Bass",                   years:"1954–1969", wiki:"Paul_Chambers" },
+  { id:"philly-joe-jones",   name:"Philly Joe Jones",   era:"bebop", instr:"Drums",                          years:"1954–1985", wiki:"Philly_Joe_Jones" },
+  { id:"cannonball-adderley",name:"Cannonball Adderley",nick:'"Cannonball" (born Julian)',       era:"bebop", instr:"Alto Sax",               years:"1955–1975", wiki:"Cannonball_Adderley" },
+  { id:"red-rodney",         name:"Red Rodney",         era:"bebop", instr:"Trumpet",                        years:"1945–1994", wiki:"Red_Rodney" },
+  { id:"milt-jackson",       name:"Milt Jackson",       nick:'"Bags"',                           era:"bebop", instr:"Vibraphone",             years:"1945–1999", wiki:"Milt_Jackson" },
+  { id:"john-lewis",         name:"John Lewis",         era:"bebop", instr:"Piano",                          years:"1945–2001", wiki:"John_Lewis_(musician)" },
+  { id:"ray-brown",          name:"Ray Brown",          era:"bebop", instr:"Bass",                           years:"1946–2002", wiki:"Ray_Brown_(musician)" },
+  { id:"percy-heath",        name:"Percy Heath",        era:"bebop", instr:"Bass",                           years:"1947–2005", wiki:"Percy_Heath" },
+  { id:"connie-kay",         name:"Connie Kay",         era:"bebop", instr:"Drums",                          years:"1952–1994", wiki:"Connie_Kay" },
+  { id:"oscar-peterson",     name:"Oscar Peterson",     nick:'"The Maharajah"',                  era:"bebop", instr:"Piano",                  years:"1945–2007", wiki:"Oscar_Peterson" },
+  { id:"wes-montgomery",     name:"Wes Montgomery",     era:"bebop", instr:"Guitar",                         years:"1955–1968", wiki:"Wes_Montgomery" },
+  { id:"kenny-burrell",      name:"Kenny Burrell",      era:"bebop", instr:"Guitar",                         years:"1956–present", wiki:"Kenny_Burrell" },
+  { id:"sarah-vaughan",      name:"Sarah Vaughan",      nick:'"Sassy" · "The Divine One"',      era:"bebop", instr:"Vocals",                 years:"1942–1990", wiki:"Sarah_Vaughan" },
+  { id:"dexter-gordon",      name:"Dexter Gordon",      nick:'"Long Tall Dexter"',               era:"bebop", instr:"Tenor Sax",              years:"1943–1990", wiki:"Dexter_Gordon" },
+
+  // Modal / Avant-Garde / Cool
+  { id:"john-coltrane",    name:"John Coltrane",    nick:'"Trane"',                          era:"modal", instr:"Tenor / Soprano Sax",   years:"1949–1967", wiki:"John_Coltrane" },
+  { id:"bill-evans",       name:"Bill Evans",       era:"modal", instr:"Piano",                           years:"1956–1980", wiki:"Bill_Evans" },
+  { id:"charles-mingus",   name:"Charles Mingus",   nick:'"The Baron" · "The Angry Man of Jazz"', era:"modal", instr:"Bass / Composer",  years:"1945–1979", wiki:"Charles_Mingus" },
+  { id:"ornette-coleman",  name:"Ornette Coleman",  era:"modal", instr:"Alto Sax",              years:"1958–2015", wiki:"Ornette_Coleman" },
+  { id:"eric-dolphy",      name:"Eric Dolphy",      era:"modal", instr:"Alto Sax / Bass Clarinet",years:"1958–1964", wiki:"Eric_Dolphy" },
+  { id:"mccoy-tyner",      name:"McCoy Tyner",      era:"modal", instr:"Piano",                 years:"1959–2020", wiki:"McCoy_Tyner" },
+  { id:"elvin-jones",      name:"Elvin Jones",      era:"modal", instr:"Drums",                 years:"1956–2004", wiki:"Elvin_Jones" },
+  { id:"jimmy-garrison",   name:"Jimmy Garrison",   era:"modal", instr:"Bass",                  years:"1958–1976", wiki:"Jimmy_Garrison" },
+  { id:"scott-lafaro",     name:"Scott LaFaro",     era:"modal", instr:"Bass",                  years:"1958–1961", wiki:"Scott_LaFaro" },
+  { id:"paul-motian",      name:"Paul Motian",      era:"modal", instr:"Drums",                 years:"1955–2011", wiki:"Paul_Motian" },
+  { id:"don-cherry",       name:"Don Cherry",       era:"modal", instr:"Trumpet",               years:"1958–1995", wiki:"Don_Cherry_(musician)" },
+  { id:"charlie-haden",    name:"Charlie Haden",    era:"modal", instr:"Bass",                  years:"1959–2014", wiki:"Charlie_Haden" },
+  { id:"billy-higgins",    name:"Billy Higgins",    era:"modal", instr:"Drums",                 years:"1958–2001", wiki:"Billy_Higgins" },
+  { id:"ed-blackwell",     name:"Ed Blackwell",     era:"modal", instr:"Drums",                 years:"1958–1992", wiki:"Ed_Blackwell" },
+  { id:"booker-ervin",     name:"Booker Ervin",     era:"modal", instr:"Tenor Sax",             years:"1958–1970", wiki:"Booker_Ervin" },
+  { id:"dannie-richmond",  name:"Dannie Richmond",  era:"modal", instr:"Drums",                 years:"1956–1988", wiki:"Dannie_Richmond" },
+  { id:"jaki-byard",       name:"Jaki Byard",       era:"modal", instr:"Piano",                 years:"1955–1999", wiki:"Jaki_Byard" },
+  { id:"wynton-kelly",     name:"Wynton Kelly",     era:"modal", instr:"Piano",                 years:"1956–1971", wiki:"Wynton_Kelly" },
+  { id:"tony-williams",    name:"Tony Williams",    era:"modal", instr:"Drums",                 years:"1963–1997", wiki:"Tony_Williams_(drummer)" },
+  { id:"ron-carter",       name:"Ron Carter",       era:"modal", instr:"Bass",                  years:"1959–present", wiki:"Ron_Carter" },
+  { id:"herbie-hancock",   name:"Herbie Hancock",   era:"modal", instr:"Piano / Keyboards",     years:"1961–present", wiki:"Herbie_Hancock" },
+  { id:"eddie-gomez",      name:"Eddie Gomez",      era:"modal", instr:"Bass",                  years:"1966–present", wiki:"Eddie_G%C3%B3mez" },
+  { id:"lee-konitz",       name:"Lee Konitz",       era:"modal", instr:"Alto Sax",              years:"1947–2020", wiki:"Lee_Konitz" },
+  { id:"jim-hall",         name:"Jim Hall",         nick:'"The Master of Understatement"', era:"modal", instr:"Guitar", years:"1955–2013", wiki:"Jim_Hall_(musician)" },
+  { id:"gerry-mulligan",   name:"Gerry Mulligan",   nick:'"Jeru"',                           era:"modal", instr:"Baritone Sax",          years:"1946–1996", wiki:"Gerry_Mulligan" },
+  { id:"dave-brubeck",     name:"Dave Brubeck",     era:"modal", instr:"Piano",                 years:"1946–2012", wiki:"Dave_Brubeck" },
+  { id:"paul-desmond",     name:"Paul Desmond",     era:"modal", instr:"Alto Sax",              years:"1951–1977", wiki:"Paul_Desmond" },
+  { id:"joe-henderson",    name:"Joe Henderson",    era:"modal", instr:"Tenor Sax",             years:"1956–2001", wiki:"Joe_Henderson" },
+  { id:"stan-getz",        name:"Stan Getz",        nick:'"The Sound"',                      era:"modal", instr:"Tenor Sax",              years:"1944–1991", wiki:"Stan_Getz" },
+  { id:"chet-baker",       name:"Chet Baker",       era:"modal", instr:"Trumpet / Vocals",      years:"1952–1988", wiki:"Chet_Baker" },
+
+  // Fusion / Modern
+  { id:"chick-corea",       name:"Chick Corea",       era:"fusion", instr:"Piano / Keyboards",  years:"1962–2021", wiki:"Chick_Corea" },
+  { id:"joe-zawinul",       name:"Joe Zawinul",        era:"fusion", instr:"Piano / Keyboards",  years:"1959–2007", wiki:"Joe_Zawinul" },
+  { id:"jaco-pastorius",    name:"Jaco Pastorius",     nick:'"The World\'s Greatest Bass Player"', era:"fusion", instr:"Bass", years:"1971–1987", wiki:"Jaco_Pastorius" },
+  { id:"john-mclaughlin",   name:"John McLaughlin",    era:"fusion", instr:"Guitar",             years:"1963–present", wiki:"John_McLaughlin_(musician)" },
+  { id:"pat-metheny",       name:"Pat Metheny",        era:"fusion", instr:"Guitar",             years:"1974–present", wiki:"Pat_Metheny" },
+  { id:"stanley-clarke",    name:"Stanley Clarke",     era:"fusion", instr:"Bass",               years:"1970–present", wiki:"Stanley_Clarke" },
+  { id:"lenny-white",       name:"Lenny White",        era:"fusion", instr:"Drums",              years:"1969–present", wiki:"Lenny_White" },
+  { id:"al-di-meola",       name:"Al Di Meola",        era:"fusion", instr:"Guitar",             years:"1974–present", wiki:"Al_Di_Meola" },
+  { id:"billy-cobham",      name:"Billy Cobham",       era:"fusion", instr:"Drums",              years:"1969–present", wiki:"Billy_Cobham" },
+  { id:"dave-holland",      name:"Dave Holland",       era:"fusion", instr:"Bass",               years:"1968–present", wiki:"Dave_Holland_(musician)" },
+  { id:"jack-dejohnette",   name:"Jack DeJohnette",    era:"fusion", instr:"Drums",              years:"1966–present", wiki:"Jack_DeJohnette" },
+  { id:"keith-jarrett",     name:"Keith Jarrett",      era:"fusion", instr:"Piano",              years:"1966–2020", wiki:"Keith_Jarrett" },
+  { id:"wynton-marsalis",   name:"Wynton Marsalis",    era:"fusion", instr:"Trumpet",            years:"1981–present", wiki:"Wynton_Marsalis" },
+  { id:"branford-marsalis", name:"Branford Marsalis",  era:"fusion", instr:"Tenor / Soprano Sax",years:"1980–present", wiki:"Branford_Marsalis" },
+  { id:"lyle-mays",         name:"Lyle Mays",          era:"fusion", instr:"Piano / Keyboards",  years:"1975–2020", wiki:"Lyle_Mays" },
+  { id:"joshua-redman",     name:"Joshua Redman",      era:"fusion", instr:"Tenor Sax",          years:"1991–present", wiki:"Joshua_Redman" },
+  { id:"brad-mehldau",      name:"Brad Mehldau",       era:"fusion", instr:"Piano",              years:"1990–present", wiki:"Brad_Mehldau" },
+  { id:"chris-potter",      name:"Chris Potter",       era:"fusion", instr:"Tenor Sax",          years:"1987–present", wiki:"Chris_Potter_(musician)" },
+  { id:"joe-pass",          name:"Joe Pass",           era:"fusion", instr:"Guitar",             years:"1944–1994", wiki:"Joe_Pass" },
+  { id:"airto-moreira",     name:"Airto Moreira",      era:"fusion", instr:"Percussion",         years:"1967–present", wiki:"Airto_Moreira" },
+  { id:"miroslav-vitous",   name:"Miroslav Vitous",    era:"fusion", instr:"Bass",               years:"1966–present", wiki:"Miroslav_Vito%C5%A1" },
+  { id:"gary-peacock",      name:"Gary Peacock",       era:"fusion", instr:"Bass",               years:"1958–2020", wiki:"Gary_Peacock" },
+];
+
+// ─── LINKS ───────────────────────────────────────────────────────────────────
+const rawLinks = [
+  // Louis Armstrong
+  { s:"louis-armstrong",   t:"earl-hines",        c:"Hot Five / Hot Seven (1927–28)",                  w:4 },
+  { s:"louis-armstrong",   t:"kid-ory",            c:"Hot Five (1925–27)",                              w:4 },
+  { s:"louis-armstrong",   t:"sidney-bechet",      c:"Clarence Williams Blue Five (1923–24)",           w:2 },
+  { s:"louis-armstrong",   t:"jack-teagarden",     c:"All Stars (1947–56)",                             w:4 },
+  { s:"louis-armstrong",   t:"ella-fitzgerald",    c:"Recorded together (1956)",                        w:2 },
+  { s:"louis-armstrong",   t:"billie-holiday",     c:"Recorded together",                               w:1 },
+
+  // Duke Ellington
+  { s:"duke-ellington",    t:"billy-strayhorn",    c:"Ellington Orchestra — co-composer / arranger (1939–67)", w:5 },
+  { s:"duke-ellington",    t:"johnny-hodges",      c:"Ellington Orchestra (1928–70)",                   w:5 },
+  { s:"duke-ellington",    t:"ben-webster",        c:"Ellington Orchestra (1935–43)",                   w:3 },
+  { s:"duke-ellington",    t:"cootie-williams",    c:"Ellington Orchestra (1929–40)",                   w:4 },
+  { s:"duke-ellington",    t:"coleman-hawkins",    c:"Recorded together (1962)",                        w:1 },
+  { s:"duke-ellington",    t:"kenny-burrell",      c:"NYC studio sessions (1960s)",                     w:2 },
+  { s:"duke-ellington",    t:"john-coltrane",      c:"Duke Ellington & John Coltrane (Impulse!, 1962)", w:3 },
+  { s:"duke-ellington",    t:"sidney-bechet",      c:"Ellington Orchestra (1925, briefly)",             w:1 },
+
+  // Count Basie
+  { s:"count-basie",       t:"lester-young",       c:"Basie Orchestra (1936–40)",                       w:4 },
+  { s:"count-basie",       t:"buck-clayton",       c:"Basie Orchestra (1936–43)",                       w:4 },
+  { s:"count-basie",       t:"jo-jones",           c:"Basie Orchestra (1936–48)",                       w:5 },
+  { s:"count-basie",       t:"billie-holiday",     c:"Recorded together (1937)",                        w:2 },
+  { s:"count-basie",       t:"ella-fitzgerald",    c:"Recorded together",                               w:1 },
+  { s:"count-basie",       t:"oscar-peterson",     c:"JATP concerts / recorded together",               w:2 },
+
+  // Benny Goodman
+  { s:"benny-goodman",     t:"gene-krupa",         c:"Goodman Orchestra (1934–38)",                     w:4 },
+  { s:"benny-goodman",     t:"lionel-hampton",     c:"Goodman Quartet (1936–40)",                       w:4 },
+  { s:"benny-goodman",     t:"teddy-wilson",       c:"Goodman Trio / Quartet (1935–39)",                w:4 },
+  { s:"benny-goodman",     t:"charlie-christian",  c:"Goodman Sextet (1939–41)",                        w:3 },
+
+  // Billie Holiday
+  { s:"billie-holiday",    t:"lester-young",       c:"Recorded together (1937–41)",                     w:4 },
+  { s:"billie-holiday",    t:"teddy-wilson",       c:"Recorded together (1935–42)",                     w:3 },
+  { s:"billie-holiday",    t:"buck-clayton",       c:"Recorded together (1937–38)",                     w:3 },
+
+  // Coleman Hawkins
+  { s:"coleman-hawkins",   t:"thelonious-monk",    c:"'Round Midnight sessions (1944)",                 w:2 },
+
+  // Dizzy Gillespie
+  { s:"dizzy-gillespie",   t:"charlie-parker",     c:"Bebop co-creators — small groups & big band (1944–46)", w:5 },
+  { s:"dizzy-gillespie",   t:"miles-davis",        c:"Gillespie's big band (1945)",                     w:2 },
+  { s:"dizzy-gillespie",   t:"thelonious-monk",    c:"Minton's Playhouse jam sessions (1941–42)",       w:3 },
+  { s:"dizzy-gillespie",   t:"kenny-clarke",       c:"Gillespie's groups (1945+)",                      w:3 },
+  { s:"dizzy-gillespie",   t:"milt-jackson",       c:"Gillespie's Sextet (1945–47)",                    w:3 },
+  { s:"dizzy-gillespie",   t:"john-lewis",         c:"Gillespie's big band (1946)",                     w:3 },
+  { s:"dizzy-gillespie",   t:"ray-brown",          c:"Gillespie's groups (1945–47)",                    w:3 },
+  { s:"dizzy-gillespie",   t:"sonny-rollins",      c:"Recorded together",                               w:1 },
+  { s:"dizzy-gillespie",   t:"bud-powell",         c:"Massey Hall Concert (1953)",                      w:2 },
+  { s:"dizzy-gillespie",   t:"charlie-christian",  c:"Minton's Playhouse jam sessions (1941)",          w:2 },
+  { s:"dizzy-gillespie",   t:"sarah-vaughan",      c:"Musicraft recordings (1945–46)",                  w:3 },
+  { s:"dizzy-gillespie",   t:"dexter-gordon",      c:"Gillespie's big band (1945–46)",                  w:3 },
+  { s:"dizzy-gillespie",   t:"stan-getz",          c:"Prestige / Verve recordings (1953–55)",           w:2 },
+
+  // Charlie Parker
+  { s:"charlie-parker",    t:"miles-davis",        c:"Parker Quintet (1945–48)",                        w:4 },
+  { s:"charlie-parker",    t:"thelonious-monk",    c:"Minton's / Savoy sessions (1945)",                w:3 },
+  { s:"charlie-parker",    t:"max-roach",          c:"Parker Quintet / Savoy & Verve sessions",         w:3 },
+  { s:"charlie-parker",    t:"bud-powell",         c:"Massey Hall Concert (1953)",                      w:2 },
+  { s:"charlie-parker",    t:"red-rodney",         c:"Parker Quintet (1949–51)",                        w:3 },
+  { s:"charlie-parker",    t:"kenny-clarke",       c:"Recorded together",                               w:2 },
+  { s:"charlie-parker",    t:"sarah-vaughan",      c:"Recorded live together (1947)",                   w:2 },
+
+  // Thelonious Monk
+  { s:"thelonious-monk",   t:"sonny-rollins",      c:"Monk's group (1953–54)",                          w:3 },
+  { s:"thelonious-monk",   t:"john-coltrane",      c:"Monk Quartet (1957) — Carnegie Hall, Five Spot",  w:4 },
+  { s:"thelonious-monk",   t:"art-blakey",         c:"Recorded together (1947–57)",                     w:3 },
+  { s:"thelonious-monk",   t:"max-roach",          c:"Recorded together (1953)",                        w:2 },
+  { s:"thelonious-monk",   t:"milt-jackson",       c:"Blue Note sessions (1948)",                       w:2 },
+
+  // Miles Davis
+  { s:"miles-davis",       t:"john-coltrane",      c:"First Great Quintet (1955–60)",                   w:5 },
+  { s:"miles-davis",       t:"red-garland",        c:"First Great Quintet (1955–58)",                   w:4 },
+  { s:"miles-davis",       t:"paul-chambers",      c:"Davis groups (1955–63) — 8 years",                w:5 },
+  { s:"miles-davis",       t:"philly-joe-jones",   c:"First Great Quintet (1955–58)",                   w:4 },
+  { s:"miles-davis",       t:"cannonball-adderley",c:"Kind of Blue Sextet (1958–59)",                   w:4 },
+  { s:"miles-davis",       t:"bill-evans",         c:"Kind of Blue sessions (1959)",                    w:3 },
+  { s:"miles-davis",       t:"wynton-kelly",       c:"Davis groups (1959–63)",                          w:4 },
+  { s:"miles-davis",       t:"herbie-hancock",     c:"Second Great Quintet (1963–68)",                  w:5 },
+  { s:"miles-davis",       t:"wayne-shorter",      c:"Second Great Quintet (1964–68)",                  w:5 },
+  { s:"miles-davis",       t:"tony-williams",      c:"Second Great Quintet (1963–68)",                  w:5 },
+  { s:"miles-davis",       t:"ron-carter",         c:"Second Great Quintet (1963–68)",                  w:5 },
+  { s:"miles-davis",       t:"chick-corea",        c:"Bitches Brew era (1968–70)",                      w:3 },
+  { s:"miles-davis",       t:"john-mclaughlin",    c:"Bitches Brew / In a Silent Way (1969–70)",        w:2 },
+  { s:"miles-davis",       t:"jack-dejohnette",    c:"Bitches Brew era (1969–71)",                      w:3 },
+  { s:"miles-davis",       t:"dave-holland",       c:"Davis group (1968–70)",                           w:3 },
+  { s:"miles-davis",       t:"keith-jarrett",      c:"Davis group (1970–71)",                           w:2 },
+  { s:"miles-davis",       t:"joe-zawinul",        c:"In a Silent Way / Bitches Brew (1969)",           w:2 },
+  { s:"miles-davis",       t:"lee-konitz",         c:"Birth of the Cool (1949)",                        w:2 },
+  { s:"miles-davis",       t:"gerry-mulligan",     c:"Birth of the Cool (1949)",                        w:2 },
+  { s:"miles-davis",       t:"max-roach",          c:"Birth of the Cool (1949)",                        w:2 },
+  { s:"miles-davis",       t:"billy-cobham",       c:"Bitches Brew sessions (1969)",                    w:1 },
+  { s:"miles-davis",       t:"miroslav-vitous",    c:"Bitches Brew sessions",                           w:1 },
+  { s:"miles-davis",       t:"sonny-rollins",      c:"Prestige sessions: Cookin', Workin', Relaxin', Steamin' (1956)", w:3 },
+  { s:"miles-davis",       t:"thelonious-monk",    c:"Monk's Blue Note dates (1954) / Bags' Groove (Prestige, 1954)", w:2 },
+
+  // Art Blakey / Jazz Messengers
+  { s:"art-blakey",        t:"clifford-brown",     c:"Jazz Messengers (1954)",                          w:3 },
+  { s:"art-blakey",        t:"horace-silver",      c:"Jazz Messengers co-founder (1954–56)",            w:4 },
+  { s:"art-blakey",        t:"lee-morgan",         c:"Jazz Messengers (1958–61, 1965–67)",              w:4 },
+  { s:"art-blakey",        t:"benny-golson",       c:"Jazz Messengers (1958–59)",                       w:3 },
+  { s:"art-blakey",        t:"freddie-hubbard",    c:"Jazz Messengers (1961–64)",                       w:4 },
+  { s:"art-blakey",        t:"wayne-shorter",      c:"Jazz Messengers (1959–64) — 5 years",             w:5 },
+  { s:"art-blakey",        t:"cedar-walton",       c:"Jazz Messengers (1961–64)",                       w:3 },
+  { s:"art-blakey",        t:"bobby-timmons",      c:"Jazz Messengers (1958–61)",                       w:3 },
+  { s:"art-blakey",        t:"donald-byrd",        c:"Jazz Messengers (1956–58)",                       w:2 },
+  { s:"art-blakey",        t:"jackie-mclean",      c:"Jazz Messengers (1956–57)",                       w:2 },
+  { s:"art-blakey",        t:"woody-shaw",         c:"Jazz Messengers (1981+)",                         w:2 },
+  { s:"art-blakey",        t:"wynton-marsalis",    c:"Jazz Messengers (1980–82)",                       w:3 },
+  { s:"art-blakey",        t:"branford-marsalis",  c:"Jazz Messengers (1981)",                          w:2 },
+  { s:"art-blakey",        t:"dexter-gordon",      c:"Blue Note recording sessions (1962–65)",          w:2 },
+
+  // John Coltrane
+  { s:"john-coltrane",     t:"mccoy-tyner",        c:"Classic Quartet (1960–65)",                       w:5 },
+  { s:"john-coltrane",     t:"elvin-jones",        c:"Classic Quartet (1960–65)",                       w:5 },
+  { s:"john-coltrane",     t:"jimmy-garrison",     c:"Classic Quartet (1961–67)",                       w:5 },
+  { s:"john-coltrane",     t:"eric-dolphy",        c:"Africa/Brass · Live at Village Vanguard (1961–62)",w:4 },
+  { s:"john-coltrane",     t:"cannonball-adderley",c:"Miles Davis group together (1958–59)",            w:3 },
+  { s:"john-coltrane",     t:"kenny-burrell",      c:"Kenny Burrell & John Coltrane (Prestige, 1958)",  w:2 },
+
+  // Ornette Coleman
+  { s:"ornette-coleman",   t:"don-cherry",         c:"Coleman Quartet (1958–63)",                       w:5 },
+  { s:"ornette-coleman",   t:"charlie-haden",      c:"Coleman Quartet (1958–67)",                       w:5 },
+  { s:"ornette-coleman",   t:"billy-higgins",      c:"Coleman Quartet (1958–60)",                       w:4 },
+  { s:"ornette-coleman",   t:"ed-blackwell",       c:"Coleman groups (1959+)",                          w:4 },
+  { s:"ornette-coleman",   t:"eric-dolphy",        c:"Free Jazz album (1960)",                          w:2 },
+
+  // Charles Mingus
+  { s:"charles-mingus",    t:"eric-dolphy",        c:"Mingus groups (1960–64)",                         w:4 },
+  { s:"charles-mingus",    t:"jackie-mclean",      c:"Mingus groups (1955)",                            w:2 },
+  { s:"charles-mingus",    t:"booker-ervin",       c:"Mingus groups (1958–64)",                         w:3 },
+  { s:"charles-mingus",    t:"dannie-richmond",    c:"Lifetime partner — 25 years (1956–79)",           w:5 },
+  { s:"charles-mingus",    t:"jaki-byard",         c:"Mingus groups (1962–65)",                         w:3 },
+  { s:"charles-mingus",    t:"don-cherry",         c:"Recorded together",                               w:1 },
+  { s:"charles-mingus",    t:"elvin-jones",        c:"Recorded together",                               w:1 },
+  { s:"charles-mingus",    t:"lee-konitz",         c:"East Coasting / early sessions",                  w:1 },
+  { s:"charles-mingus",    t:"max-roach",          c:"Massey Hall Concert (1953)",                      w:2 },
+
+  // Bill Evans Trio
+  { s:"bill-evans",        t:"scott-lafaro",       c:"Evans Trio (1959–61)",                            w:5 },
+  { s:"bill-evans",        t:"paul-motian",        c:"Evans Trio (1959–64)",                            w:4 },
+  { s:"bill-evans",        t:"eddie-gomez",        c:"Evans Trio (1966–77) — 11 years",                 w:5 },
+
+  // Dave Brubeck
+  { s:"dave-brubeck",      t:"paul-desmond",       c:"Brubeck Quartet (1951–67) — 16 years",            w:5 },
+
+  // Clifford Brown / Max Roach
+  { s:"clifford-brown",    t:"max-roach",          c:"Brown–Roach Quintet (1954–56) — co-leads",        w:5 },
+  { s:"clifford-brown",    t:"sonny-rollins",      c:"Brown–Roach Quintet (1955–56)",                   w:3 },
+
+  // Weather Report
+  { s:"joe-zawinul",       t:"wayne-shorter",      c:"Weather Report co-founders (1970–85) — 15 years", w:5 },
+  { s:"joe-zawinul",       t:"jaco-pastorius",     c:"Weather Report (1976–82)",                        w:5 },
+  { s:"joe-zawinul",       t:"miroslav-vitous",    c:"Weather Report (1971–73)",                        w:3 },
+
+  // Cannonball Adderley
+  { s:"cannonball-adderley",t:"joe-zawinul",       c:"Adderley Quintet (1961–70) — wrote 'Mercy, Mercy, Mercy'", w:5 },
+
+  // Return to Forever
+  { s:"chick-corea",       t:"stanley-clarke",     c:"Return to Forever (1972–77)",                     w:5 },
+  { s:"chick-corea",       t:"lenny-white",        c:"Return to Forever (1973–77)",                     w:4 },
+  { s:"chick-corea",       t:"al-di-meola",        c:"Return to Forever (1974–77)",                     w:4 },
+  { s:"chick-corea",       t:"airto-moreira",      c:"Return to Forever (1972)",                        w:3 },
+  { s:"chick-corea",       t:"dave-holland",       c:"Circle (1970–71)",                                w:3 },
+
+  // Mahavishnu / Lifetime
+  { s:"john-mclaughlin",   t:"billy-cobham",       c:"Mahavishnu Orchestra (1971–73)",                  w:4 },
+  { s:"john-mclaughlin",   t:"tony-williams",      c:"Tony Williams Lifetime (1969)",                   w:3 },
+
+  // Pat Metheny Group
+  { s:"pat-metheny",       t:"lyle-mays",          c:"Pat Metheny Group (1977–2010) — 33 years",        w:5 },
+  { s:"pat-metheny",       t:"charlie-haden",      c:"Rejoicing (1983) / various collaborations",       w:2 },
+  { s:"pat-metheny",       t:"jack-dejohnette",    c:"Recorded together (1980s)",                       w:2 },
+  { s:"pat-metheny",       t:"brad-mehldau",       c:"Metheny / Mehldau (2006)",                        w:2 },
+
+  // Keith Jarrett Standards Trio
+  { s:"keith-jarrett",     t:"gary-peacock",       c:"Standards Trio (1983–2019) — 30+ years",          w:5 },
+  { s:"keith-jarrett",     t:"jack-dejohnette",    c:"Standards Trio (1983–2019) — 30+ years",          w:5 },
+  { s:"keith-jarrett",     t:"charlie-haden",      c:"American Quartet (1971–76)",                      w:3 },
+  { s:"keith-jarrett",     t:"paul-motian",        c:"American Quartet (1971–76)",                      w:3 },
+
+  // Oscar Peterson
+  { s:"oscar-peterson",    t:"ray-brown",          c:"Peterson Trio (1949–66) — 17 years",              w:5 },
+  { s:"oscar-peterson",    t:"joe-pass",           c:"Peterson Trio / duo recordings (1970s–80s)",      w:4 },
+  { s:"oscar-peterson",    t:"ella-fitzgerald",    c:"Recorded together (1957)",                        w:2 },
+  { s:"oscar-peterson",    t:"sarah-vaughan",      c:"Recorded together (Mercury, 1950s)",              w:2 },
+  { s:"oscar-peterson",    t:"stan-getz",          c:"Stan Getz & Oscar Peterson (Verve, 1957)",        w:3 },
+
+  // Joe Pass + Ella
+  { s:"joe-pass",          t:"ella-fitzgerald",    c:"Duo recordings: Take Love Easy, Easy Living (1973–76)", w:4 },
+
+  // Elvin Jones Jazz Machine
+  { s:"elvin-jones",       t:"woody-shaw",         c:"Elvin Jones Jazz Machine (1970s)",                w:3 },
+  { s:"elvin-jones",       t:"joe-henderson",      c:"Elvin Jones Jazz Machine (1968–70)",              w:3 },
+  { s:"elvin-jones",       t:"freddie-hubbard",    c:"Blue Note sessions (1960s)",                      w:2 },
+
+  // Modern Jazz Quartet
+  { s:"milt-jackson",      t:"john-lewis",         c:"Modern Jazz Quartet (1952–74, 1981–93)",          w:5 },
+  { s:"milt-jackson",      t:"percy-heath",        c:"Modern Jazz Quartet",                             w:5 },
+  { s:"milt-jackson",      t:"connie-kay",         c:"Modern Jazz Quartet (1955–74)",                   w:5 },
+  { s:"john-lewis",        t:"percy-heath",        c:"Modern Jazz Quartet",                             w:5 },
+  { s:"john-lewis",        t:"connie-kay",         c:"Modern Jazz Quartet",                             w:5 },
+
+  // Sonny Rollins
+  { s:"sonny-rollins",     t:"max-roach",          c:"Brown–Roach Quintet / later collaborations",      w:3 },
+  { s:"sonny-rollins",     t:"horace-silver",      c:"Blue Note sessions (1954–55)",                    w:2 },
+  { s:"sonny-rollins",     t:"dexter-gordon",      c:"Blue Note contemporaries / shared sessions",      w:1 },
+
+  // VSOP Quintet
+  { s:"herbie-hancock",    t:"wayne-shorter",      c:"Miles Davis group / VSOP Quintet (1976–91)",      w:5 },
+  { s:"herbie-hancock",    t:"tony-williams",      c:"Miles Davis group / VSOP Quintet",                w:5 },
+  { s:"herbie-hancock",    t:"ron-carter",         c:"Miles Davis group / VSOP Quintet",                w:5 },
+  { s:"herbie-hancock",    t:"freddie-hubbard",    c:"VSOP Quintet (1976–91)",                          w:4 },
+
+  // Wayne Shorter + Lee Morgan
+  { s:"wayne-shorter",     t:"lee-morgan",         c:"Jazz Messengers together (1958–61)",              w:3 },
+
+  // Wes Montgomery
+  { s:"wes-montgomery",    t:"wynton-kelly",       c:"Smokin' at the Half Note (1965) — landmark album",w:4 },
+  { s:"wes-montgomery",    t:"ron-carter",         c:"Recorded together",                               w:2 },
+
+  // Joe Henderson
+  { s:"joe-henderson",     t:"freddie-hubbard",    c:"Blue Note sessions — Hub-Tones, Ready for Freddie (1962–63)", w:3 },
+  { s:"joe-henderson",     t:"herbie-hancock",     c:"Blue Note sessions (1960s)",                      w:2 },
+  { s:"joe-henderson",     t:"kenny-burrell",      c:"Recorded together",                               w:2 },
+
+  // Birth of the Cool / West Coast
+  { s:"lee-konitz",        t:"gerry-mulligan",     c:"Birth of the Cool / Mulligan Pianoless Quartet",  w:4 },
+
+  // Sarah Vaughan
+  { s:"sarah-vaughan",     t:"earl-hines",         c:"Earl Hines Orchestra (1943–44)",                  w:3 },
+
+  // Stan Getz
+  { s:"stan-getz",         t:"gerry-mulligan",     c:"Stan Meets Gerry (Verve, 1957)",                  w:2 },
+  { s:"stan-getz",         t:"chet-baker",         c:"West Coast cool scene — shared sessions",         w:2 },
+
+  // Chet Baker
+  { s:"chet-baker",        t:"gerry-mulligan",     c:"Mulligan Pianoless Quartet (1952–53)",            w:5 },
+
+  // Cross-connections
+  { s:"wynton-marsalis",   t:"branford-marsalis",  c:"Brothers / various co-led groups",                w:3 },
+  { s:"wynton-marsalis",   t:"herbie-hancock",     c:"VSOP / recorded together",                        w:2 },
+  { s:"joshua-redman",     t:"brad-mehldau",       c:"Recorded together (various)",                     w:3 },
+  { s:"chris-potter",      t:"dave-holland",       c:"Dave Holland Quintet / Octet (2000s) — 5 yrs",    w:4 },
+  { s:"don-cherry",        t:"charlie-haden",      c:"Coleman Quartet / Liberation Music Orchestra",    w:4 },
+  { s:"don-cherry",        t:"ed-blackwell",       c:"Coleman groups / Old and New Dreams",             w:3 },
+  { s:"charlie-haden",     t:"billy-higgins",      c:"Coleman Quartet",                                 w:4 },
+  { s:"cannonball-adderley",t:"bill-evans",        c:"Miles Davis group (1958–59)",                     w:3 },
+  { s:"cannonball-adderley",t:"wynton-kelly",      c:"Davis group together (1959–63)",                  w:3 },
+  { s:"freddie-hubbard",   t:"wayne-shorter",      c:"Blue Note records / shared sessions",             w:3 },
+  { s:"freddie-hubbard",   t:"ron-carter",         c:"Blue Note sessions (1960s)",                      w:2 },
+  { s:"jim-hall",          t:"bill-evans",         c:"Undercurrent & subsequent recordings (1962–66)",  w:4 },
+  { s:"jim-hall",          t:"sonny-rollins",      c:"The Bridge (1962)",                               w:3 },
+  { s:"jim-hall",          t:"lee-konitz",         c:"Recorded together (1959–60)",                     w:2 },
+  { s:"jim-hall",          t:"ron-carter",         c:"Recorded together (1969–72)",                     w:2 },
+  { s:"jim-hall",          t:"chet-baker",         c:"Recorded together (1959)",                        w:2 },
+  { s:"paul-chambers",     t:"wynton-kelly",       c:"Davis group / Wes Montgomery Trio session",       w:3 },
+  { s:"horace-silver",     t:"art-blakey",         c:"Jazz Messengers co-founder (1954–56)",            w:4 },
+  { s:"art-tatum",         t:"oscar-peterson",     c:"JATP — informal jams / mutual influence",         w:1 },
+  { s:"lee-morgan",        t:"horace-silver",      c:"Blue Note sessions — Song for My Father etc.",    w:3 },
+];
+
+// ─── PRE-PROCESS ─────────────────────────────────────────────────────────────
+
+const graphLinks = rawLinks.map(l => ({ source:l.s, target:l.t, label:l.c, weight:l.w }));
+
+const degree = {};
+nodes.forEach(n => { degree[n.id] = 0; });
+rawLinks.forEach(l => { degree[l.s]=(degree[l.s]||0)+1; degree[l.t]=(degree[l.t]||0)+1; });
+
+const adj = {};
+nodes.forEach(n => { adj[n.id] = []; });
+rawLinks.forEach(l => {
+  adj[l.s].push({ id:l.t, label:l.c, weight:l.w });
+  adj[l.t].push({ id:l.s, label:l.c, weight:l.w });
+});
+
+const nodeMap = {};
+nodes.forEach(n => { nodeMap[n.id] = n; });
+
+const maxDeg = d3.max(Object.values(degree));
+const rScale = d3.scaleSqrt().domain([0, maxDeg]).range([6, 34]);
+
+// Opacity only — no width variation
+const wOpacity = d3.scaleLinear().domain([1,5]).range([0.10, 0.62]);
+
+// ─── SVG & ZOOM ──────────────────────────────────────────────────────────────
+
+const W = window.innerWidth;
+const H = window.innerHeight - 84 - 34;
+
+const svg = d3.select("#graph").attr("viewBox", [0, 0, W, H]);
+const g   = svg.append("g");
+const defs = svg.append("defs");
+
+let activeInstr = "all";
+const gradientSet = new Set(); // indices of links currently using gradient strokes
+
+function instrMatches(instrStr, filter) {
+  const s = (instrStr||"").toLowerCase();
+  if (filter==="all")      return true;
+  if (filter==="vocal")    return s.includes("vocal");
+  if (filter==="trumpet")  return s.includes("trumpet");
+  if (filter==="trombone") return s.includes("trombone");
+  if (filter==="sax")      return s.includes("sax") || (s.includes("clarinet") && !s.includes("bass cl"));
+  if (filter==="guitar")   return s.includes("guitar");
+  if (filter==="vibes")    return s.includes("vibraphone");
+  if (filter==="piano")    return s.includes("piano") || s.includes("keyboard");
+  if (filter==="bass")     return s.includes("bass") && !s.includes("sax") && !s.includes("clarinet");
+  if (filter==="drums")    return s.includes("drum") || s.includes("percussion");
+  return false;
+}
+
+function setOrUpdateGradient(idx, x1,y1,x2,y2, c0,op0, c1,op1) {
+  let lg = defs.select("#lg"+idx);
+  if (lg.empty()) {
+    lg = defs.append("linearGradient").attr("id","lg"+idx).attr("gradientUnits","userSpaceOnUse");
+    lg.append("stop").attr("offset","0%");
+    lg.append("stop").attr("offset","100%");
+  }
+  lg.attr("x1",x1).attr("y1",y1).attr("x2",x2).attr("y2",y2);
+  lg.select("stop:first-child").attr("stop-color",c0).attr("stop-opacity",op0);
+  lg.select("stop:last-child").attr("stop-color",c1).attr("stop-opacity",op1);
+}
+
+let currentTransform = d3.zoomIdentity;
+const zoomBehavior = d3.zoom()
+  .extent([[0,0],[W,H]]).scaleExtent([0.12, 8])
+  .on("zoom", e => {
+    currentTransform = e.transform;
+    g.attr("transform", e.transform);
+    updateLabelVisibility();
+  });
+svg.call(zoomBehavior);
+svg.on("click", () => { resetHighlight(); closeSidebar(); });
+
+// Era column headers
+Object.entries(ERA_X).forEach(([era, x]) => {
+  g.append("text")
+    .attr("x", W*x).attr("y", 18)
+    .attr("text-anchor","middle")
+    .attr("fill", ERA_COLOR[era]).attr("opacity", 0.25)
+    .attr("font-size", 10).attr("letter-spacing", 2).attr("font-family","Georgia")
+    .text(ERA_LABEL[era].toUpperCase());
+});
+
+// Era dividers
+[0.245, 0.49, 0.73].forEach(x => {
+  g.append("line")
+    .attr("x1",W*x).attr("y1",0).attr("x2",W*x).attr("y2",H)
+    .attr("stroke","#121224").attr("stroke-width",1).attr("stroke-dasharray","3,8");
+});
+
+// ─── LINKS ───────────────────────────────────────────────────────────────────
+
+const linkSel = g.append("g")
+  .selectAll("line")
+  .data(graphLinks)
+  .join("line")
+  .attr("class","link")
+  .attr("stroke", l => {
+    const srcEra = nodeMap[l.source]?.era || nodeMap[l.source?.id]?.era;
+    return ERA_COLOR[srcEra] || "#8888aa";
+  })
+  .attr("stroke-width", 1.5)
+  .attr("stroke-opacity", l => wOpacity(l.weight));
+
+// ─── NODES ───────────────────────────────────────────────────────────────────
+
+const nodeSel = g.append("g")
+  .selectAll("g")
+  .data(nodes)
+  .join("g")
+  .attr("class","node")
+  .style("--era-color", d => ERA_COLOR[d.era])
+  .call(d3.drag()
+    .on("start",(e,d) => { if(!e.active) sim.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+    .on("drag", (e,d) => { d.fx=e.x; d.fy=e.y; })
+    .on("end",  (e,d) => { if(!e.active) sim.alphaTarget(0); d.fx=null; d.fy=null; })
+  )
+  .on("mouseover", onHover)
+  .on("mousemove", onMove)
+  .on("mouseout",  onOut)
+  .on("click",     onSelect);
+
+nodeSel.append("circle")
+  .attr("r", d => rScale(degree[d.id]))
+  .attr("fill", d => ERA_COLOR[d.era])
+  .attr("fill-opacity", 0.82)
+  .attr("stroke", d => ERA_COLOR[d.era])
+  .attr("stroke-width", 1.8)
+  .attr("stroke-opacity", 0.90);
+
+nodeSel.append("text")
+  .attr("dy", d => rScale(degree[d.id]) + 11)
+  .attr("text-anchor","middle")
+  .attr("font-family","Georgia")
+  .attr("font-size", d => { const r=rScale(degree[d.id]); return r>24?12:r>16?10.5:9; })
+  .attr("fill", d => degree[d.id]>=8 ? "#d0d0d0" : "#888888")
+  .text(d => d.name);
+
+// ─── SIMULATION ──────────────────────────────────────────────────────────────
+
+const sim = d3.forceSimulation(nodes)
+  .force("link",      d3.forceLink(graphLinks).id(d=>d.id)
+    .distance(d => 110 + (5-d.weight)*18)
+    .strength(0.30))
+  .force("charge",    d3.forceManyBody().strength(d => -380 - degree[d.id]*14))
+  .force("center",    d3.forceCenter(W/2, H/2).strength(0.03))
+  .force("collision", d3.forceCollide(d => rScale(degree[d.id]) + 14))
+  .force("x",         d3.forceX(d => W * ERA_X[d.era]).strength(0.15))
+  .force("y",         d3.forceY(d => H * instrBand(d.instr)).strength(0.10));
+
+sim.on("tick", () => {
+  linkSel
+    .attr("x1", d=>d.source.x).attr("y1", d=>d.source.y)
+    .attr("x2", d=>d.target.x).attr("y2", d=>d.target.y);
+  nodeSel.attr("transform", d=>`translate(${d.x},${d.y})`);
+  // Update gradient positions for fading links
+  if (gradientSet.size > 0) {
+    linkSel.each(function(l, i) {
+      if (gradientSet.has(i)) {
+        defs.select("#lg"+i)
+          .attr("x1",l.source.x).attr("y1",l.source.y)
+          .attr("x2",l.target.x).attr("y2",l.target.y);
+      }
+    });
+  }
+});
+
+// Run label update once simulation cools
+sim.on("end", updateLabelVisibility);
+
+// ─── TEXT VISIBILITY BY ZOOM ─────────────────────────────────────────────────
+// Hide labels when the rendered circle radius is too small to be meaningful
+
+function updateLabelVisibility() {
+  const k = currentTransform.k;
+  nodeSel.select("text").attr("display", d => {
+    const renderedR = rScale(degree[d.id]) * k;
+    return renderedR < 9 ? "none" : null;
+  });
+}
+
+// ─── TOOLTIP ─────────────────────────────────────────────────────────────────
+
+const tip = d3.select("#tooltip");
+
+function onHover(e,d) {
+  tip.html(
+    `<strong style="color:${ERA_COLOR[d.era]}">${d.name}</strong>` +
+    (d.nick ? `<br><em style="color:#8a7040;font-size:11.5px">${d.nick}</em>` : '') +
+    `<br><span style="color:#888">${d.instr}</span>` +
+    `<br><span style="color:#555">Active: ${d.years}</span>` +
+    `<br><span style="color:#3a3a55">${degree[d.id]} connections</span>`
+  ).classed("visible", true);
+}
+function onMove(e)  { tip.style("left",(e.pageX+16)+"px").style("top",(e.pageY-10)+"px"); }
+function onOut()    { tip.classed("visible", false); }
+
+// ─── SELECT / HIGHLIGHT / ZOOM ───────────────────────────────────────────────
+
+let activeNode = null;
+
+function onSelect(e, d) {
+  e.stopPropagation();
+  if (activeNode === d.id) { resetHighlight(); closeSidebar(); return; }
+  activeNode = d.id;
+
+  const connected = new Set([d.id]);
+  adj[d.id].forEach(a => connected.add(a.id));
+
+  nodeSel.classed("dimmed",   n => !connected.has(n.id));
+  nodeSel.classed("selected", n => n.id === d.id);
+  linkSel
+    .classed("dimmed", l => l.source.id !== d.id && l.target.id !== d.id)
+    .classed("lit",    l => l.source.id === d.id || l.target.id === d.id);
+
+  populateSidebar(d);
+  zoomToNode(d);
+}
+
+function zoomToNode(d) {
+  const sbW   = 320;
+  const cx    = (W - sbW) / 2;
+  const scale = Math.max(currentTransform.k, 1.8);
+  const tx    = cx - d.x * scale;
+  const ty    = H/2 - d.y * scale;
+  svg.transition().duration(800).ease(d3.easeCubicInOut)
+     .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+function resetHighlight() {
+  activeNode = null;
+  nodeSel.classed("dimmed", false).classed("selected", false);
+  linkSel.classed("dimmed", false).classed("lit", false)
+    .attr("stroke-opacity", l => wOpacity(l.weight));
+  applyFilters();
+}
+
+// ─── SIDEBAR ─────────────────────────────────────────────────────────────────
+
+function populateSidebar(d) {
+  document.getElementById("sb-name").textContent  = d.name;
+
+  const nickEl = document.getElementById("sb-nickname");
+  nickEl.textContent = d.nick || "";
+  nickEl.style.display = d.nick ? "block" : "none";
+
+  document.getElementById("sb-instr").textContent = d.instr;
+  document.getElementById("sb-years").textContent = "Active: " + d.years;
+  document.getElementById("sb-count").textContent = `${degree[d.id]} documented connections`;
+
+  const tag = document.getElementById("sb-era-tag");
+  tag.textContent  = ERA_LABEL[d.era];
+  tag.style.cssText= `background:${ERA_COLOR[d.era]}1e;color:${ERA_COLOR[d.era]};border:1px solid ${ERA_COLOR[d.era]}44;padding:3px 12px;border-radius:12px;font-size:11.5px;margin-bottom:8px;display:inline-block;`;
+
+  const wikiSlug = d.wiki || d.name.replace(/ /g,"_");
+  document.getElementById("sb-wiki").href    = `https://en.wikipedia.org/wiki/${wikiSlug}`;
+  document.getElementById("sb-spotify").href = `https://open.spotify.com/search/${encodeURIComponent(d.name)}`;
+
+  const eraOrder = ["early","bebop","modal","fusion"];
+  const list = document.getElementById("sb-list");
+  list.innerHTML = "";
+
+  [...adj[d.id]]
+    .sort((a,b) => {
+      if (b.weight !== a.weight) return b.weight - a.weight;
+      const ea = nodeMap[a.id]?.era||"z", eb = nodeMap[b.id]?.era||"z";
+      return eraOrder.indexOf(ea) - eraOrder.indexOf(eb) || (nodeMap[a.id]?.name||"").localeCompare(nodeMap[b.id]?.name||"");
+    })
+    .forEach(conn => {
+      const nd = nodeMap[conn.id]; if (!nd) return;
+      const li = document.createElement("li");
+      li.innerHTML =
+        `<span class="sb-nm" style="color:${ERA_COLOR[nd.era]};font-size:14px">${nd.name}</span>` +
+        `<div class="sb-weight" style="color:${ERA_COLOR[d.era]}99">${weightDots(conn.weight)} <span style="color:#8888b8;font-size:12px">${weightLabel(conn.weight)}</span></div>` +
+        `<div class="sb-ctx">${conn.label}</div>`;
+      li.addEventListener("click", () => onSelect({ stopPropagation:()=>{} }, nd));
+      list.appendChild(li);
+    });
+
+  document.getElementById("sidebar").classList.add("open");
+}
+
+function closeSidebar() { document.getElementById("sidebar").classList.remove("open"); }
+document.getElementById("close-sb").addEventListener("click", () => { resetHighlight(); closeSidebar(); });
+
+// ─── FILTERS (era + instrument) ──────────────────────────────────────────────
+
+let activeEra = "all";
+
+function applyFilters() {
+  // Compute visible node set
+  const vis = new Set();
+  nodes.forEach(n => {
+    const eraOk  = activeEra   === "all" || n.era === activeEra;
+    const instrOk = activeInstr === "all" || instrMatches(n.instr, activeInstr);
+    if (eraOk && instrOk) vis.add(n.id);
+  });
+
+  nodeSel.style("opacity", n => vis.has(n.id) ? null : 0.04);
+  gradientSet.clear();
+
+  linkSel.each(function(l, i) {
+    const srcVis = vis.has(l.source.id);
+    const tgtVis = vis.has(l.target.id);
+    const col    = ERA_COLOR[l.source.era] || "#8888aa";
+    const wo     = wOpacity(l.weight);
+
+    if (srcVis && tgtVis) {
+      d3.select(this).attr("stroke", col).attr("stroke-opacity", wo).classed("dimmed",false);
+    } else if (!srcVis && !tgtVis) {
+      d3.select(this).attr("stroke","#111122").attr("stroke-opacity",0.015).classed("dimmed",true);
+    } else {
+      // One visible, one dimmed → gradient fade
+      gradientSet.add(i);
+      const [c0,op0,c1,op1] = srcVis ? [col,wo,col,0] : [col,0,col,wo];
+      setOrUpdateGradient(i, l.source.x,l.source.y, l.target.x,l.target.y, c0,op0,c1,op1);
+      d3.select(this).attr("stroke","url(#lg"+i+")").attr("stroke-opacity",1).classed("dimmed",false);
+    }
+  });
+
+  // Link hover: flash the dimmed-end node
+  linkSel.on("mouseover.filter", function(e, l) {
+    if (vis.size === nodes.length) return;
+    const srcVis = vis.has(l.source.id), tgtVis = vis.has(l.target.id);
+    if (srcVis === tgtVis) return;
+    const dimmedId = srcVis ? l.target.id : l.source.id;
+    nodeSel.filter(n => n.id === dimmedId).classed("link-flash", true);
+    setTimeout(() => nodeSel.filter(n => n.id === dimmedId).classed("link-flash", false), 700);
+  });
+}
+
+document.querySelectorAll(".era-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".era-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    activeEra = btn.dataset.era;
+    resetHighlight(); closeSidebar(); applyFilters();
+    sim.alpha(0.3).restart();
+  });
+});
+
+document.querySelectorAll(".instr-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".instr-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    activeInstr = btn.dataset.instr;
+    resetHighlight(); closeSidebar(); applyFilters();
+  });
+});
+
+// ─── SEARCH DROPDOWN ─────────────────────────────────────────────────────────
+
+const searchBox      = document.getElementById("search-box");
+const searchDropdown = document.getElementById("search-dropdown");
+let focusedIdx = -1;
+
+function showDropdown(q) {
+  const matches = nodes
+    .filter(n => n.name.toLowerCase().includes(q.toLowerCase()) ||
+                 (n.nick||"").toLowerCase().includes(q.toLowerCase()))
+    .sort((a,b) => {
+      const as = a.name.toLowerCase().startsWith(q.toLowerCase());
+      const bs = b.name.toLowerCase().startsWith(q.toLowerCase());
+      if (as && !bs) return -1; if (!as && bs) return 1;
+      return a.name.localeCompare(b.name);
+    }).slice(0,9);
+
+  if (!matches.length) { searchDropdown.style.display="none"; return; }
+  searchDropdown.innerHTML = ""; focusedIdx = -1;
+
+  matches.forEach(m => {
+    const item = document.createElement("div");
+    item.className = "drop-item";
+    const idx = m.name.toLowerCase().indexOf(q.toLowerCase());
+    const nameHtml = idx >= 0
+      ? m.name.slice(0,idx) +
+        `<span style="color:#eee;font-weight:bold">${m.name.slice(idx, idx+q.length)}</span>` +
+        m.name.slice(idx+q.length)
+      : m.name;
+    item.innerHTML =
+      `<div class="drop-name" style="color:${ERA_COLOR[m.era]}">${nameHtml}</div>` +
+      `<div class="drop-meta">${m.instr} · ${m.years}</div>`;
+    item.addEventListener("mousedown", e => {
+      e.preventDefault();
+      searchBox.value = m.name;
+      searchDropdown.style.display="none";
+      nodeSel.style("opacity",null);
+      linkSel.attr("stroke-opacity", l => wOpacity(l.weight));
+      onSelect({ stopPropagation:()=>{} }, m);
+    });
+    searchDropdown.appendChild(item);
+  });
+  searchDropdown.style.display = "block";
+}
+
+searchBox.addEventListener("input", e => {
+  const q = e.target.value.trim();
+  if (!q) { searchDropdown.style.display="none"; if(!activeNode) resetHighlight(); return; }
+  showDropdown(q);
+});
+
+searchBox.addEventListener("keydown", e => {
+  const items = searchDropdown.querySelectorAll(".drop-item");
+  if (!items.length) return;
+  if      (e.key==="ArrowDown"){ e.preventDefault(); focusedIdx=(focusedIdx+1)%items.length; }
+  else if (e.key==="ArrowUp")  { e.preventDefault(); focusedIdx=(focusedIdx-1+items.length)%items.length; }
+  else if (e.key==="Enter")    { if(focusedIdx>=0) items[focusedIdx].dispatchEvent(new MouseEvent("mousedown")); }
+  else if (e.key==="Escape")   { searchDropdown.style.display="none"; searchBox.blur(); }
+  items.forEach((it,i) => it.classList.toggle("focused", i===focusedIdx));
+});
+searchBox.addEventListener("blur", () => setTimeout(()=>{ searchDropdown.style.display="none"; },150));
+
+// ─── FIXED Y-AXIS LABELS ─────────────────────────────────────────────────────
+
+const yBands = [
+  { text:"Vocals",         band:0.09 },
+  { text:"Trumpet",        band:0.21 },
+  { text:"Trombone",       band:0.29 },
+  { text:"Sax / Clarinet", band:0.43 },
+  { text:"Guitar / Vibes", band:0.54 },
+  { text:"Piano",          band:0.63 },
+  { text:"Bass",           band:0.76 },
+  { text:"Drums",          band:0.88 },
+];
+
+const yContainer = document.getElementById("y-labels-container");
+yBands.forEach(b => {
+  const el = document.createElement("div");
+  el.className = "y-label";
+  el.textContent = b.text;
+  el.style.top = (b.band * H) + "px";
+  yContainer.appendChild(el);
+});
+
+// ─── FIXED X-AXIS TIMELINE ───────────────────────────────────────────────────
+
+const xAxisEl = document.getElementById("x-axis");
+
+const xEraLabels = [
+  { label:ERA_LABEL.early,  color:ERA_COLOR.early,  pos:ERA_X.early  },
+  { label:ERA_LABEL.bebop,  color:ERA_COLOR.bebop,  pos:ERA_X.bebop  },
+  { label:ERA_LABEL.modal,  color:ERA_COLOR.modal,  pos:ERA_X.modal  },
+  { label:ERA_LABEL.fusion, color:ERA_COLOR.fusion, pos:ERA_X.fusion },
+];
+const xYearMarks = [
+  { year:"1900s", pos:0.04  },
+  { year:"~1945", pos:0.245 },
+  { year:"~1955", pos:0.37  },
+  { year:"~1960", pos:0.49  },
+  { year:"~1968", pos:0.62  },
+  { year:"~1972", pos:0.73  },
+  { year:"1985+",  pos:0.92 },
+];
+
+xEraLabels.forEach(d => {
+  const el = document.createElement("span");
+  el.className = "x-era-label";
+  el.textContent = d.label.toUpperCase();
+  el.style.left  = (d.pos * 100) + "%";
+  el.style.color = d.color;
+  xAxisEl.appendChild(el);
+});
+xYearMarks.forEach(d => {
+  const wrap = document.createElement("div");
+  wrap.className = "x-mark";
+  wrap.style.left = (d.pos * 100) + "%";
+  wrap.innerHTML  = `<div class="x-tick"></div><div class="x-year">${d.year}</div>`;
+  xAxisEl.appendChild(wrap);
+});
+
+// ─── STATS ───────────────────────────────────────────────────────────────────
+
+document.getElementById("stats").textContent =
+  `${nodes.length} artists · ${rawLinks.length} connections`;
+
+// ─── INITIAL LABEL VISIBILITY ────────────────────────────────────────────────
+// Call once after a short delay to ensure initial positions are set
+setTimeout(updateLabelVisibility, 100);
+
+</script>
+</body>
+</html>
