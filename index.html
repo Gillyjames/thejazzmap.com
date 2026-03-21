@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>The Jazz Map</title>
   <style>
+    :root { --header-h: 58px; }
     * { margin:0; padding:0; box-sizing:border-box; }
     body { background:#0d0d1a; color:#e0e0e0; font-family:'Georgia',serif; overflow:hidden; height:100vh; width:100vw; }
 
@@ -75,6 +77,10 @@
     #header-credit { font-size:9px; color:#606080; }
     #header-credit a { color:#a07838; text-decoration:none; }
     #header-spacer { flex:1; min-width:4px; }
+    #era-filters-wrap,
+    #instr-filters-wrap { display:flex; align-items:center; }
+    #mobile-actions { display:flex; align-items:center; gap:6px; }
+    #mobile-instr-row { display:none; }
     .filter-sep { width:1px; height:16px; background:#1e1e38; flex-shrink:0; margin:0 2px; }
     #era-filters   { display:flex; align-items:center; gap:4px; flex-shrink:0; flex-wrap:nowrap; }
     #instr-filters { display:flex; align-items:center; gap:4px; flex-shrink:0; flex-wrap:nowrap; }
@@ -135,25 +141,35 @@
     .drop-meta { font-size:10.5px; color:#363654; margin-top:2px; }
 
     /* ── GRAPH ── */
-    #svg-wrap { position:absolute; top:58px; left:0; right:0; bottom:0; }
+    #svg-wrap { position:absolute; top:var(--header-h); left:0; right:0; bottom:0; }
     svg { width:100%; height:100%; }
 
     /* ── FIXED OVERLAYS ── */
-    #y-labels-container { position:absolute; left:0; top:58px; bottom:0; pointer-events:none; z-index:4; }
+    #y-labels-container { position:absolute; left:0; top:var(--header-h); bottom:0; pointer-events:none; z-index:4; }
     .y-label { position:absolute; font-size:8px; color:#1e1e36; letter-spacing:1.5px; text-transform:uppercase; left:8px; transform:translateY(-50%); white-space:nowrap; }
+    #map-backdrop {
+      position:absolute; inset:var(--header-h) 0 0 0;
+      background:rgba(5,5,16,0.08);
+      opacity:0;
+      pointer-events:none;
+      z-index:7;
+      transition:opacity 0.8s ease;
+    }
+    #map-backdrop.open { opacity:1; pointer-events:auto; }
 
 
 
     /* ── LINKS ── */
-    .link { }
+    .link { transition:stroke-opacity 0.8s ease, stroke-width 0.24s ease, filter 0.8s ease; }
     .link.dimmed { stroke-opacity:0.02 !important; }
     .link.lit    { stroke-opacity:0.96 !important; }
 
     /* ── NODES ── */
     .node circle {
       cursor:pointer;
-      transition:stroke-width 0.22s ease, filter 0.22s ease;
+      transition:stroke-width 0.24s ease, filter 0.8s ease;
     }
+    .node { transition:opacity 0.8s ease; }
     .node:hover circle {
       stroke-width:2.5px !important;
       filter:drop-shadow(0 0 10px var(--era-color, #aaa));
@@ -181,12 +197,27 @@
 
     /* ── SIDEBAR ── */
     #sidebar {
-      position:absolute; right:0; top:58px; bottom:0; width:320px;
+      position:absolute; right:0; top:var(--header-h); bottom:0; width:320px;
       background:rgba(7,7,18,0.99); border-left:1px solid #161628;
-      padding:26px 22px; z-index:8; overflow-y:auto;
+      padding:10px 0 0; z-index:8; overflow:hidden;
+      display:flex; flex-direction:column;
       transform:translateX(calc(100% + 24px));
       transition:transform 0.55s cubic-bezier(0.16,1,0.3,1), box-shadow 0.55s cubic-bezier(0.16,1,0.3,1);
       box-shadow:none;
+    }
+    #sidebar-handle {
+      display:none;
+      width:54px; height:5px; border-radius:999px;
+      background:#2b2b46;
+      margin:0 auto 16px;
+      cursor:ns-resize;
+      flex-shrink:0;
+    }
+    #sidebar-scroll {
+      flex:1;
+      overflow-y:auto;
+      padding:10px 22px 26px;
+      overscroll-behavior:contain;
     }
     #sidebar.open { transform:translateX(0); box-shadow:-28px 0 70px rgba(0,0,0,0.65); }
     #close-sb { position:absolute; top:18px; right:18px; background:none; border:none; color:#282840; font-size:16px; cursor:pointer; transition:color 0.22s; }
@@ -388,6 +419,180 @@
     #nl-fine {
       font-size:9px; color:#303050; margin-top:12px; text-align:center;
     }
+
+    @media (max-width: 900px) {
+      #intro-title { font-size:42px; letter-spacing:8px; }
+      #intro-sub { font-size:12px; letter-spacing:2.4px; line-height:2; padding:0 18px; }
+      #intro-eras { gap:16px; flex-wrap:wrap; justify-content:center; padding:0 18px; }
+      #intro-hint { bottom:34px; text-align:center; padding:0 20px; }
+
+      #header {
+        height:auto;
+        min-height:58px;
+        padding:8px 12px 10px;
+        gap:8px;
+        align-items:center;
+        flex-wrap:wrap;
+        justify-content:center;
+      }
+      #brand {
+        width:100%;
+        margin-right:0;
+        align-items:center;
+        text-align:center;
+      }
+      #header-title { font-size:13px; letter-spacing:2.4px; }
+      #header-credit { font-size:8.5px; }
+      #header-spacer { display:none; }
+      .filter-sep { display:none; }
+      #era-filters-wrap,
+      #instr-filters-wrap,
+      #mobile-actions,
+      #search-wrap,
+      #mobile-instr-row {
+        width:100%;
+      }
+      #brand { order:1; }
+      #mobile-actions { order:2; }
+      #search-wrap { order:3; }
+      #era-filters-wrap { order:4; }
+      #mobile-instr-row { order:5; }
+      #era-filters {
+        width:100%;
+        min-width:0;
+        justify-content:center;
+        flex-wrap:nowrap;
+        overflow-x:auto;
+        overflow-y:hidden;
+        gap:6px;
+        margin:0;
+        padding-bottom:0;
+      }
+      #era-filters::-webkit-scrollbar { display:none; }
+      #instr-filters-wrap { display:none; }
+      #mobile-instr-row {
+        width:100%;
+        display:flex;
+        justify-content:center;
+      }
+      #mobile-instr-select {
+        width:100%;
+        max-width:280px;
+        background:#0b0b22;
+        border:1px solid #2a2a48;
+        border-radius:18px;
+        color:#d0d0e8;
+        font-size:11px;
+        font-family:Georgia,serif;
+        padding:8px 14px;
+        outline:none;
+      }
+      .era-btn,
+      .instr-btn,
+      .action-btn { flex-shrink:0; }
+      #mobile-actions {
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        flex-wrap:nowrap;
+        gap:8px;
+      }
+      #search-wrap {
+        margin-left:0;
+        display:flex;
+        justify-content:center;
+      }
+      #search-box {
+        width:100%;
+        max-width:280px;
+      }
+      #search-dropdown {
+        width:min(280px, calc(100vw - 24px));
+      }
+      #stats { bottom:12px; right:10px; font-size:9px; }
+      #tooltip { display:none; }
+    }
+
+    @media (max-width: 640px) {
+      #intro-title { font-size:34px; letter-spacing:6px; }
+      #intro-rule { width:220px; }
+      .intro-era { font-size:10px; letter-spacing:1.8px; }
+
+      .action-btn {
+        padding:4px 10px;
+        font-size:10.5px;
+        min-width:0;
+        justify-content:center;
+      }
+      .era-btn,
+      .instr-btn {
+        font-size:10.5px;
+        padding:3px 10px;
+      }
+
+      #y-labels-container,
+      #stats { display:none; }
+
+      #sidebar {
+        top:auto;
+        left:0;
+        right:0;
+        bottom:0;
+        width:100%;
+        height:min(38vh, 320px);
+        border-left:none;
+        border-top:1px solid #161628;
+        padding:10px 0 0;
+        transform:translateY(calc(100% + 24px));
+        transition:transform 0.45s cubic-bezier(0.16,1,0.3,1), box-shadow 0.45s cubic-bezier(0.16,1,0.3,1), height 0.32s ease;
+      }
+      #sidebar.dragging {
+        transition:none;
+      }
+      #sidebar-scroll {
+        padding:0 18px 24px;
+      }
+      #sidebar.open {
+        transform:translateY(0);
+        box-shadow:0 -24px 70px rgba(0,0,0,0.65);
+      }
+      #sidebar.expanded {
+        height:min(74vh, 620px);
+      }
+      #sidebar-handle {
+        display:block;
+        position:sticky;
+        top:0;
+        z-index:2;
+      }
+      #sb-name { font-size:22px; }
+      #sb-links { flex-wrap:wrap; }
+      #sb-list li { padding:11px 0; }
+
+      #feedback-box,
+      #learn-box,
+      #nl-box {
+        width:calc(100vw - 24px);
+        padding:24px 20px 20px;
+      }
+      #kofi-box {
+        width:calc(100vw - 16px);
+      }
+      #kofi-frame { height:470px; }
+      #learn-book {
+        flex-direction:column;
+        gap:14px;
+      }
+      #learn-cover-wrap {
+        width:96px;
+      }
+      #nl-form {
+        flex-direction:column;
+      }
+      #nl-submit {
+        width:100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -412,30 +617,50 @@
     <div id="header-credit">by <a href="mailto:james@thejazzmap.com">James Gilchrist</a> · 2026</div>
   </div>
   <div class="filter-sep"></div>
-  <div id="era-filters">
-    <button class="era-btn active" data-era="all">All</button>
-    <button class="era-btn" data-era="early">Early</button>
-    <button class="era-btn" data-era="bebop">Bebop</button>
-    <button class="era-btn" data-era="modal">Modal</button>
-    <button class="era-btn" data-era="fusion">Fusion</button>
+  <div id="era-filters-wrap">
+    <div id="era-filters">
+      <button class="era-btn active" data-era="all">All</button>
+      <button class="era-btn" data-era="early">Early</button>
+      <button class="era-btn" data-era="bebop">Bebop</button>
+      <button class="era-btn" data-era="modal">Modal</button>
+      <button class="era-btn" data-era="fusion">Fusion</button>
+    </div>
   </div>
   <div class="filter-sep"></div>
-  <div id="instr-filters">
-    <button class="instr-btn active" data-instr="all">All</button>
-    <button class="instr-btn" data-instr="vocal">Vocals</button>
-    <button class="instr-btn" data-instr="trumpet">Trumpet</button>
-    <button class="instr-btn" data-instr="trombone">Trombone</button>
-    <button class="instr-btn" data-instr="sax">Sax</button>
-    <button class="instr-btn" data-instr="guitar">Guitar</button>
-    <button class="instr-btn" data-instr="vibes">Vibes</button>
-    <button class="instr-btn" data-instr="piano">Piano</button>
-    <button class="instr-btn" data-instr="bass">Bass</button>
-    <button class="instr-btn" data-instr="drums">Drums</button>
+  <div id="instr-filters-wrap">
+    <div id="instr-filters">
+      <button class="instr-btn active" data-instr="all">All</button>
+      <button class="instr-btn" data-instr="vocal">Vocals</button>
+      <button class="instr-btn" data-instr="trumpet">Trumpet</button>
+      <button class="instr-btn" data-instr="trombone">Trombone</button>
+      <button class="instr-btn" data-instr="sax">Sax</button>
+      <button class="instr-btn" data-instr="guitar">Guitar</button>
+      <button class="instr-btn" data-instr="vibes">Vibes</button>
+      <button class="instr-btn" data-instr="piano">Piano</button>
+      <button class="instr-btn" data-instr="bass">Bass</button>
+      <button class="instr-btn" data-instr="drums">Drums</button>
+    </div>
+  </div>
+  <div id="mobile-instr-row">
+    <select id="mobile-instr-select" aria-label="Filter by instrument">
+      <option value="all">All instruments</option>
+      <option value="vocal">Vocals</option>
+      <option value="trumpet">Trumpet</option>
+      <option value="trombone">Trombone</option>
+      <option value="sax">Sax / Clarinet</option>
+      <option value="guitar">Guitar</option>
+      <option value="vibes">Vibraphone</option>
+      <option value="piano">Piano</option>
+      <option value="bass">Bass</option>
+      <option value="drums">Drums / Percussion</option>
+    </select>
   </div>
   <div id="header-spacer"></div>
-  <button class="action-btn" id="learn-btn">📖 Learn More</button>
-  <button class="action-btn" id="feedback-btn">💬 Feedback</button>
-  <button class="action-btn" id="coffee-btn">☕ Coffee</button>
+  <div id="mobile-actions">
+    <button class="action-btn" id="learn-btn">📖 Learn More</button>
+    <button class="action-btn" id="feedback-btn">💬 Feedback</button>
+    <button class="action-btn" id="coffee-btn">☕ Coffee</button>
+  </div>
   <div id="search-wrap">
     <input type="text" id="search-box" placeholder="Search artist…" autocomplete="off">
     <div id="search-dropdown"></div>
@@ -443,31 +668,35 @@
 </div>
 
 <div id="y-labels-container"></div>
+<div id="map-backdrop"></div>
 <div id="svg-wrap"><svg id="graph"></svg></div>
 
 <div id="sidebar">
-  <button id="close-sb">✕</button>
-  <div id="sb-name"></div>
-  <div id="sb-nickname"></div>
-  <div id="sb-instr"></div>
-  <div id="sb-years"></div>
-  <span id="sb-era-tag"></span>
-  <div id="sb-count"></div>
-  <div id="sb-links">
-    <a id="sb-wiki"    class="sb-link" href="" target="_blank" rel="noopener">📖 Wikipedia</a>
-    <a id="sb-spotify" class="sb-link" href="" target="_blank" rel="noopener">🎵 Spotify</a>
-  </div>
-  <div id="sb-heading">Played With</div>
-  <ul id="sb-list"></ul>
+  <div id="sidebar-handle" aria-hidden="true"></div>
+  <div id="sidebar-scroll">
+    <button id="close-sb">✕</button>
+    <div id="sb-name"></div>
+    <div id="sb-nickname"></div>
+    <div id="sb-instr"></div>
+    <div id="sb-years"></div>
+    <span id="sb-era-tag"></span>
+    <div id="sb-count"></div>
+    <div id="sb-links">
+      <a id="sb-wiki"    class="sb-link" href="" target="_blank" rel="noopener">📖 Wikipedia</a>
+      <a id="sb-spotify" class="sb-link" href="" target="_blank" rel="noopener">🎵 Spotify</a>
+    </div>
+    <div id="sb-heading">Played With</div>
+    <ul id="sb-list"></ul>
 
-  <!-- Link mode content (hidden when showing a node) -->
-  <div id="sb-link-section" style="display:none">
-    <div id="sb-link-header">Connection</div>
-    <div id="sb-link-names"></div>
-    <div id="sb-link-desc" class="sb-ctx" style="font-size:13px;color:#8888b0;margin-bottom:8px"></div>
-    <div id="sb-link-strength"></div>
-    <div id="sb-albums-head" style="display:none">Key Recordings</div>
-    <ul id="sb-albums"></ul>
+    <!-- Link mode content (hidden when showing a node) -->
+    <div id="sb-link-section" style="display:none">
+      <div id="sb-link-header">Connection</div>
+      <div id="sb-link-names"></div>
+      <div id="sb-link-desc" class="sb-ctx" style="font-size:13px;color:#8888b0;margin-bottom:8px"></div>
+      <div id="sb-link-strength"></div>
+      <div id="sb-albums-head" style="display:none">Key Recordings</div>
+      <ul id="sb-albums"></ul>
+    </div>
   </div>
 </div>
 
@@ -1410,8 +1639,16 @@ function wWidth(w)   { return [0, 1.0,  1.6,  2.4,  3.6,  5.2][w] || 1.5; }
 
 // ─── SVG & ZOOM ──────────────────────────────────────────────────────────────
 
+const headerEl = document.getElementById("header");
+const getHeaderHeight = () => (headerEl ? headerEl.offsetHeight : 58);
+document.documentElement.style.setProperty("--header-h", `${getHeaderHeight()}px`);
+window.addEventListener("resize", () => {
+  document.documentElement.style.setProperty("--header-h", `${getHeaderHeight()}px`);
+  if (!isMobileSheet()) collapseMobileSheet();
+});
+
 const W = window.innerWidth;
-const H = window.innerHeight - 58;
+const H = window.innerHeight - getHeaderHeight();
 
 const svg = d3.select("#graph").attr("viewBox", [0, 0, W, H]);
 const g   = svg.append("g");
@@ -1419,6 +1656,7 @@ const defs = svg.append("defs");
 
 let activeInstr = "all";
 const gradientSet = new Set(); // indices of links currently using gradient strokes
+const mobileInstrSelect = document.getElementById("mobile-instr-select");
 
 function instrMatches(instrStr, filter) {
   const s = (instrStr||"").toLowerCase();
@@ -1464,6 +1702,7 @@ svg.on("click", () => {
       b.classList.toggle("active", b.dataset.era === "all"));
     document.querySelectorAll(".instr-btn").forEach(b =>
       b.classList.toggle("active", b.dataset.instr === "all"));
+    if (mobileInstrSelect) mobileInstrSelect.value = "all";
     applyFilters();
   }
 });
@@ -1610,6 +1849,34 @@ function onOut()    { tip.classed("visible", false); }
 
 let activeNode = null;
 let activeLink = null;
+const sidebarEl = document.getElementById("sidebar");
+const sidebarHandleEl = document.getElementById("sidebar-handle");
+const sidebarScrollEl = document.getElementById("sidebar-scroll");
+const mapBackdropEl = document.getElementById("map-backdrop");
+
+function isMobileSheet() {
+  return window.innerWidth <= 640;
+}
+
+function collapseMobileSheet() {
+  if (!isMobileSheet()) return;
+  sidebarEl.classList.remove("expanded");
+}
+
+function expandMobileSheet() {
+  if (!isMobileSheet()) return;
+  sidebarEl.classList.add("expanded");
+  suppressAutoCollapseUntil = Date.now() + 250;
+}
+
+function resetMobileSheet() {
+  if (!isMobileSheet()) return;
+  sidebarScrollEl.scrollTop = 0;
+  lastSidebarScrollTop = 0;
+  sidebarEl.classList.remove("dragging");
+  sidebarEl.style.transform = "";
+  collapseMobileSheet();
+}
 
 function onSelect(e, d) {
   e.stopPropagation();
@@ -1638,8 +1905,8 @@ function onSelect(e, d) {
 }
 
 function zoomToNode(d) {
-  const sbW   = 320;
-  const cx    = (W - sbW) / 2;
+  const sbW   = window.innerWidth <= 640 ? 0 : 320;
+  const cx    = sbW ? (W - sbW) / 2 : W / 2;
   const scale = Math.max(currentTransform.k, 1.8);
   const tx    = cx - d.x * scale;
   const ty    = H/2 - d.y * scale;
@@ -1648,8 +1915,8 @@ function zoomToNode(d) {
 }
 
 function zoomToLink(l) {
-  const sbW   = 320;
-  const cx    = (W - sbW) / 2;
+  const sbW   = window.innerWidth <= 640 ? 0 : 320;
+  const cx    = sbW ? (W - sbW) / 2 : W / 2;
   const mx    = (l.source.x + l.target.x) / 2;
   const my    = (l.source.y + l.target.y) / 2;
   const scale = Math.max(currentTransform.k, 1.8);
@@ -1717,7 +1984,9 @@ function populateSidebar(d) {
       list.appendChild(li);
     });
 
-  document.getElementById("sidebar").classList.add("open");
+  resetMobileSheet();
+  sidebarEl.classList.add("open");
+  mapBackdropEl.classList.add("open");
 }
 
 function populateLinkSidebar(l) {
@@ -1796,11 +2065,164 @@ function populateLinkSidebar(l) {
     albumsHead.style.display = "none";
   }
 
-  document.getElementById("sidebar").classList.add("open");
+  resetMobileSheet();
+  sidebarEl.classList.add("open");
+  mapBackdropEl.classList.add("open");
 }
 
-function closeSidebar() { document.getElementById("sidebar").classList.remove("open"); }
-document.getElementById("close-sb").addEventListener("click", () => { resetHighlight(); closeSidebar(); });
+function closeSidebar() {
+  sidebarEl.classList.remove("open");
+  mapBackdropEl.classList.remove("open");
+  sidebarEl.classList.remove("dragging");
+  sidebarEl.style.transform = "";
+  sidebarScrollEl.scrollTop = 0;
+  lastSidebarScrollTop = 0;
+  collapseMobileSheet();
+}
+
+function dismissSidebarSoftly() {
+  resetHighlight();
+  setTimeout(() => closeSidebar(), 140);
+}
+
+document.getElementById("close-sb").addEventListener("click", dismissSidebarSoftly);
+mapBackdropEl.addEventListener("click", dismissSidebarSoftly);
+
+sidebarHandleEl.addEventListener("click", () => {
+  if (!isMobileSheet() || !sidebarEl.classList.contains("open")) return;
+  sidebarEl.classList.toggle("expanded");
+});
+
+let sheetTouchStartY = null;
+let sheetTouchStartScrollTop = 0;
+let sheetExpandedByGesture = false;
+let sheetDragMode = null;
+let sheetDragStartY = 0;
+let sheetTouchActive = false;
+let sheetTouchFromHandle = false;
+let lastSidebarScrollTop = 0;
+let suppressAutoCollapseUntil = 0;
+function resetSheetTouchState() {
+  sheetTouchStartY = null;
+  sheetTouchStartScrollTop = 0;
+  sheetExpandedByGesture = false;
+  sheetDragMode = null;
+  sheetDragStartY = 0;
+  sheetTouchActive = false;
+  sheetTouchFromHandle = false;
+}
+
+function beginSheetTouch(clientY, onHandle) {
+  if (!isMobileSheet() || !sidebarEl.classList.contains("open")) return;
+  sheetTouchStartY = clientY;
+  sheetTouchStartScrollTop = onHandle ? 0 : sidebarScrollEl.scrollTop;
+  sheetExpandedByGesture = false;
+  sheetDragMode = onHandle ? "handle" : null;
+  sheetDragStartY = clientY;
+  sheetTouchActive = true;
+  sheetTouchFromHandle = onHandle;
+}
+
+function moveSheetTouch(e, clientY, fromHandle) {
+  if (!isMobileSheet() || !sheetTouchActive || sheetTouchStartY == null || !sidebarEl.classList.contains("open")) return;
+  const deltaY = clientY - sheetTouchStartY;
+  const atTop = sidebarScrollEl.scrollTop <= 2;
+
+  if (sheetDragMode === "collapse" || sheetDragMode === "handle") {
+    e.preventDefault();
+    const dragY = Math.max(0, clientY - sheetDragStartY);
+    sidebarEl.classList.add("dragging");
+    sidebarEl.style.transform = `translateY(${dragY}px)`;
+    return;
+  }
+
+  if (!sidebarEl.classList.contains("expanded") && deltaY < -42 && (sheetTouchStartScrollTop <= 18 || fromHandle)) {
+    expandMobileSheet();
+    sheetExpandedByGesture = true;
+    return;
+  }
+
+  if (sidebarEl.classList.contains("expanded") && deltaY > 0 && atTop) {
+    sheetDragMode = "collapse";
+    sheetDragStartY = clientY;
+    e.preventDefault();
+  }
+}
+
+function endSheetTouch(clientY, fromHandle) {
+  if (!isMobileSheet() || !sheetTouchActive || sheetTouchStartY == null || !sidebarEl.classList.contains("open")) return;
+  const deltaY = clientY - sheetTouchStartY;
+  const atTop = sidebarScrollEl.scrollTop <= 2;
+
+  if (sheetDragMode === "collapse" || sheetDragMode === "handle") {
+    const dragDistance = Math.max(0, clientY - sheetDragStartY);
+    sidebarEl.classList.remove("dragging");
+    sidebarEl.style.transform = "";
+    if (dragDistance > 36) {
+      collapseMobileSheet();
+      sidebarScrollEl.scrollTop = 0;
+    } else if (sidebarEl.classList.contains("expanded") || sheetDragMode === "handle") {
+      expandMobileSheet();
+    }
+    resetSheetTouchState();
+    return;
+  }
+
+  if (!sheetExpandedByGesture && deltaY < -52 && (sheetTouchStartScrollTop <= 18 || fromHandle)) {
+    expandMobileSheet();
+  } else if (sidebarEl.classList.contains("expanded") && deltaY > 36 && atTop) {
+    collapseMobileSheet();
+    sidebarScrollEl.scrollTop = 0;
+  }
+
+  resetSheetTouchState();
+}
+
+sidebarScrollEl.addEventListener("touchstart", e => {
+  beginSheetTouch(e.touches[0].clientY, false);
+}, { passive: true });
+
+sidebarHandleEl.addEventListener("touchstart", e => {
+  beginSheetTouch(e.touches[0].clientY, true);
+}, { passive: true });
+
+sidebarScrollEl.addEventListener("scroll", () => {
+  if (!isMobileSheet() || !sidebarEl.classList.contains("open")) return;
+  const currentScrollTop = sidebarScrollEl.scrollTop;
+  const scrollingBackDown = currentScrollTop < lastSidebarScrollTop;
+
+  if (!sidebarEl.classList.contains("expanded") && currentScrollTop > 72) {
+    expandMobileSheet();
+  }
+  if (
+    sidebarEl.classList.contains("expanded") &&
+    scrollingBackDown &&
+    currentScrollTop <= 0 &&
+    Date.now() > suppressAutoCollapseUntil
+  ) {
+    collapseMobileSheet();
+    sidebarScrollEl.scrollTop = 0;
+  }
+  lastSidebarScrollTop = currentScrollTop;
+}, { passive: true });
+
+
+document.addEventListener("touchmove", e => {
+  if (!sheetTouchActive) return;
+  moveSheetTouch(e, e.touches[0].clientY, sheetTouchFromHandle);
+}, { passive: false, capture: true });
+
+document.addEventListener("touchend", e => {
+  if (!sheetTouchActive) return;
+  endSheetTouch(e.changedTouches[0].clientY, sheetTouchFromHandle);
+}, { passive: true, capture: true });
+
+document.addEventListener("touchcancel", () => {
+  if (!sheetTouchActive) return;
+  sidebarEl.classList.remove("dragging");
+  sidebarEl.style.transform = "";
+  resetSheetTouchState();
+}, { passive: true, capture: true });
 
 // ─── FILTERS (era + instrument) ──────────────────────────────────────────────
 
@@ -1891,10 +2313,21 @@ document.querySelectorAll(".instr-btn").forEach(btn => {
     document.querySelectorAll(".instr-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     activeInstr = btn.dataset.instr;
+    if (mobileInstrSelect) mobileInstrSelect.value = activeInstr;
     resetHighlight(); closeSidebar(); applyFilters();
     sim.alpha(0.3).restart();
   });
 });
+
+if (mobileInstrSelect) {
+  mobileInstrSelect.addEventListener("change", e => {
+    activeInstr = e.target.value;
+    document.querySelectorAll(".instr-btn").forEach(b =>
+      b.classList.toggle("active", b.dataset.instr === activeInstr));
+    resetHighlight(); closeSidebar(); applyFilters();
+    sim.alpha(0.3).restart();
+  });
+}
 
 // ─── SEARCH DROPDOWN ─────────────────────────────────────────────────────────
 
@@ -1940,7 +2373,13 @@ function showDropdown(q) {
   });
   const rect = searchBox.getBoundingClientRect();
   searchDropdown.style.top   = (rect.bottom + 6) + "px";
-  searchDropdown.style.right = (window.innerWidth - rect.right) + "px";
+  if (window.innerWidth <= 900) {
+    searchDropdown.style.left = rect.left + "px";
+    searchDropdown.style.right = "";
+  } else {
+    searchDropdown.style.left = "";
+    searchDropdown.style.right = (window.innerWidth - rect.right) + "px";
+  }
   searchDropdown.style.display = "block";
 }
 
