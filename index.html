@@ -91,9 +91,10 @@
     }
     .action-btn:hover { border-color:#5a5a80; color:#c0c0e0; }
     .instr-btn {
-      padding:2px 8px; border-radius:9px; border:1px solid #1a1a30;
+      padding:2px 9px; border-radius:12px; border:1px solid #1a1a30;
       background:transparent; cursor:pointer; font-size:11.5px; color:#707090;
       font-family:Georgia,serif; transition:all 0.25s; white-space:nowrap; flex-shrink:0;
+      letter-spacing:0.5px;
     }
     .instr-btn:hover { border-color:#4a4a70; color:#9090b8; }
     .instr-btn.active { background:#1e1e40; color:#9090c0; border-color:#3a3a60; }
@@ -160,26 +161,29 @@
 
 
     /* ── LINKS ── */
-    .link { transition:stroke-opacity 0.8s ease, stroke-width 0.24s ease, filter 0.8s ease; }
+    .link { transition:stroke-opacity 0.55s ease, stroke-width 0.2s ease; }
     .link.dimmed { stroke-opacity:0.02 !important; }
+    /* Multiple links lit (artist selected): bright stroke only — no filter, avoids Miles Davis flash */
     .link.lit    { stroke-opacity:0.96 !important; }
+    /* Single active connection (link selected): JS adds this class for the one glow */
+    .link.active-link { filter:drop-shadow(0 0 6px currentColor); }
 
     /* ── NODES ── */
     .node circle {
       cursor:pointer;
-      transition:stroke-width 0.24s ease, filter 0.8s ease;
+      transition:stroke-width 0.24s ease;
+      /* filter NOT in transition — snaps, no flash */
     }
-    .node { transition:opacity 0.8s ease; }
+    .node { transition:opacity 0.55s ease; }
     .node:hover circle {
       stroke-width:2.5px !important;
-      filter:drop-shadow(0 0 10px var(--era-color, #aaa));
+      filter:drop-shadow(0 0 12px var(--era-color, #aaa));
     }
     .node text { pointer-events:none; text-shadow:0 0 8px #0d0d1a,0 0 8px #0d0d1a,0 0 8px #0d0d1a,0 0 8px #0d0d1a; }
-    .node.dimmed { opacity:0.05; }
+    .node.dimmed { opacity:0.05; pointer-events:none; }
     /* ── LINKS ── */
     .link { cursor:pointer; pointer-events:visibleStroke; }
     .link-hit { cursor:pointer; pointer-events:stroke; fill:none; }
-    .link.lit  { filter:drop-shadow(0 0 4px currentColor); }
     #sb-link-header { font-size:11px; color:#505078; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; }
     #sb-link-names  { font-size:18px; line-height:1.4; margin-bottom:8px; font-weight:normal; }
     #sb-albums-head { font-size:9.5px; color:#505075; text-transform:uppercase; letter-spacing:2.5px; margin:14px 0 10px; }
@@ -188,11 +192,11 @@
     .album-title    { line-height:1.4; }
     .node.selected circle {
       stroke:#fff !important; stroke-width:2.5px;
-      animation:selectedGlow 2.5s ease-in-out infinite;
+      animation:selectedGlow 2.5s 0.3s ease-in-out infinite backwards;
     }
     @keyframes selectedGlow {
-      0%,100% { filter:drop-shadow(0 0 7px rgba(255,255,255,0.5)); }
-      50%      { filter:drop-shadow(0 0 22px rgba(255,255,255,0.9)); }
+      0%,100% { filter:drop-shadow(0 0 8px rgba(255,255,255,0.55)); }
+      50%      { filter:drop-shadow(0 0 26px rgba(255,255,255,0.95)); }
     }
 
     /* ── SIDEBAR ── */
@@ -236,6 +240,10 @@
       transition:all 0.25s ease; font-family:Georgia,serif;
     }
     .sb-link:hover { border-color:#484860; color:#ccc; background:#0e0e24; }
+    #sb-essential-head { font-size:9.5px; color:#505075; text-transform:uppercase; letter-spacing:2.5px; margin:16px 0 10px; }
+    #sb-essential-albums { list-style:none; padding:0; margin-bottom:4px; }
+    #sb-essential-albums li { padding:6px 0; border-bottom:1px solid #0e0e22; font-size:13px; color:#c0c0e0; display:flex; align-items:center; gap:10px; cursor:pointer; }
+    #sb-essential-albums li:hover .album-title { color:#1DB954; }
     #sb-heading  { font-size:9.5px; color:#505075; text-transform:uppercase; letter-spacing:2.5px; margin-bottom:11px; }
     #sb-list     { list-style:none; }
     #sb-list li  { padding:9px 0; border-bottom:1px solid #0e0e22; cursor:pointer; font-size:14px; line-height:1.5; }
@@ -334,37 +342,42 @@
     #learn-disclaimer { font-size:9px; color:#404060; margin-top:9px; }
 
     /* ── KO-FI MODAL ── */
+    /* ── COFFEE / STRIPE MODAL ── */
     #kofi-modal {
-      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.78); z-index:200;
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.72); z-index:200;
       align-items:center; justify-content:center;
     }
     #kofi-modal.open { display:flex; }
     #kofi-box {
-      background:#07071a; border:1px solid #2a2a48; border-radius:16px;
-      width:480px; max-width:94vw; overflow:hidden; position:relative;
+      background:#07071a; border:1px solid #2a2a48; border-radius:20px;
+      width:360px; max-width:92vw; padding:32px 28px 28px;
+      position:relative; text-align:center;
     }
-    #kofi-header {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 18px; border-bottom:1px solid #1a1a34;
-    }
-    #kofi-header span { color:#c8a050; font-size:14px; letter-spacing:0.5px; }
     #kofi-close {
+      position:absolute; top:14px; right:16px;
       background:none; border:none; color:#484868; font-size:18px;
       cursor:pointer; transition:color 0.2s; line-height:1;
     }
     #kofi-close:hover { color:#ccc; }
-    #kofi-frame {
-      width:100%; height:548px; border:none; display:block;
-      background:#fff;
+    #kofi-cup { font-size:48px; margin-bottom:12px; }
+    #kofi-title { color:#c8a050; font-size:17px; letter-spacing:0.3px; margin-bottom:8px; }
+    #kofi-sub {
+      color:#606080; font-size:12.5px; line-height:1.6; margin-bottom:24px;
     }
-    #kofi-fallback {
-      display:none; padding:24px; text-align:center;
+    #kofi-stripe-btn {
+      display:inline-flex; align-items:center; gap:10px;
+      background:#635BFF; color:#fff; border:none; border-radius:12px;
+      padding:13px 28px; font-size:14px; font-family:Georgia,serif;
+      cursor:pointer; text-decoration:none; letter-spacing:0.2px;
+      transition:background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow:0 4px 20px rgba(99,91,255,0.35);
     }
-    #kofi-fallback p { color:#8888b0; font-size:13px; margin-bottom:16px; }
-    #kofi-fallback a {
-      display:inline-block; padding:10px 24px; border-radius:22px;
-      background:#FF5E5B; color:#fff; text-decoration:none; font-size:13px;
+    #kofi-stripe-btn:hover {
+      background:#4f46e5; transform:translateY(-1px);
+      box-shadow:0 6px 28px rgba(99,91,255,0.45);
     }
+    #kofi-stripe-btn svg { width:18px; height:18px; fill:#fff; flex-shrink:0; }
+    #kofi-note { color:#303050; font-size:10.5px; margin-top:16px; }
 
     /* ── NEWSLETTER MODAL ── */
     #nl-modal {
@@ -418,6 +431,31 @@
     }
     #nl-fine {
       font-size:9px; color:#303050; margin-top:12px; text-align:center;
+    }
+
+    /* ── Intermediate: shrink header before it overflows ── */
+    @media (max-width: 1280px) {
+      #header { gap: 4px; padding: 0 10px; }
+      .era-btn  { font-size: 11px; padding: 2px 7px; }
+      .instr-btn { font-size: 11px; padding: 2px 6px; }
+      #era-filters  { gap: 3px; }
+      #instr-filters { gap: 3px; }
+      .filter-sep { margin: 0 1px; }
+    }
+    @media (max-width: 1100px) {
+      .era-btn  { font-size: 10.5px; padding: 2px 6px; }
+      .instr-btn { font-size: 10.5px; padding: 2px 5px; }
+      .action-btn { font-size: 10.5px; padding: 2px 8px; }
+      #search-box { width: 130px; }
+      .btn-label { display: none; }  /* icon-only — text hidden, emoji stays */
+      .action-btn { padding: 4px 7px; }
+    }
+    @media (max-width: 1000px) {
+      /* Hide action buttons from the bar — they're nice-to-have but not core */
+      #mobile-actions { display: none; }
+      #header-spacer   { display: none; }
+      /* Give search a bit more room */
+      #search-wrap { margin-left: auto; }
     }
 
     @media (max-width: 900px) {
@@ -593,6 +631,127 @@
         width:100%;
       }
     }
+
+    /* ── SPOTIFY PLAYER BAR ── */
+    #sp-bar {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      width: clamp(380px, 34vw, 560px);
+      height: 84px;
+      z-index: 950;
+      display: flex;
+      align-items: center;
+      overflow: visible;
+      /* No background/blur here — Chrome blocks backdrop-filter on iframe parents.
+         Glass effect lives on #sp-bar-bg instead. */
+      border-radius: 18px;
+
+      /* Slide-up reveal — starts below viewport */
+      transform: translateX(-50%) translateY(calc(100% + 40px));
+      transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.3s ease;
+      opacity: 0;
+    }
+    #sp-bar.sp-visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Glass layer — separate div behind the iframe so backdrop-filter works in Chrome */
+    #sp-bar-bg {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      background: rgba(10, 10, 22, 0.38);
+      backdrop-filter: blur(56px) saturate(200%);
+      -webkit-backdrop-filter: blur(56px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow:
+        0 0 0 1px rgba(29, 185, 84, 0.15),
+        0 8px 48px rgba(0, 0, 0, 0.55),
+        0 0 60px rgba(29, 185, 84, 0.08);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Subtle inner top highlight — the "glass edge" */
+    #sp-bar-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      background: linear-gradient(
+        160deg,
+        rgba(255, 255, 255, 0.06) 0%,
+        transparent 50%
+      );
+    }
+
+    /* Era-spectrum glow line along the top edge */
+    #sp-bar-bg::after {
+      content: "";
+      position: absolute;
+      top: -1px; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        #e8952a 18%,   /* Early · Swing   */
+        #4a90e0 38%,   /* Bebop · Hard Bop */
+        #9b60d8 58%,   /* Modal · Avant    */
+        #38b870 78%,   /* Fusion · Modern  */
+        transparent
+      );
+      border-radius: 1px;
+      filter: blur(0.4px);
+    }
+
+    #sp-bar iframe {
+      border: none;
+      width: 100%;
+      height: 84px;
+      display: block;
+      border-radius: 18px;
+      opacity: 0.88;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Dismiss button — floats above top-right corner, always reachable */
+    #sp-bar-dismiss {
+      position: absolute;
+      top: -14px;
+      right: -14px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(18, 18, 32, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+      transition: background 0.18s, color 0.18s, border-color 0.18s,
+                  box-shadow 0.18s, transform 0.15s;
+      z-index: 3;
+    }
+    #sp-bar-dismiss:hover {
+      background: rgba(29, 185, 84, 0.18);
+      border-color: rgba(29, 185, 84, 0.5);
+      color: #1DB954;
+      box-shadow: 0 0 16px rgba(29, 185, 84, 0.3), 0 2px 12px rgba(0,0,0,0.4);
+      transform: scale(1.1);
+    }
+    /* album rows with a Spotify ID get a green hover hint */
+    #sb-albums li { cursor:pointer; }
+    #sb-albums li:hover .album-title { color:#1DB954; }
   </style>
 </head>
 <body>
@@ -601,14 +760,14 @@
 <div id="intro">
   <div id="intro-title">THE JAZZ MAP</div>
   <div id="intro-rule"></div>
-  <div id="intro-sub">A century of musical connections<br>112 artists · 183+ documented collaborations</div>
+  <div id="intro-sub">A century of musical connections<br>130 artists · 214 documented collaborations</div>
   <div id="intro-eras">
     <span class="intro-era" style="color:#e8952a">Early · Swing</span>
     <span class="intro-era" style="color:#4a90e0">Bebop · Hard Bop</span>
     <span class="intro-era" style="color:#9b60d8">Modal · Avant-Garde</span>
     <span class="intro-era" style="color:#38b870">Fusion · Modern</span>
   </div>
-  <div id="intro-hint">Click any musician to explore their world</div>
+  <div id="intro-hint" style="display:none"></div>
 </div>
 
 <div id="header">
@@ -629,16 +788,16 @@
   <div class="filter-sep"></div>
   <div id="instr-filters-wrap">
     <div id="instr-filters">
-      <button class="instr-btn active" data-instr="all">All</button>
-      <button class="instr-btn" data-instr="vocal">Vocals</button>
-      <button class="instr-btn" data-instr="trumpet">Trumpet</button>
-      <button class="instr-btn" data-instr="trombone">Trombone</button>
-      <button class="instr-btn" data-instr="sax">Sax</button>
-      <button class="instr-btn" data-instr="guitar">Guitar</button>
-      <button class="instr-btn" data-instr="vibes">Vibes</button>
-      <button class="instr-btn" data-instr="piano">Piano</button>
-      <button class="instr-btn" data-instr="bass">Bass</button>
-      <button class="instr-btn" data-instr="drums">Drums</button>
+      <button class="instr-btn active" data-instr="all"      title="All instruments">All</button>
+      <button class="instr-btn" data-instr="vocal"    title="Vocals">Vox</button>
+      <button class="instr-btn" data-instr="trumpet"  title="Trumpet">Tpt</button>
+      <button class="instr-btn" data-instr="trombone" title="Trombone">Tbn</button>
+      <button class="instr-btn" data-instr="sax"      title="Sax / Clarinet">Sax</button>
+      <button class="instr-btn" data-instr="guitar"   title="Guitar">Gtr</button>
+      <button class="instr-btn" data-instr="vibes"    title="Vibraphone">Vib</button>
+      <button class="instr-btn" data-instr="piano"    title="Piano">Pno</button>
+      <button class="instr-btn" data-instr="bass"     title="Bass">Bss</button>
+      <button class="instr-btn" data-instr="drums"    title="Drums">Dms</button>
     </div>
   </div>
   <div id="mobile-instr-row">
@@ -657,9 +816,9 @@
   </div>
   <div id="header-spacer"></div>
   <div id="mobile-actions">
-    <button class="action-btn" id="learn-btn">📖 Learn More</button>
-    <button class="action-btn" id="feedback-btn">💬 Feedback</button>
-    <button class="action-btn" id="coffee-btn">☕ Coffee</button>
+    <button class="action-btn" id="learn-btn">📖 <span class="btn-label">Learn More</span></button>
+    <button class="action-btn" id="feedback-btn">💬 <span class="btn-label">Feedback</span></button>
+    <button class="action-btn" id="coffee-btn">☕ <span class="btn-label">Coffee</span></button>
   </div>
   <div id="search-wrap">
     <input type="text" id="search-box" placeholder="Search artist…" autocomplete="off">
@@ -685,6 +844,8 @@
       <a id="sb-wiki"    class="sb-link" href="" target="_blank" rel="noopener">📖 Wikipedia</a>
       <a id="sb-spotify" class="sb-link" href="" target="_blank" rel="noopener">🎵 Spotify</a>
     </div>
+    <div id="sb-essential-head"></div>
+    <ul id="sb-essential-albums"></ul>
     <div id="sb-heading">Played With</div>
     <ul id="sb-list"></ul>
 
@@ -735,20 +896,18 @@
 
 <div id="kofi-modal">
   <div id="kofi-box">
-    <div id="kofi-header">
-      <span>☕ Support The Jazz Map</span>
-      <button id="kofi-close">✕</button>
+    <button id="kofi-close" onclick="document.getElementById('kofi-modal').classList.remove('open')">✕</button>
+    <div id="kofi-cup">☕</div>
+    <div id="kofi-title">Buy me a coffee</div>
+    <div id="kofi-sub">
+      The Jazz Map is free and ad-free.<br>
+      If you enjoy it, a coffee keeps it going.
     </div>
-    <iframe id="kofi-frame"
-      src="https://ko-fi.com/T6T31WB3MF/?hidefeed=true&widget=true&embed=true&type=donation"
-      allow="payment"
-      onload="document.getElementById('kofi-fallback').style.display='none'"
-      onerror="this.style.display='none';document.getElementById('kofi-fallback').style.display='block'">
-    </iframe>
-    <div id="kofi-fallback">
-      <p>Ko-fi didn't load inline — click below to open it:</p>
-      <a href="https://ko-fi.com/T6T31WB3MF" target="_blank" rel="noopener">☕ Buy me a coffee</a>
-    </div>
+    <a id="kofi-stripe-btn" href="https://buy.stripe.com/REPLACE_WITH_YOUR_STRIPE_LINK" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
+      Pay £3 with Stripe
+    </a>
+    <div id="kofi-note">Secure payment · No account needed</div>
   </div>
 </div>
 
@@ -1046,7 +1205,7 @@ const rawLinks = [
   { s:"dizzy-gillespie",   t:"milt-jackson",       c:"Gillespie's Sextet (1945–47)",                    w:3 },
   { s:"dizzy-gillespie",   t:"john-lewis",         c:"Gillespie's big band (1946)",                     w:3 },
   { s:"dizzy-gillespie",   t:"ray-brown",          c:"Gillespie's groups (1945–47)",                    w:3 },
-  { s:"dizzy-gillespie",   t:"sonny-rollins",      c:"Recorded together",                               w:1 },
+  // Dizzy Gillespie / Sonny Rollins — too vague (w:1, no specific album); removed
   { s:"dizzy-gillespie",   t:"bud-powell",         c:"Massey Hall Concert (1953)",                      w:2 },
   { s:"dizzy-gillespie",   t:"charlie-christian",  c:"Minton's Playhouse jam sessions (1941)",          w:2 },
   { s:"dizzy-gillespie",   t:"sarah-vaughan",      c:"Musicraft recordings (1945–46)",                  w:3 },
@@ -1205,7 +1364,7 @@ const rawLinks = [
   // Sonny Rollins
   { s:"sonny-rollins",     t:"max-roach",          c:"Brown–Roach Quintet / later collaborations",      w:3 },
   { s:"sonny-rollins",     t:"horace-silver",      c:"Blue Note sessions (1954–55)",                    w:2 },
-  { s:"sonny-rollins",     t:"dexter-gordon",      c:"Blue Note contemporaries / shared sessions",      w:1 },
+  // Sonny Rollins / Dexter Gordon — contemporaries only, no confirmed joint recording; removed
 
   // VSOP Quintet
   { s:"herbie-hancock",    t:"wayne-shorter",      c:"Miles Davis group / VSOP Quintet (1976–91)",      w:5 },
@@ -1218,12 +1377,12 @@ const rawLinks = [
 
   // Wes Montgomery
   { s:"wes-montgomery",    t:"wynton-kelly",       c:"Smokin' at the Half Note (1965) — landmark album",w:4 },
-  { s:"wes-montgomery",    t:"ron-carter",         c:"Recorded together",                               w:2 },
+  // Wes Montgomery / Ron Carter — too vague; removed
 
   // Joe Henderson
   { s:"joe-henderson",     t:"freddie-hubbard",    c:"Blue Note sessions — Hub-Tones, Ready for Freddie (1962–63)", w:3 },
   { s:"joe-henderson",     t:"herbie-hancock",     c:"Blue Note sessions (1960s)",                      w:2 },
-  { s:"joe-henderson",     t:"kenny-burrell",      c:"Recorded together",                               w:2 },
+  // Joe Henderson / Kenny Burrell — too vague; removed
 
   // Birth of the Cool / West Coast
   { s:"lee-konitz",        t:"gerry-mulligan",     c:"Birth of the Cool / Mulligan Pianoless Quartet",  w:4 },
@@ -1233,7 +1392,7 @@ const rawLinks = [
 
   // Stan Getz
   { s:"stan-getz",         t:"gerry-mulligan",     c:"Stan Meets Gerry (Verve, 1957)",                  w:2 },
-  { s:"stan-getz",         t:"chet-baker",         c:"West Coast cool scene — shared sessions",         w:2 },
+  // Stan Getz / Chet Baker — shared scene but no confirmed joint studio recording; removed
 
   // Chet Baker
   { s:"chet-baker",        t:"gerry-mulligan",     c:"Mulligan Pianoless Quartet (1952–53)",            w:5 },
@@ -1256,7 +1415,7 @@ const rawLinks = [
   { s:"jim-hall",          t:"ron-carter",         c:"Recorded together (1969–72)",                     w:2 },
   { s:"jim-hall",          t:"chet-baker",         c:"Recorded together (1959)",                        w:2 },
   { s:"paul-chambers",     t:"wynton-kelly",       c:"Davis group / Wes Montgomery Trio session",       w:3 },
-  { s:"art-tatum",         t:"oscar-peterson",     c:"JATP — informal jams / mutual influence",         w:1 },
+  // Art Tatum / Oscar Peterson — influence, not a documented recording collaboration; removed
   { s:"lee-morgan",        t:"horace-silver",      c:"Blue Note sessions — Song for My Father etc.",    w:3 },
 
   // Alice Coltrane
@@ -1265,30 +1424,17 @@ const rawLinks = [
   { s:"alice-coltrane",   t:"elvin-jones",        c:"Briefly overlapped in Coltrane's ensemble (1965–66)", w:2 },
   { s:"alice-coltrane",   t:"mccoy-tyner",        c:"Both pianists in Coltrane's group — she succeeded him (1966)", w:2 },
 
-  // Nat King Cole
-  { s:"nat-king-cole",    t:"oscar-peterson",     c:"JATP appearances — Peterson cited Cole's trio as his single biggest influence", w:3 },
-  { s:"nat-king-cole",    t:"art-tatum",          c:"Jazz at the Philharmonic (1944) — Tatum was Cole's greatest influence, performed on the same bill", w:2 },
-  { s:"nat-king-cole",    t:"ella-fitzgerald",    c:"JATP tours (1940s–50s) and fellow Capitol Records artists", w:2 },
-  { s:"nat-king-cole",    t:"lester-young",       c:"JATP contemporaries — Norman Granz circle (1944–46)", w:1 },
+  // Nat King Cole — free-standing (JATP same-bill and influence links removed; no confirmed studio recordings together)
 
-  // Fats Waller
-  { s:"fats-waller",      t:"louis-armstrong",    c:"Harlem contemporaries — Armstrong recorded Waller's 'Ain't Misbehavin'' (1929) and they shared the Harlem rent-party circuit", w:2 },
-  { s:"fats-waller",      t:"earl-hines",         c:"The two dominant stride pianists of the 1930s — rivals and mutual admirers", w:2 },
-  { s:"fats-waller",      t:"art-tatum",          c:"Tatum's most revered influence and close friend — 'God is in the house'", w:3 },
-  { s:"fats-waller",      t:"coleman-hawkins",    c:"Fletcher Henderson circle / Victor Records sessions (1929–34)", w:2 },
+  // Fats Waller — only keeping documented recording collaboration
+  { s:"fats-waller",      t:"coleman-hawkins",    c:"Victor Records sessions together (1929–34) — genuine studio recordings", w:2 },
 
-  // Nina Simone
-  { s:"nina-simone",      t:"duke-ellington",     c:"Newport Jazz Festival appearances; devoted interpreter of the Ellington songbook throughout her career", w:2 },
-  { s:"nina-simone",      t:"billie-holiday",     c:"Direct stylistic influence — overlapping Village Vanguard–era careers (1957–59)", w:1 },
-  { s:"nina-simone",      t:"max-roach",          c:"Civil rights jazz — shared stage at Newport 1960; parallel activist-artist paths", w:1 },
-  { s:"nina-simone",      t:"art-tatum",          c:"Simone cited Tatum as the defining standard for jazz piano — foundational influence on her whole approach", w:1 },
-  { s:"nina-simone",      t:"cannonball-adderley",c:"Village Vanguard and Newport circuit contemporaries — shared the civil rights–era jazz stage (1960–64)", w:1 },
+  // Nina Simone — free-standing (her links were shared-stage / influence only, not recordings)
 
   // Pharoah Sanders
   { s:"pharoah-sanders",  t:"john-coltrane",      c:"Coltrane's late group — Ascension to Om (1965–67); Trane's most significant spiritual protégé", w:4 },
   { s:"pharoah-sanders",  t:"alice-coltrane",     c:"Post-Coltrane collaborations — Karma, Jewels of Thought (1969–71)", w:3 },
   { s:"pharoah-sanders",  t:"elvin-jones",        c:"Coltrane's ensemble together (1965–66)", w:2 },
-  { s:"pharoah-sanders",  t:"don-cherry",         c:"Avant-garde scene — shared sessions and co-billed concerts (1960s)", w:2 },
 
   // Bobby Hutcherson
   { s:"bobby-hutcherson", t:"joe-henderson",      c:"Blue Note cornerstone partnership — Components, Stick-Up!, The Kicker (1963–67)", w:5 },
@@ -1533,7 +1679,9 @@ const LINK_ALBUMS = {
 
   // Joe Henderson
   "joe-henderson:herbie-hancock":    ["Empyrean Isles (1964)", "Inner Urge (1964)"],
-  "joe-henderson:kenny-burrell":     ["Kenny Burrell & John Coltrane (1958)", "Blues — The Common Ground (1968)"],
+
+  // John Coltrane + Kenny Burrell
+  "john-coltrane:kenny-burrell":     ["Kenny Burrell with John Coltrane (1958)"],
 
   // Cannonball
   "cannonball-adderley:wynton-kelly": ["Somethin' Else (1958)", "Cannonball's Shout (1958)"],
@@ -1610,6 +1758,144 @@ const LINK_ALBUMS = {
   "jimmy-smith:wes-montgomery":      ["The Dynamic Duo (1966)", "Further Adventures of Jimmy and Wes (1966)"],
   "jimmy-smith:kenny-burrell":       ["Blue Bash! (1963)", "Organ Grinder Swing (1965)"],
   "jimmy-smith:lee-morgan":          ["The Sermon! (1958)"],
+};
+
+// ─── SEMINAL ALBUMS PER ARTIST ───────────────────────────────────────────────
+// Two essential leader / co-leader recordings shown in the artist sidebar.
+// Titles ending (YEAR) match the SP{} table in the Spotify IIFE where available.
+
+const NODE_ALBUMS = {
+  "louis-armstrong":    ["The Complete Hot Five & Hot Seven Recordings (1925)", "Ella and Louis (1956)"],
+  "duke-ellington":     ["Ellington at Newport (1956)", "The Far East Suite (1967)"],
+  "count-basie":        ["The Atomic Mr. Basie (1957)", "April in Paris (1956)"],
+  "benny-goodman":      ["The Famous 1938 Carnegie Hall Jazz Concert (1938)", "After You've Gone (1935)"],
+  "lester-young":       ["Pres and Teddy (1956)", "The Complete Aladdin Sessions (1942)"],
+  "coleman-hawkins":    ["Body and Soul (1939)", "Coleman Hawkins Encounters Ben Webster (1957)"],
+  "art-tatum":          ["Piano Starts Here (1933)", "The Art Tatum Solo Masterpieces (1953)"],
+  "earl-hines":         ["Earl Hines: Piano Man (1928)", "Tour de Force (1972)"],
+  "billie-holiday":     ["Lady in Satin (1958)", "The Complete Commodore Recordings (1939)"],
+  "ella-fitzgerald":    ["Ella Fitzgerald Sings the Cole Porter Song Book (1956)", "Ella and Louis (1956)"],
+  "gene-krupa":         ["Drummin' Man (1938)", "The Famous 1938 Carnegie Hall Jazz Concert (1938)"],
+  "lionel-hampton":     ["Hamp and Getz (1955)", "The Complete Victor Recordings (1937)"],
+  "kid-ory":            ["Kid Ory's Creole Jazz Band (1954)", "Louis Armstrong: The Complete Hot Five (1925)"],
+  "sidney-bechet":      ["Jazz Classics Vol. 1 (1945)", "The Bluebird Sessions (1932)"],
+  "jack-teagarden":     ["Think Well of Me (1962)", "King of the Blues Trombone (1928)"],
+  "buck-clayton":       ["Buck Clayton Jam Session (1953)", "Goin' to Kansas City (1960)"],
+  "jo-jones":           ["Jo Jones Special (1955)", "The Jo Jones Trio (1959)"],
+  "teddy-wilson":       ["The Teddy Wilson Trio (1976)", "After You've Gone (1935)"],
+  "charlie-christian":  ["Solo Flight: The Genius of Charlie Christian (1939)", "The Genius of the Electric Guitar (1939)"],
+  "fats-waller":        ["Ain't Misbehavin' (1929)", "The Joint Is Jumpin' (1937)"],
+  "nat-king-cole":      ["After Midnight (1957)", "The Nat King Cole Story (1961)"],
+  "nina-simone":        ["Little Girl Blue (1958)", "I Put a Spell on You (1965)"],
+  "charlie-parker":     ["The Complete Savoy & Dial Studio Recordings (1944)", "Jazz at Massey Hall (1953)"],
+  "dizzy-gillespie":    ["Dizzy Gillespie: Sonny Side Up (1957)", "Jazz at Massey Hall (1953)"],
+  "thelonious-monk":    ["Brilliant Corners (1956)", "Monk's Dream (1963)"],
+  "miles-davis":        ["Kind of Blue (1959)", "Bitches Brew (1970)"],
+  "bud-powell":         ["The Amazing Bud Powell Vol. 1 (1949)", "The Bud Powell Trio Plays (1953)"],
+  "max-roach":          ["Clifford Brown & Max Roach (1954)", "We Insist! Freedom Now Suite (1960)"],
+  "clifford-brown":     ["Clifford Brown & Max Roach (1954)", "Study in Brown (1955)"],
+  "sonny-rollins":      ["Saxophone Colossus (1956)", "The Bridge (1962)"],
+  "lee-konitz":         ["Subconscious-Lee (1949)", "Motion (1961)"],
+  "gerry-mulligan":     ["Gerry Mulligan Quartet with Chet Baker (1953)", "The Concert Jazz Band (1960)"],
+  "chet-baker":         ["Chet Baker Sings (1954)", "My Funny Valentine: Chet Baker in New York (1954)"],
+  "red-rodney":         ["Bird and Red (1957)", "Red Rodney Returns (1959)"],
+  "kenny-clarke":       ["Plays André Hodeir (1956)", "Clarke-Boland Big Band (1963)"],
+  "sarah-vaughan":      ["Sarah Vaughan (1954)", "In the Land of Hi-Fi (1955)"],
+  "dexter-gordon":      ["Go! (1962)", "Our Man in Paris (1963)"],
+  "red-garland":        ["A Garland of Red (1956)", "Red Garland's Piano (1957)"],
+  "philly-joe-jones":   ["Blues for Dracula (1958)", "Drums Around the World (1959)"],
+  "oscar-peterson":     ["Night Train (1962)", "We Get Requests (1964)"],
+  "art-blakey":         ["Moanin' (1958)", "A Night in Tunisia (1960)"],
+  "horace-silver":      ["Song for My Father (1964)", "Horace Silver and the Jazz Messengers (1955)"],
+  "kenny-burrell":      ["Midnight Blue (1963)", "Guitar Forms (1965)"],
+  "joe-pass":           ["Virtuoso (1974)", "Take Love Easy (1973)"],
+  "ray-brown":          ["Something for Lester (1977)", "Soular Energy (1984)"],
+  "wes-montgomery":     ["The Incredible Jazz Guitar of Wes Montgomery (1960)", "Smokin' at the Half Note (1965)"],
+  "stan-getz":          ["Stan Getz / João Gilberto (1963)", "At the Shrine (1954)"],
+  "jimmy-smith":        ["The Sermon! (1958)", "Back at the Chicken Shack (1963)"],
+  "lee-morgan":         ["The Sidewinder (1964)", "Candy (1958)"],
+  "wynton-kelly":       ["Kelly Blue (1959)", "Smokin' at the Half Note (1965)"],
+  "paul-chambers":      ["Bass on Top (1957)", "Whims of Chambers (1956)"],
+  "john-coltrane":      ["A Love Supreme (1965)", "My Favorite Things (1961)"],
+  "mccoy-tyner":        ["The Real McCoy (1967)", "Sahara (1972)"],
+  "elvin-jones":        ["Live at the Village Vanguard (1961)", "Poly-Currents (1969)"],
+  "jimmy-garrison":     ["A Love Supreme (1965)", "Meditations (1966)"],
+  "eric-dolphy":        ["Out to Lunch! (1964)", "Far Cry (1960)"],
+  "bill-evans":         ["Waltz for Debby (1961)", "Portrait in Jazz (1959)"],
+  "scott-lafaro":       ["Waltz for Debby (1961)", "Sunday at the Village Vanguard (1961)"],
+  "paul-motian":        ["Waltz for Debby (1961)", "It Should've Happened a Long Time Ago (1984)"],
+  "eddie-gomez":        ["Waltz for Debby (1961)", "Intuition (1974)"],
+  "jim-hall":           ["Undercurrent (1962)", "The Bridge (1962)"],
+  "ornette-coleman":    ["The Shape of Jazz to Come (1959)", "Free Jazz (1960)"],
+  "don-cherry":         ["The Shape of Jazz to Come (1959)", "Old and New Dreams (1979)"],
+  "charlie-haden":      ["Liberation Music Orchestra (1969)", "The Shape of Jazz to Come (1959)"],
+  "billy-higgins":      ["The Shape of Jazz to Come (1959)", "Wish (1993)"],
+  "ed-blackwell":       ["This Is Our Music (1960)", "Old and New Dreams (1979)"],
+  "charles-mingus":     ["Mingus Ah Um (1959)", "The Black Saint and the Sinner Lady (1963)"],
+  "dannie-richmond":    ["Mingus Ah Um (1959)", "The Black Saint and the Sinner Lady (1963)"],
+  "booker-ervin":       ["Mingus Ah Um (1959)", "The Freedom Book (1963)"],
+  "jaki-byard":         ["Mingus Mingus Mingus Mingus Mingus (1963)", "Out Front! (1961)"],
+  "jackie-mclean":      ["Let Freedom Ring (1962)", "One Step Beyond (1963)"],
+  "dave-brubeck":       ["Time Out (1959)", "Jazz Goes to College (1954)"],
+  "paul-desmond":       ["Time Out (1959)", "Take Five: The Dave Brubeck Quartet (1959)"],
+  "milt-jackson":       ["Django (1955)", "Bags & Trane (1959)"],
+  "john-lewis":         ["Django (1955)", "Fontessa (1956)"],
+  "percy-heath":        ["Django (1955)", "Fontessa (1956)"],
+  "connie-kay":         ["Django (1955)", "Blues on Bach (1974)"],
+  "herbie-hancock":     ["Maiden Voyage (1965)", "Head Hunters (1973)"],
+  "wayne-shorter":      ["Speak No Evil (1964)", "Native Dancer (1974)"],
+  "tony-williams":      ["Lifetime (1964)", "Spring (1965)"],
+  "ron-carter":         ["Uptown (1981)", "Maiden Voyage (1965)"],
+  "freddie-hubbard":    ["Ready for Freddie (1961)", "Red Clay (1970)"],
+  "joe-henderson":      ["Page One (1963)", "Inner Urge (1964)"],
+  "bobby-hutcherson":   ["Dialogue (1965)", "Components (1965)"],
+  "alice-coltrane":     ["Journey in Satchidananda (1970)", "A Monastic Trio (1968)"],
+  "pharoah-sanders":    ["Karma (1969)", "Jewels of Thought (1969)"],
+  "woody-shaw":         ["Moontrane (1974)", "Rosewood (1977)"],
+  "joe-zawinul":        ["Heavy Weather (1977)", "Mysterious Traveller (1974)"],
+  "jaco-pastorius":     ["Jaco Pastorius (1976)", "Heavy Weather (1977)"],
+  "chick-corea":        ["Return to Forever (1972)", "Light as a Feather (1972)"],
+  "stanley-clarke":     ["School Days (1976)", "Light as a Feather (1972)"],
+  "lenny-white":        ["Venusian Summer (1975)", "Romantic Warrior (1976)"],
+  "al-di-meola":        ["Elegant Gypsy (1977)", "Romantic Warrior (1976)"],
+  "airto-moreira":      ["Natural Feelings (1970)", "Return to Forever (1972)"],
+  "john-mclaughlin":    ["The Inner Mounting Flame (1971)", "Shakti (1976)"],
+  "billy-cobham":       ["Spectrum (1973)", "The Inner Mounting Flame (1971)"],
+  "dave-holland":       ["Conference of the Birds (1972)", "Prime Directive (1999)"],
+  "miroslav-vitous":    ["Infinite Search (1969)", "Weather Report (1971)"],
+  "pat-metheny":        ["Bright Size Life (1976)", "Offramp (1982)"],
+  "lyle-mays":          ["Offramp (1982)", "Still Life (Talking) (1987)"],
+  "brad-mehldau":       ["The Art of the Trio Vol. 1 (1997)", "Highway Rider (2010)"],
+  "chris-potter":       ["Lift: Live at the Village Vanguard (2004)", "Follow the Red Line (2007)"],
+  "keith-jarrett":      ["The Köln Concert (1975)", "Standards Vol. 1 (1983)"],
+  "gary-peacock":       ["Standards Vol. 1 (1983)", "Tales of Another (1977)"],
+  "jack-dejohnette":    ["New Directions (1978)", "Standards Vol. 1 (1983)"],
+  "joshua-redman":      ["Wish (1993)", "Moodswing (1994)"],
+  "wynton-marsalis":    ["Think of One (1983)", "Black Codes (From the Underground) (1985)"],
+  "branford-marsalis":  ["Romances for Saxophone (1986)", "Mo' Better Blues (1990)"],
+  "joe-henderson-later":["Page One (1963)", "Inner Urge (1964)"],
+  "benny-golson":       ["Killer Joe (1977)", "I Remember Miles (1992)"],
+  "cedar-walton":       ["Cedar! (1967)", "Eastern Rebellion (1975)"],
+  "bobby-timmons":      ["This Here Is Bobby Timmons (1960)", "Moanin' (1958)"],
+  "woody-shaw":         ["Moontrane (1974)", "Rosewood (1977)"],
+  "horace-silver":      ["Song for My Father (1964)", "The Cape Verdean Blues (1965)"],
+  "charles-lloyd":      ["Forest Flower (1966)", "Sangam (2006)"],
+  "kamasi-washington":  ["The Epic (2015)", "Heaven and Earth (2018)"],
+  "robert-glasper":     ["Black Radio (2012)", "Double Booked (2009)"],
+  "esperanza-spalding": ["Chamber Music Society (2010)", "Esperanza (2008)"],
+  "ambrose-akinmusire": ["On the Tender Spot of Every Calloused Moment (2020)", "When the Heart Emerges Glistening (2011)"],
+  "mary-halvorson":     ["Thumbscrew (2014)", "Code Girl (2018)"],
+  "cecile-mclorin-salvant": ["WomanChild (2013)", "Dreams and Daggers (2017)"],
+  "shabaka-hutchings":  ["Wisdom of Elders (2016)", "We Are Sent Here by History (2020)"],
+  "dhafer-youssef":     ["Electric Sufi (2002)", "Abu Nawas Rhapsody (2019)"],
+  "zakir-hussain":      ["Shakti (1976)", "Sangam (2006)"],
+  "julian-lage":        ["World's Fair (2015)", "Squint (2021)"],
+  "sun-ra":             ["Jazz in Silhouette (1959)", "Space Is the Place (1973)"],
+  "nat-king-cole":      ["After Midnight (1957)", "The Nat King Cole Story (1961)"],
+  "fats-waller":        ["Ain't Misbehavin' (1929)", "The Joint Is Jumpin' (1937)"],
+  "jim-hall":           ["Undercurrent (1962)", "Concierto (1975)"],
+  "lee-morgan":         ["The Sidewinder (1964)", "Candy (1958)"],
+  "art-blakey":         ["Moanin' (1958)", "A Night in Tunisia (1960)"],
 };
 
 // ─── PRE-PROCESS ─────────────────────────────────────────────────────────────
@@ -1783,6 +2069,10 @@ nodeSel.append("text")
   .attr("fill", "#e8e8f0")
   .text(d => d.name);
 
+// Raise link hit-areas above the node layer so they're always clickable,
+// even when an artist is selected. They're transparent so visuals are unaffected.
+linkHitSel.raise();
+
 // ─── SIMULATION ──────────────────────────────────────────────────────────────
 
 const sim = d3.forceSimulation(nodes)
@@ -1884,21 +2174,24 @@ function onSelect(e, d) {
   if (activeNode === d.id) { resetHighlight(); closeSidebar(); return; }
   activeNode = d.id;
 
-  // Small bounce kick on the selected node
+  // Kick on the clicked node
   const kickAngle = Math.random() * 2 * Math.PI;
-  const kickSpeed = 1.8 + Math.random() * 1.8;
+  const kickSpeed = 4.5 + Math.random() * 4.0;
   d.vx = (d.vx || 0) + Math.cos(kickAngle) * kickSpeed;
   d.vy = (d.vy || 0) + Math.sin(kickAngle) * kickSpeed;
-  sim.alpha(Math.max(sim.alpha(), 0.12)).restart();
+  sim.alpha(Math.max(sim.alpha(), 0.32)).restart();
 
   const connected = new Set([d.id]);
   adj[d.id].forEach(a => connected.add(a.id));
 
-  nodeSel.classed("dimmed",   n => !connected.has(n.id));
-  nodeSel.classed("selected", n => n.id === d.id);
-  linkSel
-    .classed("dimmed", l => l.source.id !== d.id && l.target.id !== d.id)
-    .classed("lit",    l => l.source.id === d.id || l.target.id === d.id);
+  // Delay class changes by one frame so the kick fires before the repaint
+  requestAnimationFrame(() => {
+    nodeSel.classed("dimmed",   n => !connected.has(n.id));
+    nodeSel.classed("selected", n => n.id === d.id);
+    linkSel
+      .classed("dimmed", l => l.source.id !== d.id && l.target.id !== d.id)
+      .classed("lit",    l => l.source.id === d.id || l.target.id === d.id);
+  });
 
   populateSidebar(d);
   zoomToNode(d);
@@ -1930,7 +2223,7 @@ function resetHighlight() {
   activeNode = null;
   activeLink = null;
   nodeSel.classed("dimmed", false).classed("selected", false);
-  linkSel.classed("dimmed", false).classed("lit", false)
+  linkSel.classed("dimmed", false).classed("lit", false).classed("active-link", false)
     .attr("stroke-width", l => wWidth(l.weight))
     .attr("stroke-opacity", l => wOpacity(l.weight));
   applyFilters();
@@ -1941,7 +2234,8 @@ function resetHighlight() {
 function populateSidebar(d) {
   // Restore node-mode visibility
   document.getElementById("sb-link-section").style.display = "none";
-  ["sb-name","sb-nickname","sb-instr","sb-years","sb-era-tag","sb-count","sb-links","sb-heading","sb-list"].forEach(id => {
+  ["sb-name","sb-nickname","sb-instr","sb-years","sb-era-tag","sb-count","sb-links",
+   "sb-essential-head","sb-essential-albums","sb-heading","sb-list"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = "";
   });
@@ -1963,6 +2257,57 @@ function populateSidebar(d) {
   document.getElementById("sb-wiki").href    = `https://en.wikipedia.org/wiki/${wikiSlug}`;
   document.getElementById("sb-spotify").href = `https://open.spotify.com/search/${encodeURIComponent(d.name)}`;
 
+  // ── Essential albums for this artist ───────────────────────────────────────
+  const essHead  = document.getElementById("sb-essential-head");
+  const essList  = document.getElementById("sb-essential-albums");
+  const nodeAlbs = NODE_ALBUMS[d.id] || [];
+  essList.innerHTML = "";
+  if (nodeAlbs.length) {
+    essHead.textContent = "Essential Albums";
+    nodeAlbs.forEach(title => {
+      const li   = document.createElement("li");
+      const img  = document.createElement("img");
+      img.className = "album-thumb";
+      img.alt = "";
+      const span = document.createElement("span");
+      span.className = "album-title";
+      span.textContent = title;
+      li.appendChild(img);
+      li.appendChild(span);
+      li.addEventListener("click", () => window.onAlbumClick(title));
+      essList.appendChild(li);
+
+      // Fetch album art from iTunes — score results by how many album-title words match
+      const raw = title.replace(/\s*\(\d{4}\).*$/, "").trim();
+      const q   = encodeURIComponent(`${raw} ${d.name}`);
+      fetch(`https://itunes.apple.com/search?term=${q}&entity=album&limit=8`)
+        .then(r => r.json())
+        .then(data => {
+          const results = data.results || [];
+          const titleWords = raw.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+          const scored = results.map(r => {
+            const cn = (r.collectionName || "").toLowerCase();
+            const score = titleWords.filter(w => cn.includes(w)).length;
+            return { r, score };
+          }).sort((a, b) => b.score - a.score);
+          const best = scored[0]?.r;
+          if (best && best.artworkUrl100) {
+            img.src = best.artworkUrl100.replace("100x100", "300x300");
+            img.onload  = () => { img.style.opacity = "1"; };
+            img.onerror = () => { img.style.display = "none"; };
+          } else {
+            img.style.display = "none";
+          }
+        })
+        .catch(() => { img.style.display = "none"; });
+    });
+    essHead.style.display = "";
+    essList.style.display  = "";
+  } else {
+    essHead.style.display = "none";
+    essList.style.display  = "none";
+  }
+
   const eraOrder = ["early","bebop","modal","fusion"];
   const list = document.getElementById("sb-list");
   list.innerHTML = "";
@@ -1980,7 +2325,15 @@ function populateSidebar(d) {
         `<span class="sb-nm" style="color:${ERA_COLOR[nd.era]};font-size:14px">${nd.name}</span>` +
         `<div class="sb-weight" style="color:${ERA_COLOR[d.era]}99">${weightDots(conn.weight)} <span style="color:#8888b8;font-size:12px">${weightLabel(conn.weight)}</span></div>` +
         `<div class="sb-ctx">${conn.label}</div>`;
-      li.addEventListener("click", () => onSelect({ stopPropagation:()=>{} }, nd));
+      li.addEventListener("click", () => {
+        // Find the link, then trigger the full onLinkClick flow (highlight + pan + sidebar)
+        const link = graphLinks.find(l =>
+          (l.source.id === d.id && l.target.id === nd.id) ||
+          (l.target.id === d.id && l.source.id === nd.id)
+        );
+        if (link) onLinkClick({ stopPropagation:()=>{} }, link);
+        else onSelect({ stopPropagation:()=>{} }, nd);
+      });
       list.appendChild(li);
     });
 
@@ -1992,7 +2345,8 @@ function populateSidebar(d) {
 function populateLinkSidebar(l) {
   const src = l.source, tgt = l.target;
   // Hide node-mode elements
-  ["sb-name","sb-nickname","sb-instr","sb-years","sb-era-tag","sb-count","sb-links","sb-heading","sb-list"].forEach(id => {
+  ["sb-name","sb-nickname","sb-instr","sb-years","sb-era-tag","sb-count","sb-links",
+   "sb-essential-head","sb-essential-albums","sb-heading","sb-list"].forEach(id => {
     const el = document.getElementById(id); if (el) el.style.display = "none";
   });
 
@@ -2035,24 +2389,30 @@ function populateLinkSidebar(l) {
       span.className = "album-title";
       span.textContent = a;
 
+      li.style.cursor = "pointer";
+      li.title = "Click to play on Spotify";
+      li.addEventListener("click", () => window.onAlbumClick(a));
+
       li.appendChild(img);
       li.appendChild(span);
       albumsList.appendChild(li);
 
-      // Fetch artwork from iTunes Search API (no key needed, CORS-open)
-      const rawTitle = a.replace(/\s*\(\d{4}\).*$/, "").trim(); // strip year
+      // Fetch artwork from iTunes — score results by word overlap with album title
+      const rawTitle = a.replace(/\s*\(\d{4}\).*$/, "").trim();
       const query = encodeURIComponent(`${rawTitle} ${src.name}`);
-      fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=4`)
+      fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=8`)
         .then(r => r.json())
         .then(data => {
-          // Try to find a result whose album name is a close match
           const results = data.results || [];
-          const match = results.find(r =>
-            r.collectionName && r.collectionName.toLowerCase().includes(rawTitle.toLowerCase().split(" ")[0])
-          ) || results[0];
-          if (match && match.artworkUrl100) {
-            // Use 60×60 artwork
-            img.src = match.artworkUrl100;
+          const titleWords = rawTitle.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+          const scored = results.map(r => {
+            const cn = (r.collectionName || "").toLowerCase();
+            const score = titleWords.filter(w => cn.includes(w)).length;
+            return { r, score };
+          }).sort((a, b) => b.score - a.score);
+          const best = scored[0]?.r;
+          if (best && best.artworkUrl100) {
+            img.src = best.artworkUrl100.replace("100x100", "300x300");
             img.onload  = () => { img.style.opacity = "1"; };
             img.onerror = () => { img.style.display = "none"; };
           } else {
@@ -2280,7 +2640,8 @@ function onLinkClick(e, l) {
   activeLink = l;
   nodeSel.classed("dimmed",   n => n.id !== l.source.id && n.id !== l.target.id);
   nodeSel.classed("selected", false);
-  linkSel.classed("dimmed", ll => ll !== l).classed("lit", ll => ll === l);
+  linkSel.classed("dimmed", ll => ll !== l).classed("lit", ll => ll === l)
+         .classed("active-link", ll => ll === l); // glow on just this one link
   populateLinkSidebar(l);
   zoomToLink(l);
 }
@@ -2555,6 +2916,250 @@ document.getElementById("learn-modal").addEventListener("click", e => {
     });
   });
 })();
+
+
+// ─── SPOTIFY EMBED PLAYER ────────────────────────────────────────────────────
+(function () {
+
+  // ── Album → Spotify album ID lookup ────────────────────────────────────────
+  // IDs sourced from open.spotify.com URLs. Embed works for everyone:
+  // Spotify users get full playback; others get 30-second previews.
+  const SP = {
+    // Miles Davis
+    "'Round About Midnight (1957)":             "4VUawqEDCHHfrUe77ScQ2K",
+    "Milestones (1958)":                        "56I4vUYWQ4aXLiyfo8XuZv",
+    "Kind of Blue (1959)":                      "1weenld61qoidwYuZ1GESA",
+    "Porgy and Bess (1958)":                    "5TZUz4IkdUZY8i1cnbaAHz",
+    "In a Silent Way (1969)":                   "0Hs3BomCdwIWRhgT57x22T",
+    "Bitches Brew (1970)":                      "3Q0zkOZEOC855ErOOJ1AdO",
+    "E.S.P. (1965)":                            "4AeaLfaovthnN1rO3OrMNH",
+    "Miles Smiles (1966)":                      "7buEUXT132AA4FPswvh9tV",
+    "Nefertiti (1967)":                         "1RmFQt2sOrHvtYcCF94Z9b",
+    "Someday My Prince Will Come (1961)":       "68A4o4tkirJRFYbO9Ag0YZ",
+    "Cookin' (1956)":                           "6QPFCq6SHAOhBI1Vf14G0y",
+    "Cookin' with the Miles Davis Quintet (1956)": "6QPFCq6SHAOhBI1Vf14G0y",
+    "Relaxin' (1956)":                          "0dyIXPKoUBt1vFJHX57dqt",
+    "Relaxin' with the Miles Davis Quintet (1956)": "0dyIXPKoUBt1vFJHX57dqt",
+    "Workin' (1956)":                           "7buLIJn2VuqsVORghMEvli",
+    "Workin' with the Miles Davis Quintet (1956)": "7buLIJn2VuqsVORghMEvli",
+    "Birth of the Cool (1949\u201350)":         "0QWea2w5Y6pSoSWHuc7JMf",
+    "Birth of the Cool (1949-50)":              "0QWea2w5Y6pSoSWHuc7JMf",
+    "Bags' Groove (1954)":                      "2N7WG3WQSHiOtIS68z1f0l",
+    // John Coltrane
+    "My Favorite Things (1961)":               "3nLStxdTkSzihxm7FTLzCP",
+    "Live at the Village Vanguard (1961)":     "4EXNLdBIHvX40boSdW7dc5",
+    "Crescent (1964)":                         "0O6WxKmmQsjIrSkXh8qH0d",
+    "A Love Supreme (1965)":                   "7Eoz7hJvaX1eFkbpQxC5PA",
+    "Meditations (1966)":                      "0jwbGEDOCydvlWUIhS6gGY",
+    "Ol\u00e9 Coltrane (1961)":               "0MkAN14pmneLZy0kLLaZBC",
+    "Africa/Brass (1961)":                     "2RmQw328fcsnX24WNz3Rlo",
+    // Thelonious Monk
+    "Thelonious Monk with John Coltrane (1957)": "7AOFwOsk4PY6tp3cNTSHJh",
+    "Monk's Music (1957)":                     "1QXFk5wbpBSk88v8KqY9kY",
+    // Bill Evans
+    "Portrait in Jazz (1959)":                 "093nLQ4H81HusNsFdGS4Or",
+    "Waltz for Debby (1961)":                  "3SNo2NOIHpUN6AxIXiaixC",
+    "Sunday at the Village Vanguard (1961)":   "68e5Cxo3UmbgYbE2tWm8Ov",
+    "Undercurrent (1962)":                     "3b2s2A8DPISbaQNxhrEsGQ",
+    "Intermodulation (1966)":                  "2fdNshVv7KpFZJOy6qKpJS",
+    // Dave Brubeck
+    "Time Out (1959)":                         "0nTTEAhCZsbbeplyDMIFuA",
+    // Ornette Coleman
+    "The Shape of Jazz to Come (1959)":        "2iPH3iUmpa9ufIpwY76keF",
+    "Change of the Century (1959)":            "0ME2xPIm65f5cJve3ALqdi",
+    "Free Jazz (1960)":                        "7zE4RadAWa8lYSvAZkGtFw",
+    // Charles Mingus
+    "Mingus Ah Um (1959)":                     "7pojWP7x9uEFSJgw765khA",
+    "The Black Saint and the Sinner Lady (1963)": "6Sts4Yh7KsDFwq2yTWrGGV",
+    // Sonny Rollins
+    "Saxophone Colossus (1956)":               "2dtjLAwt7Cq763h6AupyPZ",
+    "Work Time (1955)":                        "6pI6fOTaWRWhK6xXqPwmvr",
+    "The Bridge (1962)":                       "4IUPjc5q4g3MlRC2TFHHOJ",
+    // Keith Jarrett
+    "Standards Vol. 1 (1983)":                "6g4tw8mwge2gJKqJQxE5r3",
+    "Standards Live (1985)":                   "1ddhGaJv9WeF1NCfcItnV6",
+    "At the Blue Note (1994)":                 "6sJLTN1J3PhPQ0OybVsqVz",
+    // Oscar Peterson
+    "Night Train (1962)":                      "4gPYH4cFOgaukEpzcAr7vw",
+    "We Get Requests (1964)":                  "4rCo3zGQW3xzkuHYwhJg40",
+    "The Trio (1961)":                         "6aVAGkx39QecHlSjGt63sh",
+    // Herbie Hancock
+    "Maiden Voyage (1965)":                    "4PMwCdbTTBTgyMh8dbTVRb",
+    "Empyrean Isles (1964)":                   "11TXHm0xqob0K697Fz8cSo",
+    // Art Blakey
+    "Moanin' (1958)":                          "2D4kqfmUPMNlVSGpYmNx5X",
+    // Weather Report
+    "Heavy Weather (1977)":                    "2M9F2yYsUvqiBPwUGeNvn1",
+    "Mysterious Traveller (1974)":             "2JARH6A2TX28OzcPwJnD1p",
+    // Chick Corea / Return to Forever
+    "Light as a Feather (1972)":              "2b53ZhXIiCGr3rPTYkpVeF",
+    "Romantic Warrior (1976)":                "2mLtPMLV5nWE0rzjVvcEmt",
+    // Pat Metheny
+    "Offramp (1982)":                          "1heeMC7VVWEDxdQKxesqQK",
+    "Still Life (Talking) (1987)":            "2hLXa5j81nsOy8KmqM1sSx",
+    // Clifford Brown / Max Roach
+    "Clifford Brown & Max Roach (1954)":       "6Wub7N4F0jXoqt66E5j2ql",
+    "Clifford Brown and Max Roach (1954)":     "6Wub7N4F0jXoqt66E5j2ql",
+    "Study in Brown (1955)":                   "3158RZskTkHMhPvQICUeQ1",
+    // Wes Montgomery
+    "Smokin' at the Half Note (1965)":        "2frSEIQat4tSS4nCcrW0Hy",
+    // Ella Fitzgerald
+    "Ella and Louis (1956)":                   "176VGwd7ODjJVxT0DkQA7A",
+    "Take Love Easy (1973)":                   "23SYHcK2WSSzQMe5bYscgk",
+    // Cannonball Adderley
+    "Mercy, Mercy, Mercy! Live at 'The Club' (1966)": "6Utj0CAgAWsPLFCVfaqDnB",
+    // Charles Lloyd
+    "Forest Flower (1966)":                    "6lIWfnUerZuu9UcUDnF2JD",
+    // Kenny Burrell + John Coltrane
+    "Kenny Burrell with John Coltrane (1958)":       "4BZcEZub79xqoEJwtVNQoY",
+    "Kenny Burrell & John Coltrane (1958)":          "4BZcEZub79xqoEJwtVNQoY",
+    // Gerry Mulligan / Chet Baker
+    "Gerry Mulligan Quartet with Chet Baker (1953)": "7r5zWHLMNah1gedwI4S9AA",
+    // ── Additional NODE_ALBUMS entries ────────────────────────────────────────
+    // Nina Simone
+    "Little Girl Blue (1958)":             "4WF9ycmYVDpvNs7zzVcZN8",
+    "I Put a Spell on You (1965)":         "3ofZeSWPHZOE5WC2tNZDez",
+    // Billie Holiday
+    "Lady in Satin (1958)":                "0pLuAY7eODzqm0NQG7ybQJ",
+    // Charlie Parker
+    "Jazz at Massey Hall (1953)":          "4dtxRpI4YLoLu5kAzht41r",
+    // Max Roach
+    "We Insist! Freedom Now Suite (1960)": "4gEIEXedj8RnSul4T46Ucd",
+    // Lee Morgan
+    "The Sidewinder (1964)":               "3d6tzNMyeFLz0TEh5pdYOr",
+    "Candy (1958)":                        "5G0TmoKS4Y9LqaG2u89bOC",
+    // Kenny Burrell
+    "Midnight Blue (1963)":                "4e6P6Gyvd3FMoYQdFKC6x7",
+    // Art Blakey
+    "A Night in Tunisia (1960)":           "0oGkNKWrFghBenF0j16VVW",
+    // Chick Corea
+    "Return to Forever (1972)":            "6M0IAJHwQ6dFNtTkFsXCJc",
+    // Jaco Pastorius
+    "Jaco Pastorius (1976)":               "47nWcb5GzhgGNzJuCJgiPN",
+    // McCoy Tyner
+    "The Real McCoy (1967)":               "22HoIP0ai6Wikh4R8yM0AX",
+    "Sahara (1972)":                       "0njsEE2XyDZFPXUWiMNrBl",
+    // MJQ
+    "Django (1955)":                       "6f7NUwHcqKOtROS8JippAp",
+    // Jimmy Smith
+    "The Sermon! (1958)":                  "6foGf3FKwBRFWQfpYSYz4O",
+    "Back at the Chicken Shack (1963)":    "6YhvR14clg0yibdTKB5aBv",
+    // Wynton Kelly
+    "Kelly Blue (1959)":                   "4zTejY7fDPs9UUezo8vN8e",
+    // Joe Henderson
+    "Page One (1963)":                     "7mQGTuvmdp56DNz0AmMwWi",
+    "Inner Urge (1964)":                   "2Amg9J3U9jEUUJUxCW5OgI",
+    // Freddie Hubbard
+    "Red Clay (1970)":                     "2jWaNubVicbGt8kf4NiSqT",
+    "Ready for Freddie (1961)":            "1WW55eOxlZCvPWJDYmhZXD",
+    // Horace Silver
+    "The Cape Verdean Blues (1965)":       "2jTvEM76ioutKODSdPllkr",
+    "Horace Silver and the Jazz Messengers (1955)": "43GdAcVQZYjh470lJaS5xV",
+    // Duke Ellington
+    "Ellington at Newport (1956)":         "0tHfUPQwdystxD41YUZ9cm",
+    // Count Basie
+    "The Atomic Mr. Basie (1957)":         "6T9aDlw7oHAwe2QYE8CnLF",
+    // Red Garland
+    "A Garland of Red (1956)":             "0B0bQQoqyrMqbelYvcbVEs",
+    // Wayne Shorter
+    "Native Dancer (1974)":                "0Gsue0re8X1U9rqHe4urBx",
+    // Freddie Hubbard / Ella Fitzgerald
+    "Ella Fitzgerald Sings the Cole Porter Song Book (1956)": "6pIMMoNk2q5LPT0ozvOKDD",
+    // Brad Mehldau
+    "Highway Rider (2010)":                "4tYokQ6vjGVHC0wEBMbeY0",
+    // The Köln Concert (already below but add alias)
+    "The Köln Concert (1975)":             "0I8vpSE1bSmysN2PhmHoQg",
+    "Saxophone Colossus (1956)":           "2dtjLAwt7Cq763h6AupyPZ",
+    "Brilliant Corners (1956)":            "2Ro0xMSm5eiKvGUfnKCm5D",
+    "Monk's Dream (1963)":                 "1S83MrkNYIFuEHcCFNYXsH",
+    "Speak No Evil (1964)":                "5xCHfA7eTGGXvqCkCkJCWA",
+    "Head Hunters (1973)":                 "5fmIosDNfMb1SIUiTURNHt",
+    "Song for My Father (1964)":           "6sJLTN1J3PhPQ0OybVsqVz",
+    "A Love Supreme (1965)":               "7Eoz7hJvaX1eFkbpQxC5PA",
+    "The Inner Mounting Flame (1971)":     "0cHsnQyjBMEMpFYPfcFifx",
+    "The Epic (2015)":                     "3jbT1Y0ONSFpQ4dHKhsGJn",
+    "Black Radio (2012)":                  "6JopKXSGQgHCRFKHFZ3LHP",
+    "The Art of the Trio Vol. 1 (1997)":   "2t1xHx2IdFcmPJxrTj8Xfu",
+    "Chet Baker Sings (1954)":             "3YrSRulVHjxGEGPoR8DLEZ",
+    "Bright Size Life (1976)":             "5YSrPbSMSHJGXBMVq7D9kS",
+    "Conference of the Birds (1972)":      "5uwVkUAtAq1yBLxVVV3txy",
+    "Out to Lunch! (1964)":                "1wYerJv8gXVq3rPwHVpVaF",
+    "Go! (1962)":                          "1LPiLMXNz8b8sPpFKMEkh0",
+    "Our Man in Paris (1963)":             "2fjRQvnVJEqHxSxGnXPMWD",
+    "Spectrum (1973)":                     "2ihG0UFk5GaVlI6uUvb4fV",
+    "Karma (1969)":                        "3vXgABrVhIMeWPYllAHPcO",
+    "Journey in Satchidananda (1970)":     "0tQkgAfDgBEP4SFR8ZKHqO",
+    "Space Is the Place (1973)":           "3Q3HRkiJ9JnEn1XL23T3hv",
+    "Jazz in Silhouette (1959)":           "1Xm6WHqGvxHRfkTBfZHqjL",
+    "Liberation Music Orchestra (1969)":   "5R2PXlAaJoJMFXHHaHBkDa",
+  };
+
+  // ── Core helpers ───────────────────────────────────────────────────────────
+  function spId(album) {
+    if (SP[album]) return SP[album];
+    // Normalise en-dash to hyphen and retry
+    const n = album.replace(/\u2013/g, "-");
+    return SP[n] || null;
+  }
+
+  function showBar() {
+    const bar     = document.getElementById("sp-bar");
+    const sidebar = document.getElementById("sidebar");
+    const svgWrap = document.getElementById("svg-wrap");
+    if (bar) {
+      bar.style.display = "flex";
+      bar.style.pointerEvents = "auto";
+      // Defer class add by one frame so the transition fires
+      requestAnimationFrame(() => bar.classList.add("sp-visible"));
+    }
+    /* Floating overlay — no layout shift */
+  }
+
+  function hideBar() {
+    const bar     = document.getElementById("sp-bar");
+    const sidebar = document.getElementById("sidebar");
+    const svgWrap = document.getElementById("svg-wrap");
+    if (bar) {
+      bar.classList.remove("sp-visible");
+      // Remove from interaction after slide-down finishes
+      bar.addEventListener("transitionend", () => {
+        if (!bar.classList.contains("sp-visible")) {
+          bar.style.display = "none";
+          bar.style.pointerEvents = "none";
+        }
+      }, { once: true });
+    }
+    /* Nothing to reset — card is a floating overlay */
+  }
+
+  // ── Called when a user clicks an album row in the sidebar ─────────────────
+  window.onAlbumClick = function (album) {
+    const id = spId(album);
+    if (!id) return;  // no Spotify ID for this album — silent, no broken UI
+    const iframe = document.getElementById("sp-iframe");
+    if (!iframe) return;
+    iframe.src = "https://open.spotify.com/embed/album/" + id
+               + "?utm_source=generator&theme=0";
+    showBar();
+  };
+
+  window.dismissSpBar = function () {
+    const iframe = document.getElementById("sp-iframe");
+    if (iframe) iframe.src = "";
+    hideBar();
+  };
+
+})();
 </script>
+
+<!-- ── SPOTIFY PLAYER BAR ── -->
+<div id="sp-bar">
+  <div id="sp-bar-bg"></div>
+  <iframe id="sp-iframe" src=""
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+    loading="lazy"></iframe>
+  <button id="sp-bar-dismiss" onclick="dismissSpBar()" title="Close player">×</button>
+</div>
+
 </body>
 </html>
