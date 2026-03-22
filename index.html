@@ -53,9 +53,55 @@
     .intro-era:nth-child(2) { animation: softReveal 0.6s ease 2.38s forwards; }
     .intro-era:nth-child(3) { animation: softReveal 0.6s ease 2.61s forwards; }
     .intro-era:nth-child(4) { animation: softReveal 0.6s ease 2.84s forwards; }
-    #intro-hint {
-      position:absolute; bottom:62px; font-size:10.5px; color:#242436; letter-spacing:2.5px;
-      opacity:0; animation: softReveal 0.7s ease 3.4s forwards;
+    #intro-hint { display:none; }
+    #intro-guide {
+      position:fixed;
+      left:50%;
+      top:50%;
+      transform:translateX(-50%) translateY(-42%);
+      width:min(860px, calc(100vw - 56px));
+      text-align:center;
+      font-size:24px;
+      line-height:1.7;
+      letter-spacing:0.4px;
+      color:rgba(240,236,248,0.92);
+      text-shadow:0 0 18px rgba(5,5,16,0.26);
+      opacity:0;
+      pointer-events:none;
+      z-index:420;
+      transition:opacity 1.1s cubic-bezier(0.22, 1, 0.36, 1), transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .intro-guide-line {
+      display:block;
+      opacity:0;
+      transform:translateY(14px);
+      filter:blur(8px);
+      transition:
+        opacity 1.05s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 1.05s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 1.05s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #intro-guide.visible {
+      opacity:1;
+      transform:translateX(-50%) translateY(-50%);
+    }
+    #intro-guide.visible .intro-guide-line {
+      opacity:1;
+      transform:translateY(0);
+      filter:blur(0);
+    }
+    #intro-guide.visible .intro-guide-line:nth-child(1) { transition-delay: 0.08s; }
+    #intro-guide.visible .intro-guide-line:nth-child(2) { transition-delay: 1.05s; }
+    #intro-guide.visible .intro-guide-line:nth-child(3) { transition-delay: 2.08s; }
+    #intro-guide.fade-out .intro-guide-line {
+      opacity:0;
+      transform:translateY(-10px);
+      filter:blur(8px);
+    }
+    #intro-guide.fade-out {
+      opacity:0;
+      transform:translateX(-50%) translateY(-57%);
+      transition:opacity 1.7s cubic-bezier(0.4,0,0.2,1), transform 1.7s cubic-bezier(0.4,0,0.2,1);
     }
 
     @keyframes titleReveal {
@@ -171,40 +217,54 @@
 
 
     /* ── LINKS ── */
-    .link { transition:stroke-opacity 0.55s ease, stroke-width 0.2s ease; }
+    .link {
+      transition:stroke-opacity 0.55s ease, stroke-width 0.2s ease;
+      stroke-linecap: round;
+    }
     .link.dimmed { stroke-opacity:0.02 !important; }
-    /* Multiple links lit (artist selected): bright stroke only — no filter, avoids Miles Davis flash */
-    .link.lit    { stroke-opacity:0.96 !important; }
-    /* Single active connection (link selected): JS adds this class for the one glow */
+    /* Multiple links lit (artist selected): stroke only — NO filter here.
+       Adding drop-shadow to 20+ links simultaneously causes a GPU compositing
+       flash (black overlay flicker) on busy nodes like Miles Davis. */
+    .link.lit    { stroke-opacity:0.92 !important; }
+    /* Single active connection (link selected): only ever one, so filter is fine */
     .link.active-link { filter:drop-shadow(0 0 6px currentColor); }
+    .link-glass {
+      pointer-events:none;
+      stroke:#ffffff;
+      stroke-linecap:round;
+      opacity:0;
+      transition:opacity 0.55s ease, stroke-width 0.2s ease;
+    }
+    .link-glass.dimmed { opacity:0 !important; }
+    .link-glass.lit { opacity:0.26 !important; }
+    .link-glass.active-link { opacity:0.34 !important; }
 
     /* ── NODES ── */
     .node circle {
       cursor:pointer;
-      transition:stroke-width 0.24s ease;
-      /* filter NOT in transition — snaps, no flash */
+      transition:stroke-width 0.24s ease, fill-opacity 0.24s ease, filter 0.24s ease;
     }
     .node { transition:opacity 0.55s ease; }
     .node:hover circle {
-      stroke-width:2.5px !important;
-      filter:drop-shadow(0 0 12px var(--era-color, #aaa));
+      stroke-width:2.2px !important;
+      filter:drop-shadow(0 0 6px var(--era-color, #aaa));
     }
     .node.trail-start circle {
       stroke:#fff7d6 !important;
-      stroke-width:3px !important;
-      filter:drop-shadow(0 0 16px rgba(255, 247, 214, 0.45));
+      stroke-width:2.7px !important;
+      filter:drop-shadow(0 0 10px rgba(255, 247, 214, 0.34));
     }
     .node.trail-next circle {
       stroke:#f0c060 !important;
-      stroke-width:2.6px !important;
-      filter:drop-shadow(0 0 14px rgba(240, 192, 96, 0.35));
+      stroke-width:2.4px !important;
+      filter:drop-shadow(0 0 8px rgba(240, 192, 96, 0.26));
     }
     .node.trail-selected circle {
       stroke:#fff !important;
-      stroke-width:2.9px !important;
-      filter:drop-shadow(0 0 16px rgba(255,255,255,0.36));
+      stroke-width:2.6px !important;
+      filter:drop-shadow(0 0 9px rgba(255,255,255,0.24));
     }
-    .node text { pointer-events:none; text-shadow:0 0 8px #0d0d1a,0 0 8px #0d0d1a,0 0 8px #0d0d1a,0 0 8px #0d0d1a; }
+    .node text { pointer-events:none; text-shadow:0 0 3px rgba(13,13,26,0.85); }
     .node.dimmed { opacity:0.05; pointer-events:none; }
     .node.trail-dimmed { opacity:0.12; }
     /* ── LINKS ── */
@@ -214,11 +274,12 @@
     .link.trail-eligible {
       stroke-opacity:0.88 !important;
       stroke-width:3.1px !important;
+      filter:drop-shadow(0 0 4px currentColor);
     }
     .link.trail-path {
       stroke-opacity:0.98 !important;
       stroke-width:4.8px !important;
-      filter:drop-shadow(0 0 10px currentColor);
+      filter:drop-shadow(0 0 7px currentColor);
     }
     #sb-link-header { font-size:11px; color:#505078; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; }
     #sb-link-names  { font-size:18px; line-height:1.4; margin-bottom:8px; font-weight:normal; }
@@ -231,8 +292,8 @@
       animation:selectedGlow 2.5s 0.3s ease-in-out infinite backwards;
     }
     @keyframes selectedGlow {
-      0%,100% { filter:drop-shadow(0 0 8px rgba(255,255,255,0.55)); }
-      50%      { filter:drop-shadow(0 0 26px rgba(255,255,255,0.95)); }
+      0%,100% { filter:drop-shadow(0 0 4px rgba(255,255,255,0.28)); }
+      50%      { filter:drop-shadow(0 0 12px rgba(255,255,255,0.5)); }
     }
 
     /* ── SIDEBAR ── */
@@ -277,6 +338,20 @@
       white-space:nowrap;
     }
     .sb-link:hover { border-color:#484860; color:#ccc; background:#0e0e24; }
+    #sb-bio {
+      font-size:13px; line-height:1.7; color:#8888aa;
+      margin-bottom:18px; padding-bottom:18px;
+      border-bottom:1px solid #0e0e22;
+      display:none;
+    }
+    #sb-bio em { color:#a0a0c8; font-style:italic; }
+    #sb-link-bio {
+      font-size:13px; line-height:1.7; color:#8888aa;
+      margin:14px 0 18px; padding-bottom:18px;
+      border-bottom:1px solid #0e0e22;
+      display:none;
+    }
+    #sb-link-bio em { color:#a0a0c8; font-style:italic; }
     #sb-essential-head { font-size:9.5px; color:#505075; text-transform:uppercase; letter-spacing:2.5px; margin:16px 0 10px; }
     #sb-essential-albums { list-style:none; padding:0; margin-bottom:4px; }
     #sb-essential-albums li { padding:6px 0; border-bottom:1px solid #0e0e22; font-size:13px; color:#c0c0e0; display:flex; align-items:center; gap:10px; cursor:pointer; }
@@ -285,7 +360,8 @@
     #sb-list     { list-style:none; }
     #sb-list li  { padding:9px 0; border-bottom:1px solid #0e0e22; cursor:pointer; font-size:14px; line-height:1.5; }
 
-    #trail-btn {
+    #trail-btn,
+    #random-btn {
       position: relative;
       background:
         linear-gradient(#0d0d1a, #0d0d1a) padding-box,
@@ -295,12 +371,72 @@
       box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 0 24px rgba(74,144,224,0.08);
     }
     #trail-btn:hover,
-    #trail-btn.active {
+    #trail-btn.active,
+    #random-btn:hover {
       color: #fff3cf;
       box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 0 28px rgba(155,96,216,0.14);
       background:
         linear-gradient(rgba(18,18,36,0.95), rgba(18,18,36,0.95)) padding-box,
         linear-gradient(90deg, #e8952a 0%, #4a90e0 35%, #9b60d8 68%, #38b870 100%) border-box;
+    }
+    #random-btn {
+      overflow: hidden;
+      isolation: isolate;
+    }
+    #random-btn > span {
+      position: relative;
+      z-index: 2;
+    }
+    #random-btn::before {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: 11px;
+      background: linear-gradient(90deg, #e8952a 0%, #4a90e0 35%, #9b60d8 68%, #38b870 100%);
+      opacity: 0.48;
+      transform: scaleX(0);
+      transform-origin: left center;
+      pointer-events: none;
+      z-index: 0;
+    }
+    #random-btn::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: 11px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+      transform: translateX(-145%);
+      opacity: 0.55;
+      pointer-events: none;
+      z-index: 1;
+    }
+    #random-btn.random-animate::before {
+      animation: randomFillSweep 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1;
+    }
+    #random-btn.random-animate::after {
+      animation: randomGlossSweep 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1;
+    }
+    @keyframes randomFillSweep {
+      0% {
+        transform: scaleX(0);
+        transform-origin: left center;
+        opacity: 0.16;
+      }
+      70% {
+        transform: scaleX(1);
+        transform-origin: left center;
+        opacity: 0.62;
+      }
+      100% {
+        transform: scaleX(1);
+        transform-origin: left center;
+        opacity: 0.18;
+      }
+    }
+    @keyframes randomGlossSweep {
+      0% { transform: translateX(-145%); opacity: 0; }
+      55% { transform: translateX(145%); opacity: 0.5; }
+      100% { transform: translateX(145%); opacity: 0; }
     }
 
     #trail-bar {
@@ -574,6 +710,67 @@
       line-height: 1.6;
       padding: 12px 2px 2px;
     }
+
+    /* ── CREATE SPOTIFY PLAYLIST CTA ── */
+    #trail-spotify-cta {
+      margin-top: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #trail-spotify-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 13px 24px;
+      border-radius: 999px;
+      border: 1px solid rgba(29, 185, 84, 0.45);
+      background: rgba(29, 185, 84, 0.10);
+      color: #1DB954;
+      font-family: Georgia, serif;
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: background 0.22s, border-color 0.22s, box-shadow 0.22s, transform 0.15s;
+    }
+    #trail-spotify-btn:hover {
+      background: rgba(29, 185, 84, 0.18);
+      border-color: rgba(29, 185, 84, 0.7);
+      box-shadow: 0 0 22px rgba(29, 185, 84, 0.18);
+      transform: translateY(-1px);
+    }
+    #trail-spotify-btn svg {
+      width: 16px; height: 16px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* ── COMING SOON TOAST ── */
+    #coming-soon-toast {
+      position: fixed;
+      bottom: 110px;
+      left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: rgba(10, 10, 22, 0.92);
+      border: 1px solid rgba(29, 185, 84, 0.4);
+      color: #1DB954;
+      padding: 11px 22px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-family: Georgia, serif;
+      z-index: 1100;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(29,185,84,0.08);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    #coming-soon-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
     #sb-list li:hover .sb-nm { text-decoration:underline; }
     .sb-ctx      { font-size:11.5px; color:#6868a0; margin-top:3px; }
     .sb-weight   { font-size:11.5px; color:#7878a8; margin-top:3px; }
@@ -804,8 +1001,10 @@
       #search-box { width:188px; }
       .btn-label { display: none; }
       .btn-icon  { display: inline; }
-      #trail-btn .btn-label { display: inline !important; }
-      #trail-btn .btn-icon  { display: none !important; }
+      #trail-btn .btn-label,
+      #random-btn .btn-label { display: inline !important; }
+      #trail-btn .btn-icon,
+      #random-btn .btn-icon  { display: none !important; }
     }
     @media (max-width: 1100px) {
       .era-btn  { font-size: 10.5px; padding: 2px 6px; }
@@ -825,7 +1024,12 @@
       #intro-title { font-size:42px; letter-spacing:8px; }
       #intro-sub { font-size:12px; letter-spacing:2.4px; line-height:2; padding:0 18px; }
       #intro-eras { gap:16px; flex-wrap:wrap; justify-content:center; padding:0 18px; }
-      #intro-hint { bottom:34px; text-align:center; padding:0 20px; }
+      #intro-guide {
+        width:calc(100vw - 42px);
+        font-size:16px;
+        line-height:1.75;
+        letter-spacing:0.2px;
+      }
 
       #header {
         height:auto;
@@ -968,12 +1172,20 @@
       #sb-list li { padding:11px 0; }
 
       #feedback-box,
-      #about-box,
       #learn-box,
       #nl-box {
         width:calc(100vw - 24px);
         padding:24px 20px 20px;
       }
+      #about-box {
+        width:calc(100vw - 24px);
+        padding:22px 18px 18px;
+        max-height:80vh;
+        overflow-y:auto;
+        -webkit-overflow-scrolling:touch;
+      }
+      #about-box p { font-size:12.5px; margin-bottom:11px; }
+      #about-box h3 { font-size:16px; margin-bottom:12px; }
       #kofi-box {
         width:calc(100vw - 16px);
       }
@@ -998,8 +1210,10 @@
       .btn-label { display: none; }
       .btn-icon  { display: inline; }
       .action-btn { padding:4px 8px; }
-      #trail-btn .btn-label { display: inline !important; }
-      #trail-btn .btn-icon  { display: none !important; }
+      #trail-btn .btn-label,
+      #random-btn .btn-label { display: inline !important; }
+      #trail-btn .btn-icon,
+      #random-btn .btn-icon  { display: none !important; }
     }
 
     /* ── SPOTIFY PLAYER BAR ── */
@@ -1122,6 +1336,151 @@
       box-shadow: 0 0 16px rgba(29, 185, 84, 0.3), 0 2px 12px rgba(0,0,0,0.4);
       transform: scale(1.1);
     }
+    /* ── MOBILE INLINE SPOTIFY PLAYER ── */
+    #sp-mobile-wrap {
+      display: none; /* hidden everywhere by default */
+      position: relative;
+      margin: 0 0 16px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(10,10,22,0.6);
+      border: 1px solid rgba(29,185,84,0.18);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(29,185,84,0.08);
+    }
+    #sp-mobile-wrap.sp-mobile-active { display: block; }
+    #sp-mobile-iframe {
+      display: block;
+      width: 100%;
+      height: 84px;
+      border: none;
+      border-radius: 14px;
+    }
+    #sp-mobile-dismiss {
+      position: absolute;
+      top: -10px; right: -10px;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: rgba(18,18,32,0.95);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2;
+      transition: background 0.15s, color 0.15s;
+    }
+    #sp-mobile-dismiss:hover {
+      background: rgba(29,185,84,0.2);
+      color: #1DB954;
+    }
+    /* ── TRAIL MODE MOBILE ── */
+    @media (max-width: 640px) {
+
+      /* ── Trail bar: full-width strip at bottom ── */
+      #trail-bar {
+        left: 0 !important;
+        right: 0;
+        width: 100% !important;
+        border-radius: 14px 14px 0 0 !important;
+        bottom: 0 !important;
+        /* Stack main text above action buttons */
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 14px 16px 12px;
+        min-height: 0;
+        transform: translateY(calc(100% + 4px));
+        transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+                    opacity 0.28s ease,
+                    bottom 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      #trail-bar.open { transform: translateY(0) !important; }
+      body.sp-playing #trail-bar { bottom: 84px !important; }
+
+      #trail-kicker { margin-bottom: 4px; }
+      #trail-summary { font-size: 14px; margin-bottom: 2px; }
+      #trail-sub { font-size: 11px; }
+
+      #trail-bar-actions {
+        display: flex;
+        gap: 8px;
+      }
+      /* "Create a Playlist" takes remaining space; "Clear" stays compact */
+      #trail-playlist-btn { flex: 1; }
+      .trail-action { padding: 9px 14px; font-size: 11.5px; }
+
+      /* ── Trail modal: sheet from bottom ── */
+      #trail-modal-box {
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-height: 82vh;
+        border-radius: 20px 20px 0 0;
+        padding: 20px 16px 24px;
+        /* Override desktop translateX(-50%) slide */
+        transform: translateY(32px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      #trail-modal.open #trail-modal-box { transform: translateY(0); }
+      #trail-modal-title { font-size: 19px; }
+      #trail-modal-sub   { font-size: 12px; }
+
+      /* ── Album cards: horizontal layout (cover left, text right) ── */
+      #trail-playlist { grid-template-columns: 1fr; gap: 10px; }
+
+      .trail-album-card {
+        display: grid;
+        grid-template-columns: 72px 1fr;
+        grid-template-rows: auto auto auto auto;
+        column-gap: 14px;
+        row-gap: 3px;
+        align-items: start;
+        padding: 12px;
+        border-radius: 14px;
+      }
+      /* Cover spans all four text rows on the left */
+      .trail-album-cover {
+        grid-column: 1;
+        grid-row: 1 / 5;
+        width: 72px;
+        height: 72px;
+        aspect-ratio: 1 / 1;
+        border-radius: 10px;
+        align-self: center;
+      }
+      .trail-album-cover img { border-radius: 10px; }
+      .trail-album-fallback  { font-size: 13px; }
+
+      .trail-album-kicker { grid-column: 2; grid-row: 1; font-size: 8.5px; }
+      .trail-album-title  { grid-column: 2; grid-row: 2; font-size: 14px; }
+      .trail-album-meta   { grid-column: 2; grid-row: 3; font-size: 11px; min-height: 0; }
+      .trail-album-open   { grid-column: 2; grid-row: 4; margin-top: 4px; padding: 7px 12px; font-size: 11px; width: fit-content; }
+    }
+
+    /* On mobile, convert floating bar to a full-width strip pinned to bottom */
+    @media (max-width: 640px) {
+      #sp-bar {
+        left: 0 !important;
+        right: 0;
+        width: 100% !important;
+        border-radius: 0 !important;
+        bottom: 0 !important;
+        /* Override the desktop translateX(-50%) — full-width needs no horizontal offset */
+        transform: translateY(calc(100% + 40px));
+      }
+      #sp-bar.sp-visible {
+        transform: translateY(0) !important;
+      }
+      #sp-bar-bg { border-radius: 0; }
+      #sp-bar iframe { border-radius: 0; }
+      /* Move dismiss button inward so it doesn't hang off edge */
+      #sp-bar-dismiss { top: -14px; right: 12px; }
+      /* Extra scroll padding so the last album isn't hidden behind the player bar */
+      body.sp-playing #sidebar-scroll { padding-bottom: 100px; }
+    }
+
     /* ── SETTINGS ── */
     #settings-wrap { flex-shrink:0; position:relative; margin-left:2px; }
     #settings-btn {
@@ -1208,15 +1567,16 @@
 <div id="intro">
   <div id="intro-title">THE JAZZ MAP</div>
   <div id="intro-rule"></div>
-  <div id="intro-sub">A century of musical connections<br>130 artists · 214 documented collaborations</div>
+  <div id="intro-sub">A century of musical connections<br>133 artists · 223 documented collaborations</div>
   <div id="intro-eras">
     <span class="intro-era" style="color:#e8952a">Early · Swing</span>
     <span class="intro-era" style="color:#4a90e0">Bebop · Hard Bop</span>
     <span class="intro-era" style="color:#9b60d8">Modal · Avant-Garde</span>
     <span class="intro-era" style="color:#38b870">Fusion · Modern</span>
   </div>
-  <div id="intro-hint" style="display:none"></div>
+  <div id="intro-hint">Each dot is an artist. Each line is a musical connection. Enjoy exploring.</div>
 </div>
+<div id="intro-guide" style="display:none"></div>
 
 <div id="header">
   <div id="brand">
@@ -1237,6 +1597,7 @@
   <div class="filter-sep"></div>
   <div id="mobile-actions">
     <button class="action-btn" id="trail-btn"><span class="btn-label">Create a Trail</span><span class="btn-icon">✧</span></button>
+    <button class="action-btn" id="random-btn"><span class="btn-label">Random</span><span class="btn-icon">✷</span></button>
     <button class="action-btn" id="about-btn"><span class="btn-label">About</span><span class="btn-icon">✦</span></button>
     <button class="action-btn" id="newsletter-btn"><span class="btn-label">Newsletter</span><span class="btn-icon">✉</span></button>
     <button class="action-btn" id="learn-btn"><span class="btn-label">Learn More</span><span class="btn-icon">📖</span></button>
@@ -1304,6 +1665,14 @@
       <a id="sb-spotify" class="sb-link" href="" target="_blank" rel="noopener">🎵 Spotify</a>
       <a id="sb-video"   class="sb-link" href="" target="_blank" rel="noopener">▶ Video</a>
     </div>
+    <!-- Mobile-only inline Spotify player (desktop uses the floating #sp-bar) -->
+    <div id="sp-mobile-wrap">
+      <iframe id="sp-mobile-iframe" src=""
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"></iframe>
+      <button id="sp-mobile-dismiss" onclick="dismissMobilePlayer()" title="Close player">×</button>
+    </div>
+    <div id="sb-bio"></div>
     <div id="sb-essential-head"></div>
     <ul id="sb-essential-albums"></ul>
     <div id="sb-heading">Played With</div>
@@ -1315,6 +1684,7 @@
       <div id="sb-link-names"></div>
       <div id="sb-link-desc" class="sb-ctx" style="font-size:13px;color:#8888b0;margin-bottom:8px"></div>
       <div id="sb-link-strength"></div>
+      <div id="sb-link-bio"></div>
       <div id="sb-albums-head" style="display:none">Key Recordings</div>
       <ul id="sb-albums"></ul>
     </div>
@@ -1328,11 +1698,11 @@
   <div id="trail-bar-main">
     <div id="trail-kicker">Trail Mode</div>
     <div id="trail-summary">Choose your starting artist.</div>
-    <div id="trail-sub">Build a chain of 4 connected artists to reveal 3 connection albums.</div>
+    <div id="trail-sub">Build a trail of 4 connected artists to create a playlist.</div>
   </div>
   <div id="trail-bar-actions">
     <button class="trail-action" id="trail-clear-btn" type="button">Clear</button>
-    <button class="trail-action primary" id="trail-playlist-btn" type="button" disabled>Reveal Albums</button>
+    <button class="trail-action primary" id="trail-playlist-btn" type="button" disabled>Create a Playlist</button>
   </div>
 </div>
 
@@ -1348,8 +1718,16 @@
     </div>
     <div id="trail-playlist"></div>
     <div id="trail-empty" style="display:none">I couldn't find clean album matches for this trail yet. Try another path.</div>
+    <div id="trail-spotify-cta">
+      <button id="trail-spotify-btn" type="button">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        Create a Spotify Playlist
+      </button>
+    </div>
   </div>
 </div>
+
+<div id="coming-soon-toast">Coming soon — Spotify playlist export is on the roadmap 🎵</div>
 
 
 
@@ -1448,50 +1826,63 @@ let introGone = false;
 // Links start hidden too
 setTimeout(() => {
   const el = document.getElementById("intro");
+  const guide = document.getElementById("intro-guide");
   if (!el) return;
   el.classList.add("fade-out");
   setTimeout(() => {
     el.classList.add("gone");
-    introGone = true;
-    // Staggered era reveal L→R (early→bebop→modal→fusion)
-    ["early","bebop","modal","fusion"].forEach((era, i) => {
-      setTimeout(() => {
-        const sel = nodeSel.filter(n => n.era === era);
-        // Fade in the group
-        sel.transition().duration(450).style("opacity", null);
-        // Bounce each circle in with a slight stagger per node
-        sel.each(function(d, j) {
-          d3.select(this).select("circle")
-            .transition()
-            .delay(j * 18)
-            .duration(520)
-            .ease(d3.easeBackOut.overshoot(1.6))
-            .attr("r", rScale(degree[d.id]));
-          // Give each node a unique random velocity so they drift independently
-          const angle = Math.random() * 2 * Math.PI;
-          const speed = 2.5 + Math.random() * 4.5;
-          d.vx = (d.vx || 0) + Math.cos(angle) * speed;
-          d.vy = (d.vy || 0) + Math.sin(angle) * speed;
-        });
-        // Kick the sim so it processes the new velocities
-        sim.alpha(Math.max(sim.alpha(), 0.25)).restart();
-      }, i * 200);
-    });
-    // Links fade in alongside, spread across the same window
-    linkSel.each(function(l, i) {
-      const era = (l.source && l.source.era) ? l.source.era : "early";
-      const eraIdx = ["early","bebop","modal","fusion"].indexOf(era);
-      const delay = Math.max(0, eraIdx) * 170;
-      d3.select(this).transition().delay(delay).duration(500)
-        .attr("stroke-opacity", wOpacity(l.weight));
-    });
-    setTimeout(() => applyFilters(), 800);
+    const startMapReveal = () => {
+      introGone = true;
+      // Staggered era reveal L→R (early→bebop→modal→fusion)
+      ["early","bebop","modal","fusion"].forEach((era, i) => {
+        setTimeout(() => {
+          const sel = nodeSel.filter(n => n.era === era);
+          // Fade in the group
+          sel.transition().duration(450).style("opacity", null);
+          // Bounce each circle in with a slight stagger per node
+          sel.each(function(d, j) {
+            d3.select(this).select("circle")
+              .transition()
+              .delay(j * 18)
+              .duration(520)
+              .ease(d3.easeBackOut.overshoot(1.6))
+              .attr("r", rScale(degree[d.id]));
+            // Give each node a unique random velocity so they drift independently
+            const angle = Math.random() * 2 * Math.PI;
+            const speed = 2.5 + Math.random() * 4.5;
+            d.vx = (d.vx || 0) + Math.cos(angle) * speed;
+            d.vy = (d.vy || 0) + Math.sin(angle) * speed;
+          });
+          // Kick the sim so it processes the new velocities
+          sim.alpha(Math.max(sim.alpha(), 0.25)).restart();
+        }, i * 200);
+      });
+      // Links fade in alongside, spread across the same window
+      linkSel.each(function(l, i) {
+        const era = (l.source && l.source.era) ? l.source.era : "early";
+        const eraIdx = ["early","bebop","modal","fusion"].indexOf(era);
+        const delay = Math.max(0, eraIdx) * 170;
+        d3.select(this).transition().delay(delay).duration(500)
+          .attr("stroke-opacity", wOpacity(l.weight));
+        d3.select(linkGlassSel.nodes()[i]).transition().delay(delay + 40).duration(500)
+          .attr("stroke-opacity", Math.max(0.05, wOpacity(l.weight) * 0.18));
+      });
+      setTimeout(() => applyFilters(), 800);
+    };
+
+    startMapReveal();
   }, 1200);
 }, 4400);
 
 const ERA_COLOR = { early:"#e8952a", bebop:"#4a90e0", modal:"#9b60d8", fusion:"#38b870" };
 const ERA_LABEL = { early:"Early / Swing", bebop:"Bebop / Hard Bop", modal:"Modal / Avant-Garde", fusion:"Fusion & Modern" };
 const ERA_X     = { early:0.13, bebop:0.37, modal:0.62, fusion:0.86 };
+const ERA_HEADER_LINES = {
+  early:  ["EARLY", "SWING"],
+  bebop:  ["BEBOP", "HARD BOP"],
+  modal:  ["MODAL", "AVANT"],
+  fusion: ["FUSION", "MODERN"]
+};
 
 function instrBand(instr) {
   const s = (instr||"").toLowerCase();
@@ -2421,6 +2812,198 @@ const NODE_ALBUMS = {
   "les-mccann":         ["Swiss Movement (1969)", "Layers (1972)"],
 };
 
+// ── Artist biography snippets ───────────────────────────────────────────────
+const NODE_BIO = {
+  "miles-davis": "A trumpeter from East St. Louis who briefly attended Juilliard before dropping out to play with Charlie Parker at 19. Over five decades he reinvented his sound completely, several times — cool jazz in the late '40s, hard bop in the mid-'50s, modal harmony with <em>Kind of Blue</em> in 1959, electric fusion with <em>Bitches Brew</em> in 1970. <em>Kind of Blue</em> is the best-selling jazz album ever recorded, made in two afternoons with almost no rehearsal. His other rare gift was an ear for talent: Coltrane, Bill Evans, Herbie Hancock, Wayne Shorter and Chick Corea all passed through his bands before the world knew their names.",
+  "john-coltrane": "A tenor and soprano saxophonist from North Carolina who spent his twenties playing R&B gigs and losing the battle with heroin, before joining Miles Davis's band in 1955. Davis fired him in 1957 for falling asleep on the bandstand. Coltrane kicked cold turkey at his mother's house in Philadelphia, came back clean, and spent the next decade making some of the most intense recordings in jazz — capped by <em>A Love Supreme</em> in 1964, a four-part suite he wrote as a direct conversation with God. He died of liver cancer at 40, still pushing into territory most listeners hadn't caught up with yet.",
+  "ornette-coleman": "An alto saxophonist from Fort Worth who arrived in New York in 1959 and caused the loudest argument jazz had seen in years. His idea was blunt: improvising musicians didn't need to follow fixed chord changes. Half the jazz establishment called it fraud. The other half called it a breakthrough. <em>The Shape of Jazz to Come</em>, recorded for Atlantic that year, is full of warm, singing melody — far less frightening than its reputation. He eventually won a Pulitzer Prize in 2007, by which point the argument had long been settled in his favour.",
+  "thelonious-monk": "A pianist and composer from North Carolina who spent his early career at Minton's Playhouse in Harlem, a late-night jam session spot where bebop was quietly being invented in the early 1940s. Many of the harmonic ideas Parker and Gillespie made famous originated at Monk's piano — he gave them away freely and watched others get the credit for years. He went on to write more jazz standards than any composer except Ellington: <em>'Round Midnight</em>, <em>Straight No Chaser</em>, <em>Blue Monk</em>, <em>Well You Needn't</em>. Police stripped his New York cabaret card in 1951, barring him from clubs in the city for six years. By the time he made the cover of <em>Time</em> in 1964, jazz had finally started to understand what he'd been doing all along.",
+
+  // ── Early era ─────────────────────────────────────────────────────────────
+  "louis-armstrong": "A trumpeter and singer from New Orleans who grew up in the Colored Waif's Home for Boys after being arrested for firing a pistol on New Year's Eve, 1913. His Hot Five and Hot Seven recordings of 1925–1928 established what jazz improvisation could sound like — one person developing a melodic idea from start to finish, not a collective riff. He was the first soloist in jazz history who people paid specifically to hear. Later in life, playing stadiums and appearing in Hollywood films made him seem like an entertainer rather than the revolutionary he had been; both things were true.",
+  "duke-ellington": "A pianist and composer from Washington D.C. who built an orchestra at the Cotton Club in Harlem in 1927 and kept a version of it running for nearly fifty years. He wrote more than a thousand compositions — <em>Mood Indigo</em>, <em>Sophisticated Lady</em>, <em>Take the A Train</em> — but what made him exceptional was that he composed for specific musicians: the alto saxophone of Johnny Hodges, the plunger-muted trumpet of Cootie Williams, the enormous tenor of Ben Webster. The band was his instrument; when those musicians died or left, Ellington rewrote himself around whoever stayed.",
+  "count-basie": "A pianist and bandleader from Red Bank, New Jersey who built one of the great swing orchestras in Kansas City in the mid-1930s, built on riffing blues figures from the jam session culture of that city. His rhythm section — particularly drummer Jo Jones, who moved the timekeeping pulse from the bass drum to the hi-hat cymbal — gave the music a looser, more rolling feel that changed how jazz rhythm sections operated. The 1938 Carnegie Hall debut brought the band to a national audience, and Basie led orchestras until a few weeks before he died in 1984.",
+  "benny-goodman": "A clarinetist from Chicago's Maxwell Street neighbourhood who rose through session work and radio gigs to headline a concert at Carnegie Hall in January 1938 — the first major jazz event in that venue — that is still considered the high-water mark of the Swing Era. He hired Teddy Wilson and Lionel Hampton for his small groups in 1936, breaking the color line on the bandstand years before the rest of American popular music would. A perfectionist who could reduce musicians to silence with a single cold stare; his nickname in the bands was 'The Ray.' He kept performing classical clarinet into the 1980s.",
+  "lester-young": "A tenor saxophonist from Woodville, Mississippi who developed a light, cool, unhurried tone in direct contrast to Coleman Hawkins's heavy vibrato — the two men defined the opposing poles of jazz saxophone for a generation. He played in Count Basie's band in the late 1930s and made some of his finest recordings paired with Billie Holiday, who gave him the nickname 'Prez' — short for President, as in the president of saxophone players. His relaxed, legato approach directly influenced the entire cool jazz movement of the late 1940s, including a young Stan Getz.",
+  "coleman-hawkins": "A tenor saxophonist from St. Joseph, Missouri who spent the 1920s and '30s building the vocabulary of jazz tenor saxophone almost from scratch. His 1939 solo recording of <em>Body and Soul</em> improvises continuously over the chord changes without ever stating the melody — at that point, a genuinely radical idea. He traveled to Europe in 1934 and stayed five years, returning to find younger players had taken his harmonic ideas further into bebop. He was adaptable enough to record with Thelonious Monk in 1944 on sessions that baffled musicians ten years his junior.",
+  "art-tatum": "A pianist from Toledo, Ohio who was nearly blind from birth and taught himself largely from recordings and radio. His technique was so advanced that other pianists — including Oscar Peterson, who idolized him — would reportedly leave bars rather than follow him to the piano. He recorded a vast series of solo and trio performances for Norman Granz in the 1950s, and his reharmonisations of standard tunes were so forward-looking that bebop musicians used them as a theoretical reference decades after his death in 1956.",
+  "earl-hines": "A pianist from Pittsburgh who developed a 'trumpet style' of piano in the late 1920s — single-note melodic lines played in octaves in the right hand, rather than the stride patterns that dominated the instrument at the time. His 1928 recordings with Louis Armstrong made two of the most inventive jazz improvisers of the decade sound like they'd found each other. He led his own big band at the Grand Terrace Ballroom in Chicago for twelve years, and at various points that band included Charlie Parker, Dizzy Gillespie, and Sarah Vaughan.",
+  "billie-holiday": "A vocalist from Baltimore who sang with Count Basie and Artie Shaw before establishing herself through small-group sessions for Columbia in the late 1930s — paired with Lester Young, who understood her phrasing better than anyone. She had limited technical range; what she had was a sense of time that made every lyric sound like lived experience. She recorded <em>Strange Fruit</em> in 1939, a song about lynching that most labels refused to touch. The New York Police revoked her cabaret card in 1947, barring her from city clubs. She died at 44 with 70 cents in the bank.",
+  "ella-fitzgerald": "A vocalist from Yonkers who won an amateur night at the Apollo Theater in 1934, at 16, and joined Chick Webb's band the following year. Her scat improvisation — using the voice as a bebop horn, inventing melodic lines over chord changes — was technically in a class of its own. The <em>Songbook</em> series she recorded for Verve between 1956 and 1964 — working through the complete catalogues of Porter, Gershwin, Ellington, and others — introduced jazz vocal phrasing to a generation that might otherwise never have found it. She won thirteen Grammy Awards.",
+  "gene-krupa": "A drummer from Chicago who was the first to make the drum kit a star solo instrument in the popular imagination. His extended feature on <em>Sing Sing Sing</em> at the 1938 Goodman Carnegie Hall concert — an improvised solo running several minutes — turned jazz drumming into theater. He was physically expressive in a way audiences had never seen, and he made being a drummer seem like something worth admiring. A drug arrest in 1943 nearly ended his career; he served a short sentence, came back, and kept leading his own band through the 1950s.",
+  "lionel-hampton": "A vibraphonist from Louisville who was essentially the first jazz musician to treat the vibraphone as a lead instrument — before Hampton, it was considered a novelty. He recorded with Louis Armstrong in 1930 and joined Benny Goodman's quartet in 1936. He led his own big band from 1940 onwards, which served as a launching pad for decades: Charles Mingus, Wes Montgomery, Clark Terry, Clifford Brown, and Quincy Jones all played in the Hampton band at some point.",
+  "teddy-wilson": "A pianist from Austin, Texas who joined Benny Goodman's trio in 1935 — one of the first racially integrated performing groups in American popular music. His playing was precise and harmonically elegant. His recordings with Billie Holiday for Columbia in the mid-1930s — small-group sessions built around spare piano and Lester Young's saxophone — are some of the most delicate and perfectly judged jazz of the decade.",
+  "charlie-christian": "A guitarist from Bonita, Texas who spent two years with Benny Goodman's sextet from 1939 to 1941 and more or less invented modern jazz guitar in the process. His approach — single-note melodic lines amplified through an electric guitar — gave the instrument the same harmonic freedom as a horn. He also spent his nights at Minton's Playhouse sitting in on the early bebop jam sessions with Monk and Gillespie. He died of tuberculosis at 25, and what he might have become is one of the sadder questions in jazz history.",
+  "johnny-hodges": "An alto saxophonist from Cambridge, Massachusetts who joined Duke Ellington's orchestra in 1928 and stayed for most of the next forty years. His tone was the richest, most sensuous alto sound in jazz — a slow, searching vibrato on ballads that nobody has equaled since. Ellington composed pieces specifically to display it: <em>Passion Flower</em>, <em>The Star-Crossed Lovers</em>. He briefly led his own groups in the early 1950s, came back, and died at Ellington's rehearsal in 1970.",
+  "ben-webster": "A tenor saxophonist from Kansas City who joined Ellington's orchestra in 1939 and recorded <em>Cotton Tail</em> — one of the most celebrated tenor solos of the Swing Era, built over the changes to <em>I Got Rhythm</em> at a tempo that challenged most other saxophonists of the period. His sound was enormous on uptempo pieces and intimate as a whisper on ballads. He lived the last years of his life in Amsterdam and Copenhagen, preferred by European audiences who gave him a reverence American club owners rarely offered.",
+  "cootie-williams": "A trumpeter from Mobile, Alabama who spent sixteen years in Ellington's orchestra as the definitive master of the plunger mute — a technique that made the trumpet sound like a speaking human voice. Ellington wrote <em>Concerto for Cootie</em> around him in 1940. When Benny Goodman hired him away that same year, Down Beat ran the headline 'Ellington Loses Cootie Williams' as though the world had shifted. He returned to Ellington in 1962 and stayed until near the end.",
+  "billy-strayhorn": "A composer and pianist from Dayton, Ohio who presented Duke Ellington with a book of his own songs at a backstage meeting in 1938 and was hired on the spot. He became Ellington's closest creative collaborator for nearly thirty years — the authorship of many pieces credited to 'Ellington' was actually Strayhorn's or a genuine joint effort. He wrote <em>Lush Life</em>, one of the great American songs, when he was nineteen. He was openly gay at a time when that required real courage. Ellington wrote the memorial suite <em>And His Mother Called Him Bill</em> after Strayhorn died of esophageal cancer in 1967.",
+  "jo-jones": "A drummer from Chicago who anchored Count Basie's rhythm section throughout the late 1930s and helped transform how jazz rhythm sections worked. Before Jones, drummers kept the pulse primarily on the bass drum; Jones moved it to the hi-hat cymbal, giving the band a lighter, more floating swing that influenced every drummer who followed. He reportedly threw a cymbal across the stage at Minton's one night to shame a young Charlie Parker off the bandstand — an apocryphal story, but one Parker apparently took as a lesson.",
+  "buck-clayton": "A trumpeter from Parsons, Kansas who joined Basie's orchestra in 1936 and spent fifteen years there, developing one of the most lyrical and melodic voices in swing-era trumpet. He later organized a series of informal jam session recordings for Columbia in the early 1950s that gathered swing-era masters for spontaneous small-group sessions that have aged better than most of the more formal recordings of that period.",
+  "sidney-bechet": "A soprano saxophonist and clarinetist from New Orleans who was playing professionally in local clubs before he was fifteen — one of the first jazz improvisers on record capable of generating continuous melodic invention comparable to Louis Armstrong. He traveled to Europe repeatedly and settled permanently in France in 1950, where he became a genuine celebrity. His 1939 recording of <em>Summertime</em>, made using overdubbed soprano saxophones to play all the parts himself, was a technical marvel no one had attempted in a recording studio before.",
+  "kid-ory": "A trombonist from LaPlace, Louisiana who led one of the most influential New Orleans jazz bands of the early 1920s and recorded <em>Ory's Creole Trombone</em> in 1922 — often cited as the first jazz recording by a Black New Orleans band. He spent the Depression years working as a chicken farmer in California before returning to play in the New Orleans revival of the 1940s and '50s. His tailgate trombone style — rough, sliding, rhythmically propulsive — defined what the instrument sounded like in the first decades of jazz.",
+  "jack-teagarden": "A trombonist and vocalist from Vernon, Texas who arrived in New York in 1927 and made every other jazz trombonist in the city feel inadequate within months. His legato phrasing, his blues vocabulary, and his ability to make the trombone sound effortless had no real precedent. He spent years stuck in a commercial contract with Paul Whiteman's orchestra before joining Louis Armstrong's All Stars in 1947. Armstrong said Teagarden was the only white musician he'd ever heard who truly felt the blues.",
+  "jelly-roll-morton": "A pianist and composer from New Orleans who spent years claiming loudly to have invented jazz — a claim that was mostly untrue but contained a kernel of real accomplishment. His Red Hot Peppers recordings for Victor in 1926–1928 are among the most carefully structured small-group jazz of the decade, intricate arrangements that still swing hard. He dictated a sprawling oral history of New Orleans jazz to Alan Lomax at the Library of Congress in 1938, and whatever his self-promotion, that testimony is an invaluable document.",
+  "nat-king-cole": "A pianist and vocalist from Montgomery, Alabama who formed the King Cole Trio in Los Angeles in 1937 and spent five years recording some of the most swinging small-group jazz of the era before his vocal career overtook everything else. As a pianist he was technically brilliant — harmonically sophisticated, directly descended from Earl Hines. <em>Straighten Up and Fly Right</em> was his first pop hit in 1943; by the late 1940s most listeners had forgotten the piano entirely. He died of lung cancer at 45.",
+  "fats-waller": "A pianist, vocalist, and composer from Harlem who studied stride piano with James P. Johnson and surpassed his teacher by the mid-1920s. He wrote <em>Ain't Misbehavin'</em> and <em>Honeysuckle Rose</em> before he was twenty-five, giving the songs away for drinking money with a generosity that cost him a fortune in royalties. His 1930s recordings with his Rhythm group are as much comedy as music — the mugging and asides often overshadow the extraordinary piano playing underneath. He died on a train crossing Kansas in 1943, aged 39.",
+
+  // ── Bebop era ─────────────────────────────────────────────────────────────
+  "charlie-parker": "An alto saxophonist from Kansas City who arrived in New York in 1939 and spent several years working out a new harmonic and rhythmic language — faster tempos, chromatic passing tones, melodic lines built from the upper extensions of chords. The recordings he made with Dizzy Gillespie from 1945 onwards — <em>Ko-Ko</em>, <em>Shaw 'Nuff</em>, <em>Ornithology</em> — announced bebop to the world. He was a heroin addict for most of his adult life and died at 34, his body so ravaged the coroner estimated his age at between 50 and 60. Miles Davis, Coltrane, and nearly every saxophonist of the following generation began by learning his solos note for note.",
+  "dizzy-gillespie": "A trumpeter from Cheraw, South Carolina who developed bebop alongside Charlie Parker in New York in the early 1940s, bringing formal music theory and compositional rigor to a style Parker approached entirely by ear. His technical range was extraordinary — high notes, speed, harmonic fluency — and he also introduced Afro-Cuban rhythms into jazz, hiring conga player Chano Pozo for his big band in 1947. <em>Manteca</em>, written with Pozo, essentially founded Afro-Cuban jazz. He remained a showman, ambassador, and enthusiastic educator until his death in 1993.",
+  "bud-powell": "A pianist from Harlem who translated Charlie Parker's alto saxophone language onto the keyboard — fast, angular right-hand melodic lines over sparse, syncopated left-hand chords. His Blue Note and Clef recordings from 1949 to 1953 are among the most technically ferocious jazz piano performances on record. He was beaten by Philadelphia police in 1945 in an incident that left him with lasting neurological damage; he spent periods in psychiatric institutions throughout his life, and the slow creative decline of his later years was painful to witness. He died in 1966 at 41.",
+  "max-roach": "A drummer from Newland, North Carolina who developed a melodic, compositionally minded approach to the drum kit — his solos told stories and developed themes. He co-led a quintet with Clifford Brown from 1954 to 1956 that made some of the finest hard bop recordings of the decade, then recorded <em>We Insist! Freedom Now Suite</em> in 1960, one of jazz's most explicit statements about civil rights. In his later years he performed with string quartets, wrote for orchestras, and kept teaching at the University of Massachusetts until 2007.",
+  "kenny-clarke": "A drummer from Pittsburgh who was the house drummer at Minton's Playhouse in the early 1940s and one of the principal architects of bebop rhythm — he moved the primary timekeeping from the bass drum to the ride cymbal, using the bass drum only for off-beat accents. He co-founded the Modern Jazz Quartet before relocating permanently to Paris in 1956, where he spent the rest of his life, co-leading the Clarke-Boland Big Band through the 1960s and '70s.",
+  "art-blakey": "A drummer from Pittsburgh who converted to Islam in the late 1940s, took the name Abdullah Ibn Buhaina, and founded the Jazz Messengers in 1955 — a working band that for thirty-five years functioned as the most important training ground for jazz talent in the music's history. Clifford Brown, Lee Morgan, Wayne Shorter, Freddie Hubbard, Keith Jarrett, and Wynton and Branford Marsalis all passed through the band. His drumming was physically overwhelming — loud, driving, with a press roll that could stop a room. He died in 1990 still leading the Messengers.",
+  "clifford-brown": "A trumpeter from Wilmington, Delaware who in four years of recording — 1952 to 1956 — established himself as one of the most important trumpet voices in jazz history. His technique was complete, his tone warm and open, his melodic lines arriving almost faster than the listener could follow. He didn't drink, didn't use drugs. He died at 25 in a car accident on the Pennsylvania Turnpike, in the same crash that killed pianist Richie Powell. Trumpet players still talk about him in the present tense.",
+  "sonny-rollins": "A tenor saxophonist from Harlem who grew up on the same block as Thelonious Monk and Coleman Hawkins, played with Miles Davis and Clifford Brown in his twenties, and then disappeared from public performance in 1959 — afraid he wasn't playing well enough — to practice alone on the Williamsburg Bridge at night, where the sound wouldn't disturb anyone. He returned stronger than before. <em>Saxophone Colossus</em> (1956), recorded before the sabbatical, remains one of the great single-session jazz records. He was still touring in his seventies.",
+  "horace-silver": "A pianist and composer from Norwalk, Connecticut who co-founded the Jazz Messengers with Art Blakey in 1955, then left to lead his own quintet, developing what he called 'funky' hard bop — jazz that drew on gospel and R&B for its rhythmic feel. He wrote every piece his quintet played: <em>Song for My Father</em>, <em>Nica's Dream</em>, <em>The Preacher</em>, <em>Doodlin'</em>. His Blue Note recordings of the late 1950s and '60s were enormously influential on soul jazz and later on hip-hop producers who sampled them heavily.",
+  "lee-morgan": "A trumpeter from Philadelphia who joined Art Blakey's Jazz Messengers at 18 — already fully formed, with a bright, aggressive tone and an inexhaustible flow of ideas. He recorded <em>The Sidewinder</em> in 1963, an album built around a catchy, bluesy groove that accidentally became a hit single and revived Blue Note's commercial fortunes. He battled heroin addiction for years, recovered with help from his girlfriend Helen More, and was shot and killed by More at Slug's Saloon in New York in February 1972. He was 33.",
+  "freddie-hubbard": "A trumpeter from Indianapolis who arrived in New York at 20 and within two years had recorded on sessions with Oliver Nelson, Eric Dolphy, and Ornette Coleman — the virtuoso who could play convincingly across the whole stylistic range. His Blue Note albums of the 1960s, especially <em>Ready for Freddie</em> and <em>Hub-Tones</em>, are among the best hard bop trumpet records of the decade. He developed serious lip problems later in his career, a source of real sadness to anyone who remembered what he'd been capable of.",
+  "wayne-shorter": "A tenor and soprano saxophonist from Newark who served as musical director for Art Blakey's Jazz Messengers before joining Miles Davis's second great quintet in 1964 — the most harmonically ambitious small group of that decade. His compositions — <em>Infant Eyes</em>, <em>Witch Hunt</em>, <em>Nefertiti</em>, <em>Footprints</em> — are among the most recorded jazz pieces of the era. He co-founded Weather Report with Joe Zawinul in 1970, and kept writing and performing into his eighties before his death in 2023.",
+  "benny-golson": "A tenor saxophonist and composer from Philadelphia who wrote an extraordinary proportion of the most-played tunes in hard bop: <em>Whisper Not</em>, <em>Stablemates</em>, <em>I Remember Clifford</em>, <em>Killer Joe</em>, <em>Along Came Betty</em>. He co-founded the Jazztet with Art Farmer in 1959, spent a decade writing for television and film, then returned to jazz with his compositional gifts fully intact. He was still playing and writing well into his nineties.",
+  "cedar-walton": "A pianist from Dallas who played in Art Blakey's Jazz Messengers from 1961 to 1964, contributing compositions like <em>Mosaic</em> and <em>Bolivia</em> to the Messengers' book. He became one of the most trusted accompanists in hard bop, recording with nearly every major figure, before leading his own quartet and making a well-regarded series of albums for Prestige and East Wind in the 1970s. His playing was direct, swinging, and harmonically inventive without calling attention to itself.",
+  "bobby-timmons": "A pianist from Philadelphia who wrote <em>Moanin'</em> in 1958 for Art Blakey's Jazz Messengers — one of the most immediately recognizable piano introductions in jazz, a minor-key gospel-funk theme that became the opening statement of the entire Blue Note aesthetic. He also wrote <em>Dat Dere</em> and <em>This Here</em> for Cannonball Adderley's quintet. His gospel-inflected, blues-drenched style was central to soul jazz, but he struggled with heroin and died at 38 from cirrhosis.",
+  "donald-byrd": "A trumpeter from Detroit who came through Art Blakey's Jazz Messengers and became one of the most prolific sidemen on the Blue Note label in the early 1960s. He later pursued a PhD in music education at Columbia and taught at Howard University before recording <em>Black Byrd</em> in 1973 — one of the best-selling albums in Blue Note's history and a record that jazz purists and funk fans have been arguing about ever since.",
+  "jackie-mclean": "An alto saxophonist from Harlem who grew up on the same block as Sonny Rollins and Miles Davis and began playing with them in his teens. His tone was deliberately sharp and acerbic — a personal sound rather than a technical flaw — and his Blue Note recordings of the early 1960s are among the most emotionally raw hard bop records of the decade. He became a committed educator at the Hartt School in Connecticut, where he helped establish one of the first university jazz programs in America.",
+  "woody-shaw": "A trumpeter from Laurinburg, North Carolina who arrived in New York in 1964 and built the most harmonically advanced trumpet vocabulary of his generation — incorporating post-Coltrane modality and the wide intervallic leaps of Eric Dolphy into a bebop framework. His Columbia albums of the late 1970s, particularly <em>Rosewood</em>, are considered among the last great hard bop trumpet records. He lost his sight in his final years due to a rare hereditary condition and died in 1989 after falling in front of a subway train in New York.",
+  "red-garland": "A pianist from Dallas who joined Miles Davis's quintet in 1955 and spent three years recording some of the most swinging bebop piano of the decade — the <em>Cookin'</em>, <em>Relaxin'</em>, <em>Workin'</em>, and <em>Steamin'</em> sessions are full of his block-chord voicings and unhurried time. Davis said Garland played piano like Ahmad Jamal, and Jamal was one of Davis's models for how to use space. After leaving Davis, Garland recorded prolifically for Prestige and went largely unappreciated until a late-career revival.",
+  "paul-chambers": "A bassist from Pittsburgh who became the most-recorded bassist in hard bop history — appearing on an astonishing proportion of the essential Blue Note and Prestige sessions of the late 1950s and early '60s, including nearly everything Miles Davis recorded, Sonny Rollins's <em>Saxophone Colossus</em>, and John Coltrane's <em>Blue Train</em>. His bowed bass solo on <em>Whims of Chambers</em> in 1956 introduced the instrument as a melodic voice in hard bop in a way nobody had managed before. He died of tuberculosis at 33.",
+  "philly-joe-jones": "A drummer from Philadelphia who anchored Miles Davis's quintet from 1955 to 1958, developing an intimately interactive style — responding in real time to what the soloists were doing rather than just maintaining a groove. Davis later said Jones was his favorite drummer of all the musicians he'd worked with. He struggled with heroin throughout his career, spent long periods working in Europe, and died in Philadelphia in 1985.",
+  "cannonball-adderley": "An alto saxophonist from Tampa who arrived in New York in 1955 and played a session that got him a Blue Note contract within days. He joined Miles Davis's sextet for the <em>Kind of Blue</em> sessions in 1959 — his alto is one of the warmest sounds on the record — then left to lead his own quintet. <em>Mercy Mercy Mercy!</em>, recorded live at a Chicago club in 1966, became a surprise hit; its gospel-funk feel pointed toward what soul jazz would become in the early 1970s.",
+  "red-rodney": "A trumpeter from Philadelphia who played in Charlie Parker's quintet from 1949 to 1951 — the only white musician Parker ever hired for his regular working band. He toured the South with Parker at a time when integrated groups weren't welcome; the story goes that Bird introduced him as 'Albino Red,' a Black albino musician from New Orleans. He spent much of the 1950s out of music due to heroin addiction, eventually returned, and recorded some of the most assured bebop of his career in his sixties.",
+  "milt-jackson": "A vibraphonist from Detroit who was a founding member of the Modern Jazz Quartet with pianist John Lewis, performing together from 1952 until Lewis's death in 2001. He slowed the vibraphone's motor down to produce a warmer, slower vibrato, and his playing was deeply blues-inflected in a way that kept the MJQ swinging even when the formal structures got intricate. He also recorded prolifically as a sideman for Prestige throughout the 1950s, in sessions that are now considered essential hard bop documents.",
+  "john-lewis": "A pianist and composer from LaGrange, Illinois who studied at the Manhattan School of Music, played with Dizzy Gillespie's big band, and co-founded the Modern Jazz Quartet in 1952. He was the intellectual architect of the MJQ's sound — influenced by baroque counterpoint, attentive to structure in a way unusual in jazz. He also composed film scores; his score for <em>Odds Against Tomorrow</em> (1959) is considered one of the finest jazz film scores ever written.",
+  "ray-brown": "A bassist from Pittsburgh who married Ella Fitzgerald in 1947 and worked as her accompanist, then spent years as Oscar Peterson's trio partner, and became the most respected bassist of the bebop era. His tone was enormous — the biggest, most authoritative bass sound in the music — and his technique was clean enough that other bassists used his records as technical benchmarks. He moved to Los Angeles in the 1970s and spent his later decades recording and mentoring, dying of a heart attack in a hotel room in Indianapolis in 2002.",
+  "percy-heath": "A bassist from Wilmington, North Carolina who played with Dizzy Gillespie's groups in the late 1940s before becoming a founding member of the Modern Jazz Quartet in 1952, remaining for nearly fifty years. His role in the MJQ was structural — a deep, steady foundation under Lewis's piano and Jackson's vibraphone — but without his unwavering time and clear tone the ensemble's delicate interplay would have been impossible to sustain.",
+  "connie-kay": "A drummer from Tuckahoe, New York who replaced Kenny Clarke in the Modern Jazz Quartet in 1955 and played with the group for forty years. His brushwork was so light and measured that he could support Milt Jackson's vibraphone without ever overbalancing it, yet he could generate genuine swing when the music opened up. The MJQ's concert recordings are full of moments where you can hear Kay making decisions that hold the ensemble together.",
+  "oscar-peterson": "A pianist from Montreal who Norman Granz recruited for a Jazz at the Philharmonic concert in New York in 1949 — he walked out unannounced and received a standing ovation. His technical facility was unmatched in the bebop era; alongside Art Tatum, he was considered one of the two most accomplished jazz pianists alive. He recorded ceaselessly for Granz throughout the 1950s and '60s, in trio sessions and collaborations with Dizzy Gillespie, Louis Armstrong, and Ella Fitzgerald. Tatum was his idol.",
+  "wes-montgomery": "A guitarist from Indianapolis who developed a completely individual technique: single-note melodic lines played with the thumb rather than a pick, then doubled in octaves, then voiced as full chords — three distinct textures in sequence within a single solo. He taught himself using Charlie Christian recordings and practiced late at night with a muted pickup so he wouldn't wake his children. His early Riverside albums are among the finest jazz guitar records ever made; the later Verve and A&M sides were more commercial but reached an enormous audience.",
+  "kenny-burrell": "A guitarist from Detroit who arrived in New York in 1956 and immediately became one of the most-sought-after session musicians on the Blue Note label. His tone was warm and round, his approach rooted in the blues even when the harmonic material got sophisticated. <em>Midnight Blue</em> (1963) is his most famous record — a late-night, unhurried session with Stanley Turrentine that sounds exactly like its title. He later founded the jazz studies program at UCLA.",
+  "sarah-vaughan": "A vocalist from Newark who won an amateur night at the Apollo in 1942 and was immediately hired by Earl Hines's band — where she sang alongside Dizzy Gillespie and Charlie Parker. Her voice was extraordinary: a three-octave range, perfect pitch, and a vibrato she could narrow to a thread or open wide. Her bebop recordings of the mid-1940s were technically staggering; her later Mercury recordings reached mainstream audiences while using the same voice more conservatively. She continued recording until her death from lung cancer in 1990.",
+  "dexter-gordon": "A tenor saxophonist from Los Angeles who came up through big bands and moved to New York to play in the Billy Eckstine Orchestra alongside Charlie Parker and Dizzy Gillespie. His playing was large, unhurried, and swaggering — he stretched the bebop tempo and made it feel weighty rather than frantic. He spent much of the 1960s and '70s in Copenhagen, returning to the United States in 1976 to a hero's welcome. His performance in Bertrand Tavernier's film <em>'Round Midnight</em> in 1986 earned him an Academy Award nomination for Best Actor.",
+  "nina-simone": "A pianist and vocalist from Tryon, North Carolina who applied to the Curtis Institute of Music in Philadelphia and was rejected — a decision she believed to be racist, and one that shaped everything that followed. She recorded <em>I Loves You, Porgy</em> in 1958 and became famous; she spent the rest of her career making music that refused any single category: jazz, blues, gospel, classical, civil rights anthem. She was a formidable pianist — trained to play Bach and Beethoven — and she used the piano to say things the voice alone couldn't. She moved to Europe in the 1970s and rarely returned.",
+  "jimmy-smith": "An organist from Norristown, Pennsylvania who essentially invented the jazz Hammond B-3 style, treating the instrument as a solo horn rather than a chord machine. His 1956 Blue Note debut made other jazz organists sound out of date almost immediately. His trio format — organ, guitar, drums — became the standard small-group configuration for soul jazz in the late 1950s and the organ club circuit that still exists today. He recorded and toured with minimal interruption until close to the end of his life in 2005.",
+  "joe-pass": "A guitarist from New Brunswick, New Jersey who spent years fighting heroin addiction — including time at Synanon, the rehabilitation community — before recording <em>Virtuoso</em> for Pablo in 1974: an unaccompanied solo guitar album in a league of its own for pure technique and musicality in that format. Norman Granz then paired him with Oscar Peterson, Ella Fitzgerald, and Dizzy Gillespie for a series of recordings and tours that brought Pass a wide audience in his fifties.",
+  "eddie-harris": "A tenor saxophonist from Chicago who recorded <em>Exodus</em> in 1961 and had an unlikely jazz hit single — the first jazz record to sell a million copies. He was an inventive experimenter who pioneered the use of electronic effects on saxophone and fitted saxophone mouthpieces onto trumpet bodies years before most musicians thought it was worth trying. His <em>Swiss Movement</em> recording with Les McCann at the Montreux Jazz Festival in 1969 remains one of the great crossover jazz documents.",
+  "les-mccann": "A pianist and vocalist from Lexington, Kentucky who came to attention at the Monterey Jazz Festival in 1960 and built a career on Pacific Jazz recordings throughout the early '60s — warm, gospel-inflected piano and a relaxed baritone. The <em>Swiss Movement</em> recording with Eddie Harris at Montreux in 1969 made him famous beyond jazz circles; <em>Compared to What</em>, his improvised social commentary over a hard-swinging groove, was exactly the record that moment needed.",
+
+  // ── Modal era ─────────────────────────────────────────────────────────────
+  "bill-evans": "A pianist from Plainfield, New Jersey who studied classical piano through college and arrived in New York in the mid-1950s with a harmonic language unlike anyone else's — voicings built from the inside of the chord, a touch so light you had to lean in to hear the spaces between notes. He joined Miles Davis's sextet in 1958, stayed eight months, played on <em>Kind of Blue</em>, and left to form his own trio. His Village Vanguard sessions of 1961 with bassist Scott LaFaro and drummer Paul Motian redefined what a jazz piano trio could do. LaFaro died in a car crash eleven days after those sessions were recorded.",
+  "charles-mingus": "A bassist, composer, and bandleader from Nogales, Arizona who formed the Jazz Workshop in the early 1950s — a working band where musicians rehearsed extended compositions and performed them from memory, without written charts. <em>Mingus Ah Um</em> (1959) and <em>The Black Saint and the Sinner Lady</em> (1963) are his two most celebrated records. He was furious, tender, politically outspoken, and capable of extraordinary harmonic complexity within music that always swung. He died of ALS in 1979 in Mexico, where he'd gone for experimental treatment.",
+  "eric-dolphy": "An alto saxophonist, bass clarinetist, and flautist from Los Angeles who arrived in New York in 1959 and immediately aligned himself with Charles Mingus and Ornette Coleman, the two most unsettling musicians in the city. His playing was angular and intervallic — wide leaps that seemed to defy harmonic logic while remaining emotionally coherent. He played on Coltrane's <em>Africa/Brass</em> sessions and recorded <em>Out to Lunch</em> for Blue Note in 1964 — one of the strangest and most beautiful jazz records ever made. He died in Berlin later that year of undiagnosed diabetes; he was 36.",
+  "mccoy-tyner": "A pianist from Philadelphia who joined John Coltrane's classic quartet in 1960 and spent five years as its harmonic foundation. His approach was unlike any bebop pianist — left-hand quartal voicings that created a modal, open quality; a right hand that could play inside or far outside depending on where Coltrane wanted to go. He left in 1965 when the music became too free for him to hear a role in it, and spent the following decades as one of the most consistently recording jazz pianists in the world. He died in 2020.",
+  "elvin-jones": "A drummer from Pontiac, Michigan who joined Coltrane's quartet in 1960 and developed one of the most distinctive rhythmic approaches in jazz — a simultaneous three-against-four polyrhythm that created a continuous rolling surge under the soloists. He reportedly influenced almost every jazz drummer who followed him. After Coltrane's death in 1967 he formed his own Jazz Machine, which he led until close to the end of his life in 2004. He once said he was trying to create under Coltrane's playing the same feeling that a gospel church's rhythm section creates under a preacher.",
+  "jimmy-garrison": "A bassist from Miami who joined Coltrane's quartet in 1961 and stayed until Coltrane's death in 1967, developing an approach that was as much rhythmic anchor as melodic entity. His bowed playing on ballads had a sound Coltrane said was exactly what the music needed. His solo introduction to <em>A Love Supreme</em> Part I is one of the most immediately recognizable passages in jazz. He died of lung cancer in 1976.",
+  "scott-lafaro": "A bassist from Newark who came to prominence in Bill Evans's trio in 1960 and, in the space of eighteen months, expanded what the bass could do in a jazz small group — playing melodic counterlines to Evans's piano rather than simply marking time, creating a three-way conversation between bass, piano, and drums. The Village Vanguard recordings from June 1961 capture the trio at its peak. LaFaro died in a car accident in rural New York eleven days later; he was 25.",
+  "paul-motian": "A drummer from Providence who came to prominence in Bill Evans's trio and developed a way of playing that made the cymbal sound feel like conversation rather than punctuation. He recorded with Evans through the early 1960s and went on to play with Paul Bley, Keith Jarrett, and Charlie Haden, before forming his own ensembles in the 1980s and '90s that were among the most critically acclaimed small groups in jazz. He died in New York in 2011 still leading his trio.",
+  "don-cherry": "A trumpeter from Oklahoma City who became Ornette Coleman's musical partner for the free jazz recordings of 1959–1961 — including <em>The Shape of Jazz to Come</em> and <em>Free Jazz</em>, the double quartet improvisation that gave a name to a movement. He spent the 1960s in Europe, collaborating with Albert Ayler and Carla Bley, and eventually developed a style drawing on music from across the world — West African, South Asian, Middle Eastern — that he called 'world music' before the phrase existed. He died in Málaga, Spain in 1995.",
+  "charlie-haden": "A bassist from Shenandoah, Iowa who came to prominence in Ornette Coleman's quartet in 1959 and brought to free jazz a tone rooted in American folk music and country blues. He co-founded the Liberation Music Orchestra in 1969 — the album of that name, arranged by Carla Bley, remains one of jazz's most directly political recordings. He later formed the Quartet West, which drew on vintage recordings and film noir atmospheres. He died of post-polio syndrome in 2014.",
+  "billy-higgins": "A drummer from Los Angeles who played on Ornette Coleman's Atlantic recordings in 1959 and went on to become the most widely recorded drummer in jazz over the following decades — his combination of precision, swing, and musical sensitivity made him the first call for sessions across every style. He was warm and generous in ways that produced the best from every musician he played with. He died of liver disease in 2001.",
+  "ed-blackwell": "A drummer from New Orleans who joined Ornette Coleman's group in 1960 and brought a New Orleans second-line feeling to free jazz — his playing was more grounded and blues-based than the bebop drumming that most jazz musicians of his generation had grown up with. He later played extensively with Don Cherry and remained active into the 1990s until kidney failure slowed him down. He died in 1992.",
+  "booker-ervin": "A tenor saxophonist from Denison, Texas who spent three crucial years in Charles Mingus's Jazz Workshop from 1958 to 1961 and established himself as one of the most emotionally forceful saxophone voices of the hard bop era. His Blue Note 'book' series — <em>The Freedom Book</em>, <em>The Blues Book</em>, <em>The Space Book</em>, <em>The Song Book</em> — recorded between 1963 and 1965, are among the most consistently excellent jazz saxophone records of the decade. He died of kidney disease in 1970 at 39.",
+  "dannie-richmond": "A drummer from New York who spent most of his career as Charles Mingus's drummer — a relationship that began in 1956 and continued, with occasional breaks, until Mingus's death in 1979. Richmond could follow Mingus through constant tempo changes and mid-piece style shifts; his adaptability was essential to the Jazz Workshop's entire way of working. He died of a heart attack in 1988, shortly after leading a Mingus tribute ensemble.",
+  "jaki-byard": "A pianist from Worcester, Massachusetts who played with Charles Mingus's Jazz Workshop from 1962 to 1965 and was one of the most stylistically omnivorous musicians in jazz — capable of stride piano, bebop, free jazz, and New Orleans ragtime within a single solo, making them feel connected rather than patchwork. He recorded a series of acclaimed solo piano albums for Prestige in the 1960s and taught at the New England Conservatory for years. He was shot and killed in his New York apartment in 1999 under circumstances never fully explained.",
+  "wynton-kelly": "A pianist from Jamaica, Brooklyn who was the regular pianist in Miles Davis's rhythm section from 1959 to 1963 and was, by most accounts, the most purely swinging jazz pianist of his generation — his blues feel was so natural that Davis trusted him with recordings that required exactly that quality. He plays on <em>Freddie Freeloader</em> on <em>Kind of Blue</em> — the only track Bill Evans didn't appear on — and his solo on it is three minutes of perfect jazz piano. He died of an epileptic seizure in Toronto in 1971 at 39.",
+  "tony-williams": "A drummer from Chicago who joined Miles Davis's quintet in 1963 at the age of 17 — the youngest musician Davis ever hired — and brought a rhythmic flexibility that made the second great quintet the most harmonically advanced small group in jazz. He played with sticks as though the rhythm were a living, shifting thing rather than a fixed grid. He founded Lifetime, one of the first jazz-rock fusion groups, in 1969, and remained one of jazz's most commanding drummers until his death in 1997.",
+  "ron-carter": "A bassist from Ferndale, Michigan who joined Miles Davis's quintet in 1963 and became the most recorded bassist in jazz history — a title he still holds, having appeared on over 2,200 albums. His tone was clear and even, his time impeccable, his musicality evident in every note he chose not to play as much as every note he did. He has led his own quartet consistently for fifty years and remains active and exacting well into his eighties.",
+  "herbie-hancock": "A pianist from Chicago who joined Miles Davis's quintet in 1963 at 23 and brought a harmonic sophistication central to the second great quintet's sound. He also recorded <em>Maiden Voyage</em> and <em>Empyrean Isles</em> for Blue Note — two of the finest modal jazz records of the decade. He later moved into funk with <em>Head Hunters</em> (1973) and won a Grammy for the hip-hop-influenced <em>Rockit</em> in 1983. He remains active, perpetually curious, and one of the most commercially successful musicians ever to come through jazz.",
+  "eddie-gomez": "A bassist from Santurce, Puerto Rico who spent eleven years as Bill Evans's bass partner from 1966 to 1977 — the longest musical relationship of his career. His technical facility was extraordinary, and his ability to match Evans's fleet, lyrical approach without overshadowing it made their recordings together some of the most intimate piano trio jazz on record. He later worked with Chick Corea and Pat Metheny, and taught at the Juilliard School for years.",
+  "lee-konitz": "An alto saxophonist from Chicago who studied with Lennie Tristano in the late 1940s and developed a tone almost entirely outside the Charlie Parker tradition — lighter, cooler, more harmonically oblique. He played on Miles Davis's <em>Birth of the Cool</em> sessions in 1949 and spent the following decades as one of jazz's most restlessly curious improvisers, recording in settings from solo to large ensemble. He died in New York in 2020 from complications of COVID-19, aged 92.",
+  "jim-hall": "A guitarist from Buffalo who developed a language of understatement — small gestures, careful listening, harmonics that implied rather than stated. His duo recordings with Bill Evans (<em>Undercurrent</em>, 1962) and his work in Jimmy Giuffre's trio established him as one of the most original voices on the instrument. He also made celebrated recordings with Ron Carter and Paul Desmond. He died in New York in 2013.",
+  "gerry-mulligan": "A baritone saxophonist and composer from New York who played in Miles Davis's nonet — the band that made the <em>Birth of the Cool</em> recordings in 1949 — then formed his own pianoless quartet in Los Angeles in 1952 with Chet Baker. The quartet's recordings for Pacific Jazz are among the most elegant jazz records of the decade; the absence of a piano forced Mulligan and Baker to create harmonic context through pure counterpoint. He led various groups and wrote prolifically for the rest of his career, dying in 1996.",
+  "dave-brubeck": "A pianist from Concord, California who studied counterpoint with Darius Milhaud at Mills College and went on to lead the most commercially successful jazz quartet of the 1950s and '60s. His approach to rhythm — using unusual time signatures like 5/4 and 7/4 at a time when virtually all jazz was in 4/4 — made him controversial among purists while reaching enormous popular audiences. <em>Time Out</em> (1959), recorded in odd meters, was the first jazz album to sell a million copies. He died on his way to a cardiologist appointment in 2012, the day before his 92nd birthday.",
+  "paul-desmond": "An alto saxophonist from San Francisco who spent most of his career in Dave Brubeck's quartet and wrote <em>Take Five</em> — the most commercially successful jazz instrumental ever recorded, which Desmond sold to Brubeck for what he later described as the worst business decision of his life. His tone was cool and silky, the opposite of the rough hard bop alto; he was fond of saying he wanted to sound like a dry martini. He died of lung cancer in 1977 and left his royalties to the American Red Cross.",
+  "joe-henderson": "A tenor saxophonist from Lima, Ohio who arrived in New York in 1962 and spent the decade as a Blue Note house musician, appearing on sessions from inside the hard bop mainstream to the outer edges of the avant-garde. His own Blue Note recordings — particularly <em>Page One</em> (1963) and <em>Inner Urge</em> (1965) — are among the finest of the decade. A late-career series of concept albums for Verve in the early 1990s won him several Grammy Awards and made him famous all over again.",
+  "stan-getz": "A tenor saxophonist from Philadelphia who came to prominence in 1948 with a solo on Woody Herman's <em>Early Autumn</em> that established what cool jazz tenor saxophone could sound like — breathy, lyrical, endlessly melodic. He recorded <em>Jazz Samba</em> with guitarist Charlie Byrd in 1962, which brought bossa nova to American audiences. <em>The Girl from Ipanema</em>, recorded with João Gilberto and Astrud Gilberto in 1963, remains one of the most recognizable jazz recordings ever made. He died of liver cancer in 1991.",
+  "chet-baker": "A trumpeter and vocalist from Yale, Oklahoma who came to prominence in Gerry Mulligan's pianoless quartet in 1952 and was briefly, in the mid-1950s, considered the biggest thing in jazz — magazine covers, the look of a film star with the sound of something genuinely new. He was also a heroin addict whose life repeatedly fell apart: arrests, prison time, a beating in 1968 that destroyed his teeth and nearly ended his trumpet career. He rebuilt his embouchure, returned to playing, recorded prolifically in Europe for two decades, and fell from a hotel window in Amsterdam in 1988. He was 58.",
+  "sun-ra": "A pianist and bandleader from Birmingham, Alabama who at some point in the 1950s renamed himself Sun Ra, claimed to have been born on Saturn, and spent the following forty years leading his Arkestra — a large ensemble playing music that ranged from Ellington swing to free jazz to pure noise, often in elaborate costumes. Behind the mythology was a serious musician who had played in Fletcher Henderson's orchestra and understood the complete history of jazz. <em>Jazz in Silhouette</em> (1959) and <em>Space Is the Place</em> (1972) are good entry points. He died in 1993.",
+  "alice-coltrane": "A pianist and harpist from Detroit who married John Coltrane in 1965 and became an important figure in his final recordings before his death in 1967. She developed her own post-Coltrane approach through the early 1970s, recording a series of albums for Impulse! that drew on Indian classical music and Hindu philosophy — <em>A Monastic Trio</em> (1968) and <em>Journey in Satchidananda</em> (1971) are the most celebrated. She later founded a spiritual community in California, returning late in life to record <em>Translinear Light</em> in 2004. She died in 2007.",
+  "pharoah-sanders": "A tenor saxophonist from Little Rock, Arkansas who joined John Coltrane's group in 1965 and played in the expansive, spiritually intense recordings of Coltrane's final years. After Coltrane's death he recorded a series of albums for Impulse! — including <em>Karma</em> (1969) and <em>Thembi</em> (1971) — that extended Coltrane's late style into something warmer and more accessible. In his seventies he was rediscovered by a new generation through his collaboration with producer Floating Points; the album <em>Promises</em> (2021) introduced him to a completely new audience. He died in 2022.",
+  "bobby-hutcherson": "A vibraphonist from Los Angeles who played on some of the most harmonically advanced Blue Note sessions of the 1960s — Eric Dolphy's <em>Out to Lunch</em>, Andrew Hill's <em>Point of Departure</em> — bringing a bright, angular approach to an instrument most people associated with Milt Jackson's warmer blues feel. He co-led a quintet with Harold Land for several years and died in 2016.",
+  "charles-lloyd": "A tenor saxophonist and flautist from Memphis who formed a quartet in 1966 that became one of the first jazz groups to play rock venues — the Fillmore, the Monterey Pop Festival — with a young Keith Jarrett on piano. His 1967 <em>Forest Flower</em>, recorded live at Monterey, became a bestseller. He largely withdrew from music in the 1970s, returned in the 1980s, and has continued recording into his eighties with quiet consistency.",
+
+  // ── Fusion & contemporary era ──────────────────────────────────────────────
+  "chick-corea": "A pianist from Chelsea, Massachusetts who played in Miles Davis's electric bands — including on <em>Bitches Brew</em> (1970) — and then founded Return to Forever, one of the defining jazz-rock fusion groups. He covered an extraordinary range of styles across his career: bebop, fusion, flamenco-influenced acoustic music, avant-garde solo work, collaborations with vibraphonist Gary Burton. He won twenty-three Grammy Awards and died of cancer in 2021, three months after the diagnosis.",
+  "joe-zawinul": "A pianist and synthesizer player from Vienna who played in Cannonball Adderley's quintet — writing <em>Mercy Mercy Mercy</em>, the hit that made the band commercially viable in 1966 — and then co-founded Weather Report with Wayne Shorter in 1970. Weather Report ran for fifteen years and was one of the most adventurous and commercially successful jazz groups of the era. Zawinul was a keyboard visionary who heard the synthesizer as an orchestral instrument, not a pop toy. He died of skin cancer in Vienna in 2007.",
+  "jaco-pastorius": "A self-taught bassist from Fort Lauderdale who arrived in New York in 1976 with an unaccompanied bass demo tape that convinced CBS Records to sign him on the spot. His fretless bass playing on Weather Report's <em>Heavy Weather</em> (1977) and on his own debut album demonstrated technical and melodic possibilities that had never existed in the instrument's history. He developed bipolar disorder and drug problems in the early 1980s and died in 1987 from injuries sustained in a fight outside a bar in Fort Lauderdale. He was 35.",
+  "john-mclaughlin": "A guitarist from Doncaster, England who arrived in New York in 1969 at Miles Davis's invitation, played on <em>Bitches Brew</em>, and then founded the Mahavishnu Orchestra — a quintet that played jazz-rock fusion at volumes and speeds nobody had attempted before. <em>The Inner Mounting Flame</em> (1971) and <em>Birds of Fire</em> (1973) are considered among the most technically impressive small-group recordings in jazz. He later formed Shakti with Indian classical musicians, integrating Carnatic music into his jazz language.",
+  "pat-metheny": "A guitarist from Lee's Summit, Missouri who joined Gary Burton's quartet at 18 and recorded his debut album for ECM in 1976, establishing a sound — clean, lyrical, broadly appealing — that would make him the best-selling jazz artist of the late twentieth century. He founded the Pat Metheny Group in 1977, exploring acoustic jazz, electronic music, and Latin influences across a series of albums that reached large audiences without sacrificing musical seriousness. He has also recorded free-jazz duets with Ornette Coleman and Derek Bailey, showing a range his popular recordings sometimes obscure.",
+  "stanley-clarke": "A bassist from Philadelphia who played with Horace Silver and Joe Henderson before joining Chick Corea's Return to Forever in 1972, where his electric bass matched McLaughlin's guitar in speed and technical precision. His debut album as a leader in 1974 essentially defined electric bass as a solo instrument in a jazz context. He has worked in film and television scoring throughout his career and continues to perform across jazz, funk, and classical music.",
+  "lenny-white": "A drummer from New York who played on Miles Davis's <em>Bitches Brew</em> sessions in 1969 at age 19 — one of his first major recording dates — and then joined Return to Forever with Corea, Clarke, and Di Meola for the group's most commercially successful period. His playing combined jazz precision with rock power in a way that was central to what fusion audiences wanted. He later moved toward production work and continues to record and teach.",
+  "al-di-meola": "A guitarist from Jersey City who replaced Bill Connors in Return to Forever in 1974, aged 19, and within two years was considered one of the fastest guitarists in jazz. His acoustic trio albums with John McLaughlin and Paco de Lucía, starting with <em>Friday Night in San Francisco</em> (1980), showed what happened when he applied that technique to flamenco-influenced acoustic music. He remains one of the most technically accomplished guitarists in jazz.",
+  "billy-cobham": "A drummer from Panama who grew up in New York and played on Miles Davis's <em>Bitches Brew</em> before joining John McLaughlin's Mahavishnu Orchestra, where his combination of jazz independence and rock power defined what fusion drumming could sound like. His solo album <em>Spectrum</em> (1973) remains a landmark of the genre. He has recorded with George Duke, Randy Brecker, and many others and remained active as a performer and educator.",
+  "dave-holland": "A bassist from Wolverhampton, England who Miles Davis heard playing in London in 1968 and recruited for the electric band — Holland appears on <em>In a Silent Way</em> and <em>Bitches Brew</em>. He later played with Circle (with Chick Corea) and Anthony Braxton, and formed his own quintet in the 1980s that became one of the most admired small groups in post-bop jazz. He received a MacArthur Fellowship in 2015 and continues to lead and record.",
+  "jack-dejohnette": "A drummer from Chicago who replaced Tony Williams in Miles Davis's band in 1969 and played on <em>Bitches Brew</em>, bringing a more open, atmospheric approach that suited the new electric direction. He later co-founded the Standards Trio with Keith Jarrett and Gary Peacock, which became one of the most celebrated piano trio recordings in jazz history across thirty years of albums together. He is also a pianist and composer of considerable accomplishment.",
+  "keith-jarrett": "A pianist from Allentown, Pennsylvania who played in Charles Lloyd's quartet, then Miles Davis's electric band — though he famously hated playing electric instruments — and then formed his own groups in the early 1970s. His solo piano concerts — begun at the Bremen and Lausanne concerts in 1973 and continuing for decades — are the most celebrated improvised solo piano performances in jazz history. The 1975 <em>Köln Concert</em> is the best-selling solo piano album ever recorded. He suffered two strokes in 1996 that interrupted his career for years before a partial recovery.",
+  "wynton-marsalis": "A trumpeter from New Orleans who arrived in New York at 18, joined Art Blakey's Jazz Messengers, and almost immediately became both celebrated and controversial — his argument that jazz should return to its acoustic, bebop-era roots positioned him against fusion and free jazz at a time when those were still live debates. He won Grammy Awards simultaneously for jazz and classical music in 1983 and 1984. His oratorio <em>Blood on the Fields</em> won the Pulitzer Prize in 1997. He has been artistic director of Jazz at Lincoln Center since its founding.",
+  "branford-marsalis": "A tenor and soprano saxophonist from New Orleans who came up in Art Blakey's Jazz Messengers, played in Sting's touring band in 1985 (a move his brother Wynton publicly criticized), and led The Tonight Show band for Jay Leno from 1992 to 1995. His quartet recordings for Columbia — particularly the live <em>Royal Garden Blues</em> — show a player equally at home in post-bop, classical music, and R&B. He continues to lead his own quartet and teach.",
+  "lyle-mays": "A pianist and keyboardist from Wausaukee, Wisconsin who met Pat Metheny at the 1975 Wichita Jazz Festival and became his primary musical partner for the following three decades — the Pat Metheny Group's harmonic and textural sophistication was largely Mays's contribution. His ECM recordings with Metheny, particularly <em>As Falls Wichita, So Falls Wichita Falls</em> (1981), are among the most atmospheric jazz records of the era. He died of multiple organ failure in 2020.",
+  "joshua-redman": "A tenor saxophonist from Berkeley, California who was accepted to Harvard Law School when he won the Thelonious Monk International Jazz Competition in 1991 and chose music instead. His early Warner Bros. recordings were a commercial breakthrough for acoustic jazz in the 1990s, demonstrating that post-bop could reach wide audiences without compromising itself. He later formed the SFJAZZ Collective and has continued recording with a musical seriousness that has outlasted the commercial moment of his debut.",
+  "brad-mehldau": "A pianist from Jacksonville, Florida who recorded a series of trio albums for Warner Bros. in the mid-1990s that reinvented what a jazz piano trio could do — incorporating rock, classical, and pop influences without sounding like pastiche. His arrangement of Radiohead's 'Exit Music (For a Film)' on <em>The Art of the Trio Vol. 3</em> (1998) showed how a jazz musician could approach rock material without condescension. He remains one of the most intellectually rigorous pianists in jazz.",
+  "chris-potter": "A tenor saxophonist from Chicago who came to prominence as a sideman in the early 1990s and has since recorded over twenty albums as a leader. His technical command is complete — he can play bebop, free jazz, and rock-influenced fusion with equal fluency — and he is widely regarded by other musicians as one of the most gifted improvisers of his generation. His Underground quartet, formed in 2006, extended the jazz-rock fusion tradition into new territory.",
+  "airto-moreira": "A percussionist from Itaiópolis, Brazil who came to New York in 1968 with his partner Flora Purim and joined Miles Davis's electric band, appearing on <em>Bitches Brew</em>. He brought a Brazilian and Afro-Cuban percussion vocabulary into jazz fusion that expanded the rhythmic palette considerably. He later played in Return to Forever with Corea and Clarke and has recorded extensively with Weather Report and Hermeto Pascoal.",
+  "miroslav-vitous": "A bassist from Prague who came to New York in the late 1960s, played with Miles Davis and Wayne Shorter, and co-founded Weather Report with Shorter and Joe Zawinul in 1970. He left after the third album when the group's direction moved toward electric bass and pop accessibility, then went on to record a series of acoustic jazz albums for ECM that treated the bass as a melodic and compositional instrument. He has taught at the New England Conservatory.",
+  "gary-peacock": "A bassist from Burley, Idaho who played in the early avant-garde of the 1960s — recording with Bill Evans and Albert Ayler — before health problems forced a lengthy hiatus. He returned to prominence as the bassist in Keith Jarrett's Standards Trio alongside Jack DeJohnette, a partnership that lasted thirty years and produced some of the most listened-to acoustic jazz of the late twentieth century. He died in 2020.",
+  "zakir-hussain": "A tabla player from Mumbai who was the son of legendary tabla master Alla Rakha and collaborated with Western jazz musicians from the early 1970s — most notably in Shakti, the acoustic fusion group with John McLaughlin that integrated Carnatic classical music and jazz in a way nobody had quite attempted before. <em>Shakti</em> (1976) remains one of the most extraordinary meeting-points between jazz and Indian classical music ever recorded. He died in December 2024.",
+  "dhafer-youssef": "An oud player and vocalist from Téboulba, Tunisia who has spent his career in Europe — primarily Copenhagen and Vienna — fusing jazz improvisation with Islamic vocal tradition and North African musical languages. His albums for ACT Music, particularly <em>Electric Sufi</em> (2002) and <em>Digital Prophecy</em> (2003), showed how the oud could function as a jazz instrument without abandoning its own identity. He remains one of the most distinctive voices in the world music–jazz fusion space.",
+  "julian-lage": "A guitarist from Santa Rosa, California who was the subject of a documentary film at age eight, studied at the San Francisco Conservatory of Music, and came to prominence playing with Gary Burton's quintet in the 2000s. His later work — particularly <em>Squint</em> (2021) and <em>View With a Room</em> (2022) — shows a player fully in command of American roots music and jazz together, with a sound that is immediately recognizable. He has become one of the most admired jazz guitarists of his generation.",
+  "kamasi-washington": "A tenor saxophonist from Los Angeles who played on Kendrick Lamar's <em>To Pimp a Butterfly</em> (2015) and released his own triple-album debut <em>The Epic</em> the same year, announcing a jazz musician operating on an epic scale — orchestras, choirs, and a vision of the music that connected it to the spiritual tradition of Coltrane and Sanders. His prominence outside the jazz world brought new listeners to the music who might otherwise never have encountered it.",
+  "robert-glasper": "A pianist from Houston who studied at the New School in New York and developed a style that sits between jazz and hip-hop — harmonic sophistication and improvising sensibility applied to grooves and textures drawn from R&B. His <em>Black Radio</em> album (2012), featuring vocalists from the hip-hop and soul world playing over jazz arrangements, won a Grammy and introduced jazz piano to an entirely new audience. He has produced for Kendrick Lamar, Erykah Badu, and Common.",
+  "esperanza-spalding": "A bassist and vocalist from Portland, Oregon who studied at Berklee College of Music and graduated at 20, becoming a faculty member — the youngest in the school's history. Her 2011 album <em>Chamber Music Society</em> won the Grammy for Best New Artist — the first time a jazz musician had won that award — and introduced jazz-influenced songwriting to a wide audience. She has continued to expand into chamber music, opera, and experimental projects while maintaining a connection to jazz improvisation.",
+  "ambrose-akinmusire": "A trumpeter from Oakland who studied at the Manhattan School of Music and developed one of the most individual trumpet voices of his generation — lyrical but with an edge of discomfort, technically capable of extended techniques he uses sparingly and to specific expressive ends. His Blue Note albums, particularly <em>On the Tender Spot of Every Calloused Moment</em> (2020), address race and grief directly. He is widely considered one of the most significant jazz trumpeters of the twenty-first century.",
+  "mary-halvorson": "A guitarist from Brookline, Massachusetts who studied with Joe Morris and Anthony Braxton and developed a guitar language built on extended techniques — microtonal bends, delay pedals creating smeared harmonies, melodic lines that seem to lose their footing and recover. Her Code Girl and Amaryllis projects have won wide critical acclaim; she was named a MacArthur Fellow in 2019. She is one of the few jazz musicians discussed equally in avant-garde jazz and contemporary classical contexts.",
+  "cecile-mclorin-salvant": "A vocalist from Miami who studied classical voice in Aix-en-Provence and discovered jazz in her early twenties — then won the Thelonious Monk International Jazz Vocals Competition in 2010 before she had released an album. Her approach to a song is theatrical and scholarly: she recovers forgotten repertoire, addresses the relationship between singer and lyric with unusual directness, and improvises with a freedom that few jazz vocalists bring to the tradition. Her <em>WomanChild</em> (2013) and <em>For One to Love</em> (2015) are considered among the best jazz vocal albums of the decade.",
+  "shabaka-hutchings": "A tenor saxophonist and bass clarinetist from London who grew up partly in Barbados and founded three concurrent groups in the 2010s — Sons of Kemet, Shabaka and the Ancestors, and The Comet is Coming — each pursuing different fusions of jazz with Caribbean music, South African jazz, and electronic music. His prominence was central to the London jazz scene's emergence as one of the most vibrant in the world in that decade. He announced in 2023 that he was retiring from saxophone to focus on shakuhachi flute, then reversed course.",
+  "maceo-parker": "An alto and tenor saxophonist from Kinston, North Carolina who spent years as the cornerstone of James Brown's horn section — the most important horn player in funk. He has led his own band since the early 1970s, playing a hybrid of jazz, soul, and funk that is as much a celebration as a musical argument. He is still touring, still leading bands, and still playing with the same focused intensity he brought to James Brown's stage in 1964.",
+};
+
+// ── Connection biography snippets ───────────────────────────────────────────
+const LINK_BIO = {
+  "miles-davis:john-coltrane": "Coltrane joined Davis's quintet in 1955, relatively unknown outside Philadelphia. Davis fired him in 1957 when the heroin got out of hand, then rehired him once Coltrane had cleaned up, because nobody else played with that kind of ferocity. The recordings they made together — the <em>Cookin'</em>, <em>Relaxin'</em>, <em>Workin'</em> and <em>Steamin'</em> sessions, plus <em>Kind of Blue</em> — are among the most studied in jazz. Their approaches were pointed in opposite directions: Davis stripping everything back, Coltrane piling everything on. Both were right, and the tension between them is audible in every bar they recorded together.",
+  "charlie-parker:dizzy-gillespie": "The two men first crossed paths in Kansas City around 1940 and spent the following years working out bebop together in late-night Harlem jam sessions. Parker could barely read music; Gillespie, formally trained and theoretically fluent, would write out the heads and Parker transformed them in real time. The recordings they made between 1945 and 1950 — <em>Shaw 'Nuff</em>, <em>Ko-Ko</em>, <em>A Night in Tunisia</em> — established a new harmonic and rhythmic language for jazz that is still the basis of how the music is taught today. It was a short, explosive partnership between two men who agreed on almost nothing except the music itself.",
+  "miles-davis:bill-evans": "Evans, a classically trained pianist from New Jersey, joined the sextet in 1958 and stayed eight months. When he left, Davis replaced him with Wynton Kelly — then called Evans back specifically for the <em>Kind of Blue</em> sessions, because Kelly's blues feel wasn't right for the modal pieces Davis was working with. Evans played on six of the seven takes recorded across two March and April afternoons in 1959. The record has sold over five million copies. Davis later said Evans brought a \"European concept of sound\" that was exactly what the music needed — high praise from a man who rarely gave it.",
+
+  "duke-ellington:billy-strayhorn": "Strayhorn arrived in Ellington's life in 1938, aged 23, having taken a train from Pittsburgh to New York to play him a song he had written called \"Lush Life.\" Within weeks he was finishing Ellington's sentences musically — arranging, composing, conducting, and eventually co-writing so seamlessly that neither man could always say who had written what. Their collaboration produced \"Take the A Train,\" <em>Such Sweet Thunder</em>, <em>Far East Suite</em>, and much of what is considered Ellington's finest work. Strayhorn died of oesophageal cancer in 1967; Ellington recorded his grief in the <em>And His Mother Called Him Bill</em> sessions two months later — some of the most plainly emotional music he ever made.",
+
+  "duke-ellington:johnny-hodges": "Hodges joined the Ellington Orchestra in 1928, age 22, fresh from Boston and already a pupil of Sidney Bechet. He left once — briefly, between 1951 and 1955, to lead his own small group — and otherwise stayed 42 years, until his death at the keyboard during a break at a recording session in 1970. His alto saxophone sound was the emotional core of the Ellington band: liquid, sensuous, incapable of being mistaken for anyone else. Ellington built entire pieces around the sound of Hodges playing a long, unhurried melody, most fully realised on <em>Ellington Indigos</em>. When Hodges died, Ellington said simply: \"He was the most unique man in our band and in this business.\"",
+
+  "count-basie:jo-jones": "Jones joined Basie's orchestra in Kansas City in 1936 and spent twelve years there, quietly transforming the role of the jazz drummer in the process. Before Jones, the bass drum kept time; he moved the pulse to the hi-hat cymbal, lightening the rhythm section and making the whole band breathe differently. The effect was immediate and then permanent — every drummer since has worked in the space Jones opened. He is documented on Basie's early Decca and Columbia recordings and at the 1938 Carnegie Hall concert. Lester Young called him the best drummer in jazz; Young was generally right.",
+
+  "thelonious-monk:john-coltrane": "Coltrane joined Monk's quartet for a residency at the Five Spot Café in lower Manhattan in the summer of 1957 — six months spent between stints with Miles Davis, studying intensively. Monk's music was unlike anything else: the harmonic structures were strange, the rhythms deliberately angular, and he expected his sidemen to work the material out for themselves rather than be taught it. Coltrane later said those months were \"my years of learning.\" A live recording from Carnegie Hall that November went undiscovered until 2005; when it finally appeared, it confirmed what everyone who had been at the Five Spot already knew. It is extraordinary.",
+
+  "miles-davis:paul-chambers": "Chambers, a 19-year-old bassist from Pittsburgh, joined Davis's quintet in 1955 as one of its youngest members and stayed eight years — longer than anyone else. He played on the Prestige marathon sessions, <em>Kind of Blue</em>, <em>Milestones</em>, and <em>Someday My Prince Will Come</em>. His intonation was flawless, his time unwavering, and his arco playing — the bowed bass solo on \"So What\" — became one of the most recognizable sounds in the music. Chambers died of tuberculosis in 1969, age 33, having appeared on more Miles Davis records than any other musician.",
+
+  "miles-davis:herbie-hancock": "Hancock was 23 when Davis hired him in 1963, straight off his own debut <em>Takin' Off</em> for Blue Note. In the Second Great Quintet, Davis gave his musicians freedom to respond, reshape, and actively complicate what he was playing — a method Hancock called \"playing without a net.\" <em>E.S.P.</em>, <em>Miles Smiles</em>, and <em>Filles de Kilimanjaro</em> document this creative pressure at its peak. Hancock has described a moment in a 1965 concert where he played a wrong chord and Davis turned it into something new — a story that has become part of how musicians talk about the nature of improvisation.",
+
+  "miles-davis:wayne-shorter": "Shorter had spent five years writing compositions for Art Blakey's Jazz Messengers when Davis called him in 1964. His music gave the Second Great Quintet its character: \"E.S.P.,\" \"Footprints,\" \"Nefertiti,\" \"Pinocchio,\" \"Fall\" — pieces that were lyrical and abstract at once, that resisted resolution the way few jazz compositions had before them. Davis rarely explained his choices directly if he could make them through the music he played, and choosing Shorter's compositions was the clearest artistic statement he ever made. The four years of studio recordings from <em>E.S.P.</em> to <em>Filles de Kilimanjaro</em> remain one of the most consistently exploratory runs in the music's history.",
+
+  "miles-davis:tony-williams": "Williams was 17 when Davis hired him in 1963, recommended by Jackie McLean, already unlike any drummer jazz had produced. He was polyrhythmic, physically overwhelming, and willing to play through a soloist rather than under them — treating the drumkit as an equal voice rather than a timekeeper. Davis later said Williams was the most important musical relationship of his 1960s. They recorded the Second Great Quintet sessions and then the first electric records — <em>In a Silent Way</em>, <em>Bitches Brew</em> — before Williams left to form Lifetime in 1969. Davis, characteristically, described him only obliquely: \"the centre of everything.\"",
+
+  "miles-davis:ron-carter": "Carter joined Davis's group in 1963, classically trained at Eastman, forming three-quarters of what became the Second Great Quintet. He brought structural precision to a band that was actively trying to dissolve structure, and his counterpoint with Tony Williams — the bass and drums working almost conversationally — defined the bottom end of the Quintet's sound. Carter stayed five years, recorded every studio album of the period, and left before the electric turn. He has never stopped working, and holds the record as the most-recorded bassist in jazz history.",
+
+  "john-coltrane:mccoy-tyner": "Tyner, a 22-year-old from Philadelphia, joined Coltrane's quartet in 1960 having already played briefly alongside him in a local group. His approach to the piano — dense left-hand voicings built on fourths, a percussive physicality that matched Elvin Jones — gave Coltrane the harmonic platform to extend his solos into the \"sheets of sound\" that defined the Classic Quartet. <em>A Love Supreme</em>, <em>Crescent</em>, <em>Impressions</em>: the great quartet recordings are built on Tyner's playing. He left in 1965 when Coltrane's music moved beyond tonality in ways Tyner couldn't follow. What they built in five years remained the high-water mark for both of them.",
+
+  "john-coltrane:elvin-jones": "Jones came from Pontiac, Michigan — the youngest of three musical brothers — and joined Coltrane in 1960 having already played with Sonny Rollins, Miles Davis, and others. His drumming was polyrhythmic in a way jazz had not previously heard: he could sustain three independent rhythms simultaneously, all derived from African musical structures, without losing the pulse. Coltrane's long solos only became possible because Jones could hold that density indefinitely. They recorded <em>A Love Supreme</em> in a single evening in December 1964. Jones said he never found another musician who could push him so far for so long.",
+
+  "john-coltrane:jimmy-garrison": "Garrison replaced Steve Davis in the quartet in 1961, having played with Ornette Coleman and Kenny Dorham. He stayed until Coltrane's death in 1967 — the longest-serving member of the Classic Quartet — and was its most unconventional voice. He used the bass as an equal partner rather than a timekeeper, bowing and plucking simultaneously, initiating melodic lines of his own while Coltrane was mid-phrase. His opening bass statement on \"A Love Supreme, Pt. IV: Psalm\" is one of the most widely recognised passages the quartet ever recorded.",
+
+  "ornette-coleman:don-cherry": "Cherry was playing in a Los Angeles rehearsal band in the late 1950s when Coleman's music found him, and the two quickly became the front line of what free jazz's first documents would sound like. Cherry played a small pocket trumpet with an unconventional technique; Coleman's compositions had no harmonic centre; and together they created music that dispensed with chord changes entirely. <em>Something Else!!!!</em>, <em>The Shape of Jazz to Come</em>, and <em>Change of the Century</em> — all recorded in 1958 and 1959 — announced a new possibility for improvisation. Cherry later said Coleman simply trusted him to hear, and that trust changed how he understood music for the rest of his life.",
+
+  "ornette-coleman:charlie-haden": "Haden grew up in a country music family in Missouri and came to jazz sideways, arriving in Los Angeles in the mid-1950s. He met Coleman at a gig and found himself immediately inside the music, abandoning the bass's traditional role as timekeeper in favour of something closer to melodic counterpoint. Their partnership produced the core free jazz canon — <em>The Shape of Jazz to Come</em>, <em>Change of the Century</em>, <em>Free Jazz</em> — and continued on and off for decades, including the Liberation Music Orchestra recordings Haden organised in 1969. Coleman said Haden was one of the only bassists who truly understood what he was doing without needing it explained.",
+
+  "charles-mingus:dannie-richmond": "Richmond was a tenor saxophonist on a touring rock and roll circuit when Mingus heard him in 1956 and persuaded him to switch to drums. He had never played drums professionally. Mingus spent months personally teaching him the instrument, shaping Richmond's technique around his own musical requirements — and in the process created one of the most symbiotic bass-and-drums partnerships in jazz. They worked together, with a few interruptions, for 25 years, until Mingus's death in 1979. <em>Mingus Ah Um</em>, <em>The Black Saint and the Sinner Lady</em>, <em>Mingus Mingus Mingus Mingus Mingus</em>: the records Mingus is best known for all have Richmond at their centre. Mingus said Richmond knew what he was going to play before he played it.",
+
+  "bill-evans:scott-lafaro": "LaFaro, a bassist from Geneva, New York, joined Evans's trio in 1959, age 23, and played with him for barely two years before his death in a car accident in July 1961. In that time the two of them — along with drummer Paul Motian — reinvented the relationship between piano and bass in a jazz trio. Rather than accompanying the piano, LaFaro's bass responded to it, argued with it, initiated its own melodic lines while Evans was doing the same. The live recordings made at the Village Vanguard in June 1961, issued as <em>Waltz for Debby</em> and <em>Sunday at the Village Vanguard</em>, were captured eleven days before LaFaro died. Evans barely spoke about it publicly for years.",
+
+  "dave-brubeck:paul-desmond": "Desmond had an ironic, melancholy tone that was unlike anything else in jazz — he once said he wanted to sound like a dry martini. He and Brubeck met at San Francisco State College in 1946 and worked together, with some breaks, for more than 20 years. The Brubeck Quartet was one of the most commercially successful groups in jazz history, and their 1959 album <em>Time Out</em> was the first jazz album to sell a million copies. \"Take Five,\" composed by Desmond in 5/4 time, remains one of the most-played jazz recordings ever made. When Brubeck disbanded the original quartet in 1967, Desmond said he felt he had lost his musical voice.",
+
+  "clifford-brown:max-roach": "Brown and Roach formed their co-led quintet in 1954, pooling two of the most consequential instrumentalists of the post-bop era. Brown was 23, already acknowledged as the finest trumpet voice of his generation; Roach had spent years at the centre of bebop recording with Parker and Gillespie. Their quintet made a music that was technically demanding but emotionally transparent — hard bop at its most luminous. <em>Clifford Brown and Max Roach at Basin Street</em> and <em>Study in Brown</em> are among the most celebrated recordings of the 1950s. Brown was killed in a car accident on the Pennsylvania Turnpike in June 1956, age 25. In Roach's own estimation, the quintet was the most important group he was ever part of.",
+
+  "joe-zawinul:wayne-shorter": "Zawinul and Shorter had both played in Miles Davis's electric period when they co-founded Weather Report in New York in 1970. Their working partnership lasted 15 years — through multiple rhythm sections, production styles, and commercial phases. Zawinul composed most of the band's material and controlled its direction; Shorter played over it, through it, and sometimes against it. <em>Heavy Weather</em> in 1977 made them briefly famous outside jazz; <em>Mysterious Traveller</em> and <em>Sweetnighter</em> are what the serious listeners kept returning to. They were temperamentally opposed in almost every way, and the friction produced 15 years of music that neither could have made alone.",
+
+  "art-blakey:wayne-shorter": "Shorter arrived in the Jazz Messengers in 1959, age 26, recently discharged from the Army, and stayed five years — the longest tenure of any Messengers frontman. He spent that time writing original compositions for the band: \"Lester Left Town,\" \"United,\" \"Children of the Night,\" \"Infant Eyes\" — pieces that were more harmonically sophisticated than anything the Messengers had previously played. Blakey ran the group as a finishing school for young talent, and Shorter thrived in that pressure, developing the compositional voice that Miles Davis would later call the best in jazz. By the time Davis called in 1964, Shorter had already written half the repertoire the Second Great Quintet would make its own.",
+};
+
 const VIDEO_LINKS = {
   "miles-davis": "https://www.youtube.com/watch?v=nfroW6KaXXc",
   "charlie-parker": "https://www.youtube.com/watch?v=q6_kbDGIBdc",
@@ -2499,6 +3082,7 @@ window.addEventListener("resize", () => {
   document.documentElement.style.setProperty("--header-h", `${getHeaderHeight()}px`);
   if (!isMobileSheet()) collapseMobileSheet();
   syncBrandWidths();
+  updateEraHeaderLayout();
 });
 
 const W = window.innerWidth;
@@ -2507,6 +3091,23 @@ const H = window.innerHeight - getHeaderHeight();
 const svg = d3.select("#graph").attr("viewBox", [0, 0, W, H]);
 const g   = svg.append("g");
 const defs = svg.append("defs");
+
+[
+  ["early",  "#f0be63", "#e8952a", "#9a5e14"],
+  ["bebop",  "#79b3f2", "#4a90e0", "#245b96"],
+  ["modal",  "#be88f0", "#9b60d8", "#5f3292"],
+  ["fusion", "#66d59a", "#38b870", "#1d7a49"],
+].forEach(([era, light, base, dark]) => {
+  const grad = defs.append("radialGradient")
+    .attr("id", `node-glass-${era}`)
+    .attr("cx", "24%")
+    .attr("cy", "22%")
+    .attr("r", "92%");
+  grad.append("stop").attr("offset", "0%").attr("stop-color", light).attr("stop-opacity", 0.98);
+  grad.append("stop").attr("offset", "28%").attr("stop-color", base).attr("stop-opacity", 0.96);
+  grad.append("stop").attr("offset", "72%").attr("stop-color", base).attr("stop-opacity", 0.92);
+  grad.append("stop").attr("offset", "100%").attr("stop-color", dark).attr("stop-opacity", 0.9);
+});
 
 let activeInstr = "all";
 const gradientSet = new Set(); // indices of links currently using gradient strokes
@@ -2539,6 +3140,24 @@ function setOrUpdateGradient(idx, x1,y1,x2,y2, c0,op0, c1,op1) {
   lg.select("stop:last-child").attr("stop-color",c1).attr("stop-opacity",op1);
 }
 
+function setOrUpdateEraGradient(idx, x1,y1,x2,y2, c0, c1) {
+  let lg = defs.select("#leg"+idx);
+  if (lg.empty()) {
+    lg = defs.append("linearGradient").attr("id","leg"+idx).attr("gradientUnits","userSpaceOnUse");
+    lg.append("stop").attr("offset","0%");
+    lg.append("stop").attr("offset","100%");
+  }
+  lg.attr("x1",x1).attr("y1",y1).attr("x2",x2).attr("y2",y2);
+  lg.select("stop:first-child").attr("stop-color", c0).attr("stop-opacity", 1);
+  lg.select("stop:last-child").attr("stop-color", c1).attr("stop-opacity", 1);
+}
+
+function linkBaseStroke(l, i) {
+  const srcColor = ERA_COLOR[l.source.era] || "#8888aa";
+  const tgtColor = ERA_COLOR[l.target.era] || srcColor;
+  return l.source.era !== l.target.era ? `url(#leg${i})` : srcColor;
+}
+
 let currentTransform = d3.zoomIdentity;
 const zoomBehavior = d3.zoom()
   .extent([[0,0],[W,H]]).scaleExtent([0.12, 8])
@@ -2566,15 +3185,46 @@ svg.on("click", () => {
   }
 });
 
-// Era column headers
-Object.entries(ERA_X).forEach(([era, x]) => {
-  g.append("text")
-    .attr("x", W*x).attr("y", 18)
-    .attr("text-anchor","middle")
-    .attr("fill", ERA_COLOR[era]).attr("opacity", 0.25)
-    .attr("font-size", 10).attr("letter-spacing", 2).attr("font-family","Georgia")
-    .text(ERA_LABEL[era].toUpperCase());
-});
+function updateEraHeaderLayout() {
+  const narrow = window.innerWidth <= 640;
+  const veryNarrow = window.innerWidth <= 420;
+  const positions = narrow
+    ? { early:0.08, bebop:0.34, modal:0.66, fusion:0.92 }
+    : ERA_X;
+  const yPositions = narrow
+    ? { early:18, bebop:36, modal:18, fusion:36 }
+    : { early:18, bebop:18, modal:18, fusion:18 };
+  const fontSize = veryNarrow ? 7.6 : narrow ? 8.3 : 10;
+  const letterSpacing = veryNarrow ? 1.0 : narrow ? 1.35 : 2;
+
+  eraLabelSel.each(function({ era }) {
+    const label = d3.select(this);
+    const lines = narrow ? ERA_HEADER_LINES[era] : [ERA_LABEL[era].toUpperCase()];
+    const x = W * positions[era];
+    label
+      .attr("x", x)
+      .attr("y", yPositions[era])
+      .attr("font-size", fontSize)
+      .attr("letter-spacing", letterSpacing);
+    label.selectAll("tspan")
+      .data(lines)
+      .join("tspan")
+      .attr("x", x)
+      .attr("dy", (d, i) => (i === 0 ? 0 : "1.02em"))
+      .text(d => d);
+  });
+}
+
+const eraLabelSel = g.append("g")
+  .selectAll("text")
+  .data(Object.keys(ERA_X).map(era => ({ era })))
+  .join("text")
+  .attr("text-anchor","middle")
+  .attr("fill", d => ERA_COLOR[d.era])
+  .attr("opacity", 0.25)
+  .attr("font-family","Georgia");
+
+updateEraHeaderLayout();
 
 // Era dividers
 [0.245, 0.49, 0.73].forEach(x => {
@@ -2590,13 +3240,26 @@ const linkSel = g.append("g")
   .data(graphLinks)
   .join("line")
   .attr("class","link")
-  .attr("stroke", l => {
+  .attr("stroke", (l, i) => {
     const srcEra = nodeMap[l.source]?.era || nodeMap[l.source?.id]?.era;
+    const tgtEra = nodeMap[l.target]?.era || nodeMap[l.target?.id]?.era || srcEra;
+    if (srcEra && tgtEra && srcEra !== tgtEra) {
+      setOrUpdateEraGradient(i, 0, 0, 0, 0, ERA_COLOR[srcEra], ERA_COLOR[tgtEra]);
+      return `url(#leg${i})`;
+    }
     return ERA_COLOR[srcEra] || "#8888aa";
   })
   .attr("stroke-width", l => wWidth(l.weight))
   .attr("stroke-linecap", "round")
   .attr("stroke-opacity", 0);  // revealed after intro fades
+
+const linkGlassSel = g.append("g")
+  .selectAll("line")
+  .data(graphLinks)
+  .join("line")
+  .attr("class", "link-glass")
+  .attr("stroke-width", l => Math.max(0.7, wWidth(l.weight) * 0.26))
+  .attr("stroke-opacity", 0);
 
 // Invisible wide hit-targets so thin links are easy to click
 const linkHitSel = g.append("g")
@@ -2628,11 +3291,11 @@ const nodeSel = g.append("g")
 
 nodeSel.append("circle")
   .attr("r", 0)  // animated to full size after intro
-  .attr("fill", d => ERA_COLOR[d.era])
-  .attr("fill-opacity", 0.82)
+  .attr("fill", d => `url(#node-glass-${d.era})`)
+  .attr("fill-opacity", 0.98)
   .attr("stroke", d => ERA_COLOR[d.era])
-  .attr("stroke-width", 1.8)
-  .attr("stroke-opacity", 0.90);
+  .attr("stroke-width", 1.7)
+  .attr("stroke-opacity", 0.88);
 
 nodeSel.append("text")
   .attr("dy", d => rScale(degree[d.id]) + 11)
@@ -2662,6 +3325,14 @@ sim.on("tick", () => {
   linkSel
     .attr("x1", d=>d.source.x).attr("y1", d=>d.source.y)
     .attr("x2", d=>d.target.x).attr("y2", d=>d.target.y);
+  linkGlassSel
+    .attr("x1", d=>d.source.x).attr("y1", d=>d.source.y)
+    .attr("x2", d=>d.target.x).attr("y2", d=>d.target.y);
+  linkSel.each(function(l, i) {
+    if (l.source.era !== l.target.era) {
+      setOrUpdateEraGradient(i, l.source.x, l.source.y, l.target.x, l.target.y, ERA_COLOR[l.source.era], ERA_COLOR[l.target.era]);
+    }
+  });
   linkHitSel
     .attr("x1", d=>d.source.x).attr("y1", d=>d.source.y)
     .attr("x2", d=>d.target.x).attr("y2", d=>d.target.y);
@@ -2739,21 +3410,43 @@ function isMobileSheet() {
 function collapseMobileSheet() {
   if (!isMobileSheet()) return;
   sidebarEl.classList.remove("expanded");
+  // Reset scroll so the peek state always shows the top of the panel
+  lastSidebarScrollTop = 0;
+  sidebarScrollEl.scrollTop = 0;
 }
 
 function expandMobileSheet() {
   if (!isMobileSheet()) return;
+  // Only expand if there's substantially more content than the current collapsed view.
+  // Short-content artists/connections have nothing to scroll back up to 0,
+  // so they'd get stuck in the expanded state.
+  if (sidebarScrollEl.scrollHeight <= sidebarScrollEl.clientHeight + 80) return;
   sidebarEl.classList.add("expanded");
-  suppressAutoCollapseUntil = Date.now() + 250;
+  suppressAutoCollapseUntil = Date.now() + 500;
 }
 
 function resetMobileSheet() {
   if (!isMobileSheet()) return;
-  sidebarScrollEl.scrollTop = 0;
-  lastSidebarScrollTop = 0;
   sidebarEl.classList.remove("dragging");
   sidebarEl.style.transform = "";
-  collapseMobileSheet();
+  collapseMobileSheet(); // also resets scrollTop + lastSidebarScrollTop
+}
+
+function isPlayerVisible() {
+  const bar = document.getElementById("sp-bar");
+  return !!bar && bar.classList.contains("sp-visible");
+}
+
+function maybeOpenAutoAlbum(albums) {
+  if (isPlayerVisible()) return;
+  const playableAlbums = (albums || []).filter(album =>
+    typeof window.canPlayAlbum === "function" ? window.canPlayAlbum(album) : true
+  );
+  if (!playableAlbums.length) return;
+  const chosenAlbum = shuffle(playableAlbums)[0];
+  if (chosenAlbum) {
+    setTimeout(() => window.onAlbumClick(chosenAlbum), 120);
+  }
 }
 
 function getTrailEdgeIds() {
@@ -2789,7 +3482,7 @@ function updateTrailBar() {
 
   if (!count) {
     trailSummaryEl.textContent = "Choose your starting artist.";
-    trailSubEl.textContent = "Build a chain of 4 connected artists to reveal 3 connection albums.";
+    trailSubEl.textContent = "Build a trail of 4 connected artists to create a playlist.";
     return;
   }
 
@@ -2798,7 +3491,7 @@ function updateTrailBar() {
     .join(" <span style=\"color:#55557a\">→</span> ");
 
   if (complete) {
-    trailSubEl.textContent = "Trail complete. Reveal the three albums that sit on these connection lines.";
+    trailSubEl.textContent = "Create a playlist of the sounds that connect these artists.";
   } else {
     trailSubEl.textContent = `Step ${count} of ${TRAIL_MAX_ARTISTS}. Choose an artist directly connected to ${names[names.length - 1]}.`;
   }
@@ -2857,6 +3550,44 @@ function applyTrailHighlight() {
         (srcId === activeId && eligibleIds.has(tgtId)) ||
         (tgtId === activeId && eligibleIds.has(srcId))
       );
+    });
+
+  linkGlassSel
+    .classed("dimmed", l => {
+      if (!trailPath.length) return true;
+      const key = edgeKey(l.source.id, l.target.id);
+      if (edgeIds.has(key)) return false;
+      if (!activeId) return true;
+      const srcId = l.source.id;
+      const tgtId = l.target.id;
+      return !(
+        (srcId === activeId && eligibleIds.has(tgtId)) ||
+        (tgtId === activeId && eligibleIds.has(srcId))
+      );
+    })
+    .classed("lit", l => {
+      if (!activeId || !eligibleIds.size) return false;
+      const srcId = l.source.id;
+      const tgtId = l.target.id;
+      return (
+        (srcId === activeId && eligibleIds.has(tgtId)) ||
+        (tgtId === activeId && eligibleIds.has(srcId))
+      );
+    })
+    .classed("active-link", l => edgeIds.has(edgeKey(l.source.id, l.target.id)))
+    .attr("stroke-width", l => edgeIds.has(edgeKey(l.source.id, l.target.id))
+      ? Math.max(1.2, wWidth(l.weight) * 0.32)
+      : Math.max(0.7, wWidth(l.weight) * 0.26))
+    .attr("stroke-opacity", l => {
+      const key = edgeKey(l.source.id, l.target.id);
+      if (edgeIds.has(key)) return 0.3;
+      if (!activeId) return 0;
+      const srcId = l.source.id;
+      const tgtId = l.target.id;
+      const eligible =
+        (srcId === activeId && eligibleIds.has(tgtId)) ||
+        (tgtId === activeId && eligibleIds.has(srcId));
+      return eligible ? 0.22 : 0;
     });
 }
 
@@ -2934,7 +3665,7 @@ function onSelect(e, d) {
   if (activeNode === d.id) { resetHighlight(); closeSidebar(); return; }
   activeNode = d.id;
 
-  // Kick on the clicked node
+  // Kick on the clicked node — gentle nudge so it feels alive
   const kickAngle = Math.random() * 2 * Math.PI;
   const kickSpeed = 4.5 + Math.random() * 4.0;
   d.vx = (d.vx || 0) + Math.cos(kickAngle) * kickSpeed;
@@ -2951,10 +3682,16 @@ function onSelect(e, d) {
     linkSel
       .classed("dimmed", l => l.source.id !== d.id && l.target.id !== d.id)
       .classed("lit",    l => l.source.id === d.id || l.target.id === d.id);
+    linkGlassSel
+      .classed("dimmed", l => l.source.id !== d.id && l.target.id !== d.id)
+      .classed("lit",    l => l.source.id === d.id || l.target.id === d.id)
+      .classed("active-link", false)
+      .attr("stroke-opacity", l => (l.source.id === d.id || l.target.id === d.id) ? 0.24 : 0);
   });
 
   populateSidebar(d);
   zoomToNode(d);
+  maybeOpenAutoAlbum(NODE_ALBUMS[d.id] || []);
 }
 
 function zoomToNode(d) {
@@ -2996,6 +3733,9 @@ function resetHighlight() {
   linkSel.classed("dimmed", false).classed("lit", false).classed("active-link", false)
     .attr("stroke-width", l => wWidth(l.weight))
     .attr("stroke-opacity", l => wOpacity(l.weight));
+  linkGlassSel.classed("dimmed", false).classed("lit", false).classed("active-link", false)
+    .attr("stroke-width", l => Math.max(0.7, wWidth(l.weight) * 0.26))
+    .attr("stroke-opacity", l => Math.max(0.05, wOpacity(l.weight) * 0.18));
   applyFilters();
   if (trailMode) applyTrailHighlight();
 }
@@ -3010,6 +3750,7 @@ function populateSidebar(d) {
     const el = document.getElementById(id);
     if (el) el.style.display = "";
   });
+  document.getElementById("sb-link-bio").style.display = "none";
   document.getElementById("sb-name").textContent  = d.name;
 
   const nickEl = document.getElementById("sb-nickname");
@@ -3037,6 +3778,12 @@ function populateSidebar(d) {
     videoBtn.style.display = "none";
   }
 
+  // ── Artist bio ─────────────────────────────────────────────────────────────
+  const bioEl = document.getElementById("sb-bio");
+  const bio = NODE_BIO[d.id];
+  if (bio) { bioEl.innerHTML = bio; bioEl.style.display = "block"; }
+  else { bioEl.style.display = "none"; }
+
   // ── Essential albums for this artist ───────────────────────────────────────
   const essHead  = document.getElementById("sb-essential-head");
   const essList  = document.getElementById("sb-essential-albums");
@@ -3058,19 +3805,8 @@ function populateSidebar(d) {
       essList.appendChild(li);
 
       // Fetch album art from iTunes — score results by how many album-title words match
-      const raw = title.replace(/\s*\(\d{4}\).*$/, "").trim();
-      const q   = encodeURIComponent(`${raw} ${d.name}`);
-      fetch(`https://itunes.apple.com/search?term=${q}&entity=album&limit=8`)
-        .then(r => r.json())
-        .then(data => {
-          const results = data.results || [];
-          const titleWords = raw.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-          const scored = results.map(r => {
-            const cn = (r.collectionName || "").toLowerCase();
-            const score = titleWords.filter(w => cn.includes(w)).length;
-            return { r, score };
-          }).sort((a, b) => b.score - a.score);
-          const best = scored[0]?.r;
+      findBestAlbumResult(title, [d.name])
+        .then(best => {
           if (best && best.artworkUrl100) {
             img.src = best.artworkUrl100.replace("100x100", "300x300");
             img.onload  = () => { img.style.opacity = "1"; };
@@ -3126,7 +3862,7 @@ function populateLinkSidebar(l) {
   const src = l.source, tgt = l.target;
   // Hide node-mode elements
   ["sb-name","sb-nickname","sb-instr","sb-years","sb-era-tag","sb-count","sb-links",
-   "sb-essential-head","sb-essential-albums","sb-heading","sb-list"].forEach(id => {
+   "sb-essential-head","sb-essential-albums","sb-heading","sb-list","sb-bio"].forEach(id => {
     const el = document.getElementById(id); if (el) el.style.display = "none";
   });
 
@@ -3145,6 +3881,13 @@ function populateLinkSidebar(l) {
   document.getElementById("sb-link-strength").innerHTML =
     `<span style="color:${ERA_COLOR[src.era]}99">${weightDots(l.weight)}</span>` +
     ` <span style="color:#8888b8;font-size:12px">${weightLabel(l.weight)}</span>`;
+
+  // ── Connection bio ─────────────────────────────────────────────────────────
+  const linkBioEl = document.getElementById("sb-link-bio");
+  const lkey1 = `${src.id}:${tgt.id}`, lkey2 = `${tgt.id}:${src.id}`;
+  const linkBio = LINK_BIO[lkey1] || LINK_BIO[lkey2];
+  if (linkBio) { linkBioEl.innerHTML = linkBio; linkBioEl.style.display = "block"; }
+  else { linkBioEl.style.display = "none"; }
 
   // Albums lookup — try both directions
   const key1 = `${src.id}:${tgt.id}`, key2 = `${tgt.id}:${src.id}`;
@@ -3178,19 +3921,8 @@ function populateLinkSidebar(l) {
       albumsList.appendChild(li);
 
       // Fetch artwork from iTunes — score results by word overlap with album title
-      const rawTitle = a.replace(/\s*\(\d{4}\).*$/, "").trim();
-      const query = encodeURIComponent(`${rawTitle} ${src.name}`);
-      fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=8`)
-        .then(r => r.json())
-        .then(data => {
-          const results = data.results || [];
-          const titleWords = rawTitle.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-          const scored = results.map(r => {
-            const cn = (r.collectionName || "").toLowerCase();
-            const score = titleWords.filter(w => cn.includes(w)).length;
-            return { r, score };
-          }).sort((a, b) => b.score - a.score);
-          const best = scored[0]?.r;
+      findBestAlbumResult(a, [src.name, tgt.name])
+        .then(best => {
           if (best && best.artworkUrl100) {
             img.src = best.artworkUrl100.replace("100x100", "300x300");
             img.onload  = () => { img.style.opacity = "1"; };
@@ -3331,11 +4063,14 @@ sidebarScrollEl.addEventListener("scroll", () => {
   const currentScrollTop = sidebarScrollEl.scrollTop;
   const scrollingDown = currentScrollTop > lastSidebarScrollTop; // finger swiped up = content scrolls up = scrollTop increases
 
-  // Swiping up (scrollTop increases) on a collapsed panel → expand it immediately
+  // Scrolling into content on a collapsed panel → expand to full height
   if (!sidebarEl.classList.contains("expanded") && scrollingDown && currentScrollTop > 6) {
     expandMobileSheet();
   }
-  // Scrolled back to top while expanded → touch handlers handle collapse, scroll just resets
+  // Scrolled all the way back to top while expanded → collapse to peek state
+  if (sidebarEl.classList.contains("expanded") && currentScrollTop === 0 && lastSidebarScrollTop > 0 && Date.now() > suppressAutoCollapseUntil) {
+    collapseMobileSheet();
+  }
   lastSidebarScrollTop = currentScrollTop;
 }, { passive: true });
 
@@ -3390,23 +4125,37 @@ function applyFilters() {
   linkSel.each(function(l, i) {
     const srcVis = vis.has(l.source.id);
     const tgtVis = vis.has(l.target.id);
-    const col    = ERA_COLOR[l.source.era] || "#8888aa";
+    const srcCol = ERA_COLOR[l.source.era] || "#8888aa";
+    const tgtCol = ERA_COLOR[l.target.era] || srcCol;
     const wo     = wOpacity(l.weight);
     const wOk    = l.weight >= minWeight; // strength filter
 
     if (!wOk) {
       // Below minimum strength — always hide
       d3.select(this).attr("stroke","#111122").attr("stroke-opacity",0.015).classed("dimmed",true);
+      d3.select(linkGlassSel.nodes()[i]).attr("stroke-opacity", 0).classed("dimmed", true).classed("lit", false).classed("active-link", false);
     } else if (srcVis && tgtVis) {
-      d3.select(this).attr("stroke", col).attr("stroke-width", wWidth(l.weight)).attr("stroke-opacity", wo).classed("dimmed",false);
+      d3.select(this)
+        .attr("stroke", l.source.era !== l.target.era ? `url(#leg${i})` : srcCol)
+        .attr("stroke-width", wWidth(l.weight))
+        .attr("stroke-opacity", wo)
+        .classed("dimmed",false);
+      d3.select(linkGlassSel.nodes()[i])
+        .attr("stroke-width", Math.max(0.7, wWidth(l.weight) * 0.26))
+        .attr("stroke-opacity", Math.max(0.05, wo * 0.18))
+        .classed("dimmed", false)
+        .classed("lit", false)
+        .classed("active-link", false);
     } else if (!srcVis && !tgtVis) {
       d3.select(this).attr("stroke","#111122").attr("stroke-opacity",0.015).classed("dimmed",true);
+      d3.select(linkGlassSel.nodes()[i]).attr("stroke-opacity", 0).classed("dimmed", true).classed("lit", false).classed("active-link", false);
     } else {
       // One visible, one dimmed → gradient fade
       gradientSet.add(i);
-      const [c0,op0,c1,op1] = srcVis ? [col,wo,col,0] : [col,0,col,wo];
+      const [c0,op0,c1,op1] = srcVis ? [srcCol,wo,tgtCol,0] : [srcCol,0,tgtCol,wo];
       setOrUpdateGradient(i, l.source.x,l.source.y, l.target.x,l.target.y, c0,op0,c1,op1);
       d3.select(this).attr("stroke","url(#lg"+i+")").attr("stroke-opacity",1).classed("dimmed",false);
+      d3.select(linkGlassSel.nodes()[i]).attr("stroke-opacity", 0).classed("dimmed", true).classed("lit", false).classed("active-link", false);
     }
   });
 
@@ -3433,8 +4182,12 @@ function onLinkClick(e, l) {
   nodeSel.classed("selected", false);
   linkSel.classed("dimmed", ll => ll !== l).classed("lit", ll => ll === l)
          .classed("active-link", ll => ll === l); // glow on just this one link
+  linkGlassSel.classed("dimmed", ll => ll !== l).classed("lit", ll => ll === l)
+         .classed("active-link", ll => ll === l)
+         .attr("stroke-opacity", ll => ll === l ? 0.34 : 0);
   populateLinkSidebar(l);
   zoomToLink(l);
+  maybeOpenAutoAlbum(LINK_ALBUMS[`${l.source.id}:${l.target.id}`] || LINK_ALBUMS[`${l.target.id}:${l.source.id}`] || []);
 }
 
 linkHitSel
@@ -3631,22 +4384,49 @@ function shuffle(list) {
   return arr;
 }
 
+async function findBestAlbumResult(albumTitle, artistNames = []) {
+  const cleanTitle = albumTitle.replace(/\s*\(\d{4}(?:[-–]\d{2})?\)\s*$/, "").trim();
+  const titleWords = cleanTitle.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  const artistWords = artistNames.map(name => name.toLowerCase());
+  const queries = [
+    `${cleanTitle} ${artistNames[0] || ""}`.trim(),
+    `${cleanTitle} ${artistNames[1] || ""}`.trim(),
+    `${cleanTitle} ${artistNames.join(" ")}`.trim(),
+    cleanTitle,
+  ].filter(Boolean);
+
+  let best = null;
+
+  for (const queryText of queries) {
+    const query = encodeURIComponent(queryText);
+    const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=8`);
+    const data = await res.json();
+    const results = data.results || [];
+
+    const scored = results.map(result => {
+      const collectionName = (result.collectionName || "").toLowerCase();
+      const artistName = (result.artistName || "").toLowerCase();
+      const titleScore = titleWords.filter(w => collectionName.includes(w)).length;
+      const artistScore = artistWords.filter(w => artistName.includes(w)).length;
+      const exactBoost = collectionName === cleanTitle.toLowerCase() ? 3 : 0;
+      const artBoost = result.artworkUrl100 ? 2.5 : 0;
+      return {
+        result,
+        score: titleScore * 3 + artistScore * 2 + exactBoost + artBoost,
+      };
+    }).sort((a, b) => b.score - a.score);
+
+    if (scored[0] && (!best || scored[0].score > best.score)) {
+      best = scored[0];
+    }
+  }
+
+  return best?.result || null;
+}
+
 async function fetchAlbumMatch(albumTitle, artistNames) {
   const cleanTitle = albumTitle.replace(/\s*\(\d{4}(?:[-–]\d{2})?\)\s*$/, "").trim();
-  const query = encodeURIComponent(`${cleanTitle} ${artistNames.join(" ")}`);
-  const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=6`);
-  const data = await res.json();
-  const titleWords = cleanTitle.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-
-  const bestAlbum = (data.results || [])
-    .map(result => {
-      const name = (result.collectionName || "").toLowerCase();
-      const artist = (result.artistName || "").toLowerCase();
-      const titleScore = titleWords.filter(w => name.includes(w)).length;
-      const artistScore = artistNames.filter(namePart => artist.includes(namePart.toLowerCase())).length;
-      return { result, score: titleScore * 3 + artistScore };
-    })
-    .sort((a, b) => b.score - a.score)[0]?.result;
+  const bestAlbum = await findBestAlbumResult(albumTitle, artistNames);
 
   return {
     requestedTitle: albumTitle,
@@ -3677,15 +4457,26 @@ async function buildTrailAlbums() {
 
   for (const pair of pairs) {
     const albumChoices = shuffle(pair.albums);
-    const chosenAlbum = albumChoices[0];
-    if (!chosenAlbum) continue;
+    if (!albumChoices.length) continue;
     try {
-      const match = await fetchAlbumMatch(chosenAlbum, [pair.source.name, pair.target.name]);
+      let chosenMatch = null;
+
+      for (const album of albumChoices) {
+        const match = await fetchAlbumMatch(album, [pair.source.name, pair.target.name]);
+        if (!chosenMatch) chosenMatch = match;
+        if (match.artworkUrl) {
+          chosenMatch = match;
+          break;
+        }
+      }
+
+      if (!chosenMatch) continue;
       cards.push({
-        ...match,
+        ...chosenMatch,
         pair,
       });
     } catch (_) {
+      const chosenAlbum = albumChoices[0];
       cards.push({
         requestedTitle: chosenAlbum,
         cleanTitle: chosenAlbum.replace(/\s*\(\d{4}(?:[-–]\d{2})?\)\s*$/, "").trim(),
@@ -3742,7 +4533,11 @@ function renderTrailPlaylist(cards) {
     openBtn.className = "trail-album-open";
     openBtn.type = "button";
     openBtn.textContent = "Open in player";
-    openBtn.addEventListener("click", () => window.onAlbumClick(card.requestedTitle));
+    openBtn.addEventListener("click", () => {
+      // Close the modal first so the player bar (z-index 950) isn't hidden behind the overlay (z-index 970)
+      trailModalEl.classList.remove("open");
+      window.onAlbumClick(card.requestedTitle);
+    });
 
     panel.appendChild(cover);
     panel.appendChild(kicker);
@@ -3763,7 +4558,7 @@ async function openTrailPlaylist() {
     trailModalEl.classList.add("open");
   } finally {
     trailPlaylistBtnEl.disabled = false;
-    trailPlaylistBtnEl.textContent = "Reveal Albums";
+    trailPlaylistBtnEl.textContent = "Create a Playlist";
   }
 }
 
@@ -3772,12 +4567,51 @@ trailBtnEl.addEventListener("click", e => {
   toggleTrailMode();
 });
 
+document.getElementById("random-btn").addEventListener("click", e => {
+  e.stopPropagation();
+  const randomBtn = document.getElementById("random-btn");
+  randomBtn.classList.remove("random-animate");
+  void randomBtn.offsetWidth;
+  randomBtn.classList.add("random-animate");
+  setTimeout(() => randomBtn.classList.remove("random-animate"), 950);
+
+  if (trailMode) exitTrailMode();
+
+  const candidates = graphLinks.filter(link => {
+    const albums = LINK_ALBUMS[`${link.source.id}:${link.target.id}`] || LINK_ALBUMS[`${link.target.id}:${link.source.id}`] || [];
+    return albums.some(album => typeof window.canPlayAlbum === "function" ? window.canPlayAlbum(album) : true);
+  });
+  if (!candidates.length) return;
+
+  const link = candidates[Math.floor(Math.random() * candidates.length)];
+  const albums = LINK_ALBUMS[`${link.source.id}:${link.target.id}`] || LINK_ALBUMS[`${link.target.id}:${link.source.id}`] || [];
+  const playableAlbums = albums.filter(album => typeof window.canPlayAlbum === "function" ? window.canPlayAlbum(album) : true);
+  const chosenAlbum = shuffle(playableAlbums.length ? playableAlbums : albums)[0];
+
+  activeLink = null;
+  onLinkClick({ stopPropagation:()=>{} }, link);
+  if (chosenAlbum) {
+    setTimeout(() => window.onAlbumClick(chosenAlbum), 120);
+  }
+});
+
 trailClearBtnEl.addEventListener("click", () => clearTrail({ keepMode: true }));
 trailPlaylistBtnEl.addEventListener("click", openTrailPlaylist);
 trailModalCloseEl.addEventListener("click", () => trailModalEl.classList.remove("open"));
 trailModalEl.addEventListener("click", e => {
   if (e.target === trailModalEl) trailModalEl.classList.remove("open");
 });
+
+// Coming-soon toast for Spotify playlist export
+(function () {
+  let toastTimer = null;
+  const toast = document.getElementById("coming-soon-toast");
+  document.getElementById("trail-spotify-btn").addEventListener("click", () => {
+    clearTimeout(toastTimer);
+    toast.classList.add("show");
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
+  });
+})();
 
 // Feedback
 document.getElementById("feedback-btn").addEventListener("click", () => {
@@ -4080,8 +4914,8 @@ document.getElementById("about-modal").addEventListener("click", e => {
     "Spectrum (1973)":                     "2ihG0UFk5GaVlI6uUvb4fV",
     "Karma (1969)":                        "3vXgABrVhIMeWPYllAHPcO",
     "Journey in Satchidananda (1970)":     "0tQkgAfDgBEP4SFR8ZKHqO",
-    "Space Is the Place (1973)":           "3Q3HRkiJ9JnEn1XL23T3hv",
-    "Jazz in Silhouette (1959)":           "1Xm6WHqGvxHRfkTBfZHqjL",
+    "Space Is the Place (1973)":           "4tovdE0ZxbD1cH40Sd0ZP3",
+    "Jazz in Silhouette (1959)":           "3isFbNpscHoeo7xHXkrM7A",
     "Liberation Music Orchestra (1969)":   "5R2PXlAaJoJMFXHHaHBkDa",
 
     // ── QC Pass: Additional Spotify IDs ──────────────────────────────────────
@@ -4237,6 +5071,110 @@ document.getElementById("about-modal").addEventListener("click", e => {
     "Double Booked (2009)":                                "4VWTfhCRysym3Ge7fE0i7F",
     // Esperanza Spalding
     "Esperanza (2008)":                                    "7188JsHTl3rladofF7CVvW",
+
+    // ── Round 2: Zero-coverage artists ───────────────────────────────────────
+    // Benny Goodman / Gene Krupa
+    "The Famous 1938 Carnegie Hall Jazz Concert (1938)":   "28U1Wp7hMfAI0uB3fCKTUW",
+    "After You've Gone (1935)":                            "24kRX4YmcdROZq0U3tSBat",
+    // Art Tatum
+    "Piano Starts Here (1933)":                            "1FCIddh80qKhpueDBsLNfr",
+    "The Art Tatum Solo Masterpieces (1953)":              "6u03wnGbicx8NYZ38R1hOW",
+    // Nat King Cole
+    "After Midnight (1957)":                               "30S26T1LJHuWoMl8xb6Wl4",
+    "The Nat King Cole Story (1961)":                      "3NoP1ifIejWkGSDsO9T2xH",
+    // Bud Powell
+    "The Bud Powell Trio Plays (1953)":                    "0BDEes5V3k8rHdctBkC9Qn",
+    // Lee Konitz
+    "Subconscious-Lee (1949)":                             "6xExO03MzciqOPHWXsirhg",
+    "Motion (1961)":                                       "5eREwMI0CzvPOH8V2HZZDU",
+    // Tony Williams
+    "Spring (1965)":                                       "1kSn6qbOO4z1sNhWVHdxqF",
+    // Bobby Hutcherson
+    "Dialogue (1965)":                                     "5142jRc6IrvsI7F6V7tUy2",
+    "Components (1965)":                                   "3I384qOJvXmO8z1s3PqImP",
+    // Woody Shaw
+    "Rosewood (1977)":                                     "4Yps8KpeR0FUBkyGXGtmT3",
+    // Paul Chambers
+    "Bass on Top (1957)":                                  "6K9VducUPPqxEInc3FSAYJ",
+    "Whims of Chambers (1956)":                            "0DfO1WCwNjEWL6bVrFne9M",
+    // Philly Joe Jones
+    "Blues for Dracula (1958)":                            "29np0gQexIgLXRUV6kXL3X",
+    "Drums Around the World (1959)":                       "5ijYzG9bkgJCKeqXuKAXAG",
+    // Branford Marsalis
+    "Romances for Saxophone (1986)":                       "5eRiSOV3hI5jqGIP6AZHtq",
+    "Mo' Better Blues (1990)":                             "0p9pjx1LrmYBb70ns5lMGz",
+    // Benny Golson
+    "Killer Joe (1977)":                                   "348IYTtIOinIQwcMmmq6Ic",
+    // Maceo Parker
+    "Roots Revisited (1990)":                              "5ljsBp0CVbgjQi5jpNc5Op",
+    "Life on Planet Groove (1992)":                        "5GlkTpCBgyu1C8K25p9zj7",
+    // Sidney Bechet
+    "Jazz Classics Vol. 1 (1945)":                         "5oWnXKF7btZFTeKSFJpM2i",
+    // Charlie Christian
+    "Solo Flight: The Genius of Charlie Christian (1939)":  "05o2ocbpwW9Dz27C1TyWxZ",
+    "Solo Flight: The Genius of Charlie Christian (1939\u201341)": "05o2ocbpwW9Dz27C1TyWxZ",
+
+    // ── Round 2: Partial-coverage artists ────────────────────────────────────
+    // Red Garland
+    "Red Garland's Piano (1957)":                          "1Lrt5saApIz6z8dGmyKB7d",
+    // Kenny Burrell
+    "Guitar Forms (1965)":                                 "6UrGu9u28Qyk3MZ6HkYDvc",
+    // Elvin Jones
+    "Poly-Currents (1969)":                                "6uzJ1IhJ1HwgXf599X3np3",
+    // Booker Ervin
+    "The Freedom Book (1963)":                             "4bnM6LNcUtiMFXEvybE2oX",
+    // Jackie McLean
+    "One Step Beyond (1963)":                              "5coo4uFLalJIkD6QOyfnlO",
+    // Dave Brubeck
+    "Jazz Goes to College (1954)":                         "5LZkf6hrPnIwg7H6TlHG2C",
+    "Take Five: The Dave Brubeck Quartet (1959)":          "0nTTEAhCZsbbeplyDMIFuA",
+    // Pharoah Sanders
+    "Jewels of Thought (1969)":                            "4eqjbUVRGuA1iM9Gt1UhaV",
+    // Julian Lage
+    "World's Fair (2015)":                                 "1YlIUjf2RiZfLzvK7Db7mi",
+    // Cécile McLorin Salvant
+    "Dreams and Daggers (2017)":                           "2c9Oa8uygtwLDMpWcklVay",
+    // Dhafer Youssef
+    "Abu Nawas Rhapsody (2019)":                           "4iwU4rmHPrApGT7isexQ8J",
+    // Jack DeJohnette
+    "New Directions (1978)":                               "35dCqaXt9CiiRnLW5ypKG9",
+    // Bobby Timmons
+    "This Here Is Bobby Timmons (1960)":                   "2kWl3HOLorETEmR8GBWrHX",
+
+    // ── Round 3: Remaining gaps ───────────────────────────────────────────────
+    // Lionel Hampton
+    "Hamp and Getz (1955)":                                "0RjeRtLpe39EKY8p8Wk7cD",
+    // Stan Getz (second album — At the Shrine compilation covers it)
+    "At the Shrine (1954)":                                "2IJ4YGPTQ5ZJzohoShVdOT",
+    // Shakti (second album, 1976)
+    "Shakti (1976)":                                       "5cmrQ4KaJf8WR4NlxP2lDV",
+    "A Handful of Beauty (1976)":                          "1mfJkWGwzdCc5Vo6lZBFwu",
+    "Natural Elements (1977)":                             "05RPG1hN35ucYL4BqEBZdn",
+    // Dizzy Gillespie
+    "Dizzy Gillespie: Sonny Side Up (1957)":               "3bV8IGgytTqBJvvO07kxWp",
+    // Bud Powell
+    "The Amazing Bud Powell Vol. 1 (1949)":                "4JZpydaQoCZY03mYcPgsaS",
+    "The Amazing Bud Powell, Vol. 1 (1949)":               "4JZpydaQoCZY03mYcPgsaS",
+
+    // ── Round 4: Final gaps ───────────────────────────────────────────────────
+    // Earl Hines
+    "Earl Hines: Piano Man (1928)":                        "56ygksMLv5iENPNphVV9tt",
+    "Tour de Force (1972)":                                "5nUXx0VrJdlgA84nAQYrDE",
+    // Kid Ory
+    "Kid Ory's Creole Jazz Band (1954)":                   "4cVhi5CCRWIcAzScKD6Pyp",
+    // Jack Teagarden
+    "Think Well of Me (1962)":                             "2xYPWsRoUeYMYGB9vdTTRo",
+    "King of the Blues Trombone (1928)":                   "2TAYBeJs9xKtRTJiKVxn6d",
+    // Red Rodney
+    "Bird and Red (1957)":                                 "7ly7v2nviEWTAVzBZKdZui",
+    "Red Rodney Returns (1959)":                           "50SpW4pVqsFjWtax5eqEvP",
+    // Kenny Clarke
+    "Plays Andr\u00e9 Hodeir (1956)":                     "0s69Ld833Q6OtOtkbRD45O",
+    "Plays Andre Hodeir (1956)":                           "0s69Ld833Q6OtOtkbRD45O",
+    // Chris Potter
+    "Follow the Red Line (2007)":                          "47Qix4jOJ7Ymk9HeFuSSLJ",
+    // Cedar Walton
+    "Eastern Rebellion (1975)":                            "6nFcJsiuEQSh8biNaxMb1O",
   };
 
   // ── Core helpers ───────────────────────────────────────────────────────────
@@ -4247,23 +5185,23 @@ document.getElementById("about-modal").addEventListener("click", e => {
     return SP[n] || null;
   }
 
+  window.canPlayAlbum = function (album) {
+    return !!spId(album);
+  };
+
   function showBar() {
-    const bar     = document.getElementById("sp-bar");
-    const sidebar = document.getElementById("sidebar");
-    const svgWrap = document.getElementById("svg-wrap");
+    const bar = document.getElementById("sp-bar");
     if (bar) {
       bar.style.display = "flex";
       bar.style.pointerEvents = "auto";
       // Defer class add by one frame so the transition fires
       requestAnimationFrame(() => bar.classList.add("sp-visible"));
     }
-    /* Floating overlay — no layout shift */
+    document.body.classList.add("sp-playing");
   }
 
   function hideBar() {
-    const bar     = document.getElementById("sp-bar");
-    const sidebar = document.getElementById("sidebar");
-    const svgWrap = document.getElementById("svg-wrap");
+    const bar = document.getElementById("sp-bar");
     if (bar) {
       bar.classList.remove("sp-visible");
       // Remove from interaction after slide-down finishes
@@ -4274,17 +5212,20 @@ document.getElementById("about-modal").addEventListener("click", e => {
         }
       }, { once: true });
     }
-    /* Nothing to reset — card is a floating overlay */
+    document.body.classList.remove("sp-playing");
   }
 
   // ── Called when a user clicks an album row in the sidebar ─────────────────
   window.onAlbumClick = function (album) {
     const id = spId(album);
     if (!id) return;  // no Spotify ID for this album — silent, no broken UI
+    const embedSrc = "https://open.spotify.com/embed/album/" + id
+                   + "?utm_source=generator&theme=0";
+
+    // Load into the bar — on mobile it's full-width at the bottom, on desktop it floats centred
     const iframe = document.getElementById("sp-iframe");
     if (!iframe) return;
-    iframe.src = "https://open.spotify.com/embed/album/" + id
-               + "?utm_source=generator&theme=0";
+    iframe.src = embedSrc;
     showBar();
   };
 
@@ -4292,6 +5233,13 @@ document.getElementById("about-modal").addEventListener("click", e => {
     const iframe = document.getElementById("sp-iframe");
     if (iframe) iframe.src = "";
     hideBar();
+  };
+
+  window.dismissMobilePlayer = function () {
+    const wrap   = document.getElementById("sp-mobile-wrap");
+    const iframe = document.getElementById("sp-mobile-iframe");
+    if (iframe) iframe.src = "";
+    if (wrap)  wrap.classList.remove("sp-mobile-active");
   };
 
 })();
