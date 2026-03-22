@@ -81,15 +81,17 @@
     #instr-filters-wrap { display:flex; align-items:center; }
     #mobile-actions { display:flex; align-items:center; gap:6px; }
     #mobile-instr-row { display:none; }
-    .filter-sep { width:1px; height:16px; background:#1e1e38; flex-shrink:0; margin:0 2px; }
+    .filter-sep { width:1px; height:16px; background:rgba(255,255,255,0.13); flex-shrink:0; margin:0 6px; }
     #era-filters   { display:flex; align-items:center; gap:4px; flex-shrink:0; flex-wrap:nowrap; }
     #instr-filters { display:flex; align-items:center; gap:4px; flex-shrink:0; flex-wrap:nowrap; }
     .action-btn {
       padding:3px 11px; border-radius:12px; border:1px solid #1e1e38;
       background:transparent; cursor:pointer; font-size:11.5px; color:#707090;
       font-family:Georgia,serif; transition:all 0.25s; white-space:nowrap; flex-shrink:0;
+      text-decoration:none; display:inline-flex; align-items:center; gap:4px;
     }
     .action-btn:hover { border-color:#5a5a80; color:#c0c0e0; }
+    #twitter-btn:hover { border-color:#1d9bf0; color:#1d9bf0; }
     .instr-btn {
       padding:2px 9px; border-radius:12px; border:1px solid #1a1a30;
       background:transparent; cursor:pointer; font-size:11.5px; color:#707090;
@@ -238,6 +240,7 @@
       padding:6px 14px; border-radius:20px; border:1px solid #1e1e38;
       font-size:12px; color:#555; text-decoration:none;
       transition:all 0.25s ease; font-family:Georgia,serif;
+      white-space:nowrap;
     }
     .sb-link:hover { border-color:#484860; color:#ccc; background:#0e0e24; }
     #sb-essential-head { font-size:9.5px; color:#505075; text-transform:uppercase; letter-spacing:2.5px; margin:16px 0 10px; }
@@ -271,7 +274,9 @@
     }
     #feedback-modal.open { display:flex; }
     #feedback-box {
-      background:#07071a; border:1px solid #1e1e38; border-radius:14px;
+      background:rgba(7,7,26,0.78); border:1px solid rgba(200,160,80,0.18); border-radius:14px;
+      backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+      box-shadow:0 18px 60px rgba(0,0,0,0.55), 0 0 28px rgba(200,160,80,0.08);
       padding:28px 28px 22px; width:420px; max-width:92vw;
     }
     #feedback-box h3 { color:#c8a050; font-size:17px; font-weight:normal; letter-spacing:1px; margin-bottom:6px; }
@@ -308,7 +313,9 @@
     }
     #learn-modal.open { display:flex; }
     #learn-box {
-      background:#07071a; border:1px solid #2a2a48; border-radius:16px;
+      background:rgba(7,7,26,0.78); border:1px solid rgba(200,160,80,0.18); border-radius:16px;
+      backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+      box-shadow:0 18px 60px rgba(0,0,0,0.55), 0 0 28px rgba(200,160,80,0.08);
       padding:30px 30px 24px; width:460px; max-width:92vw; position:relative;
     }
     #learn-close {
@@ -341,6 +348,27 @@
     #learn-link:hover { opacity:0.85; }
     #learn-disclaimer { font-size:9px; color:#404060; margin-top:9px; }
 
+    /* ── ABOUT MODAL ── */
+    #about-modal {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.78); z-index:200;
+      align-items:center; justify-content:center;
+    }
+    #about-modal.open { display:flex; }
+    #about-box {
+      background:rgba(7,7,26,0.78); border:1px solid rgba(200,160,80,0.18); border-radius:16px;
+      backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+      box-shadow:0 18px 60px rgba(0,0,0,0.55), 0 0 28px rgba(200,160,80,0.08);
+      padding:30px 30px 24px; width:520px; max-width:92vw; position:relative;
+    }
+    #about-close {
+      position:absolute; top:14px; right:18px; background:none; border:none;
+      color:#484868; font-size:18px; cursor:pointer; transition:color 0.2s;
+    }
+    #about-close:hover { color:#ccc; }
+    #about-box h3 { color:#c8a050; font-size:18px; font-weight:normal; letter-spacing:0.5px; margin-bottom:16px; }
+    #about-box p { color:#9090b8; font-size:13px; line-height:1.85; margin-bottom:14px; }
+    #about-signoff { color:#c8a050; font-size:13px; margin-top:18px; }
+
     /* ── KO-FI MODAL ── */
     /* ── COFFEE / STRIPE MODAL ── */
     #kofi-modal {
@@ -349,8 +377,10 @@
     }
     #kofi-modal.open { display:flex; }
     #kofi-box {
-      background:#07071a; border:1px solid #2a2a48; border-radius:20px;
-      width:360px; max-width:92vw; padding:32px 28px 28px;
+      background:rgba(7,7,26,0.76); border:1px solid rgba(200,160,80,0.18); border-radius:20px;
+      backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+      box-shadow:0 18px 60px rgba(0,0,0,0.55), 0 0 30px rgba(200,160,80,0.1);
+      width:360px; max-width:92vw; padding:28px 28px 24px;
       position:relative; text-align:center;
     }
     #kofi-close {
@@ -359,10 +389,8 @@
       cursor:pointer; transition:color 0.2s; line-height:1;
     }
     #kofi-close:hover { color:#ccc; }
-    #kofi-cup { font-size:48px; margin-bottom:12px; }
-    #kofi-title { color:#c8a050; font-size:17px; letter-spacing:0.3px; margin-bottom:8px; }
     #kofi-sub {
-      color:#606080; font-size:12.5px; line-height:1.6; margin-bottom:24px;
+      color:#9090b8; font-size:13px; line-height:1.8; margin:10px 0 22px;
     }
     #kofi-stripe-btn {
       display:inline-flex; align-items:center; gap:10px;
@@ -386,9 +414,10 @@
     }
     #nl-modal.open { display:flex; }
     #nl-box {
-      background:#07071a; border:1px solid #2a2a48; border-radius:16px;
+      background:rgba(7,7,26,0.78); border:1px solid rgba(200,160,80,0.18); border-radius:16px;
+      backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+      box-shadow:0 18px 60px rgba(0,0,0,0.55), 0 0 28px rgba(200,160,80,0.08);
       padding:36px 32px 28px; width:440px; max-width:92vw; position:relative;
-      box-shadow:0 24px 80px rgba(0,0,0,0.9);
       animation: nlReveal 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
     }
     @keyframes nlReveal {
@@ -440,15 +469,24 @@
       .instr-btn { font-size: 11px; padding: 2px 6px; }
       #era-filters  { gap: 3px; }
       #instr-filters { gap: 3px; }
-      .filter-sep { margin: 0 1px; }
+      .filter-sep { margin: 0 3px; }
+    }
+
+    /* btn-icon hidden by default; shown only when btn-label is hidden */
+    .btn-icon { display: none; }
+    .btn-icon svg { vertical-align: middle; display: inline-block; }
+
+    @media (max-width: 1180px) {
+      #search-box { width:172px; }
     }
     @media (max-width: 1100px) {
       .era-btn  { font-size: 10.5px; padding: 2px 6px; }
       .instr-btn { font-size: 10.5px; padding: 2px 5px; }
-      .action-btn { font-size: 10.5px; padding: 2px 8px; }
+      .action-btn { font-size: 10.5px; padding: 4px 7px; }
       #search-box { width: 130px; }
-      .btn-label { display: none; }  /* icon-only — text hidden, emoji stays */
-      .action-btn { padding: 4px 7px; }
+      /* Switch: hide text labels, show icon fallbacks */
+      .btn-label { display: none; }
+      .btn-icon  { display: inline; }
     }
     @media (max-width: 1000px) {
       /* Hide action buttons from the bar — they're nice-to-have but not core */
@@ -484,17 +522,16 @@
       #header-spacer { display:none; }
       .filter-sep { display:none; }
       #era-filters-wrap,
-      #instr-filters-wrap,
-      #mobile-actions,
-      #search-wrap,
-      #mobile-instr-row {
+      #mobile-actions {
         width:100%;
       }
+      /* search-wrap + settings-wrap share one row */
+      #search-wrap { width:auto; flex:1; justify-content:flex-start; }
       #brand { order:1; }
       #mobile-actions { order:2; }
       #search-wrap { order:3; }
+      #settings-wrap { order:3; flex-shrink:0; margin-left:6px; }
       #era-filters-wrap { order:4; }
-      #mobile-instr-row { order:5; }
       #era-filters {
         width:100%;
         min-width:0;
@@ -508,23 +545,6 @@
       }
       #era-filters::-webkit-scrollbar { display:none; }
       #instr-filters-wrap { display:none; }
-      #mobile-instr-row {
-        width:100%;
-        display:flex;
-        justify-content:center;
-      }
-      #mobile-instr-select {
-        width:100%;
-        max-width:280px;
-        background:#0b0b22;
-        border:1px solid #2a2a48;
-        border-radius:18px;
-        color:#d0d0e8;
-        font-size:11px;
-        font-family:Georgia,serif;
-        padding:8px 14px;
-        outline:none;
-      }
       .era-btn,
       .instr-btn,
       .action-btn { flex-shrink:0; }
@@ -535,14 +555,17 @@
         flex-wrap:nowrap;
         gap:8px;
       }
+      /* On mobile, actions get their own full row — restore text labels */
+      .btn-label { display: inline; }
+      .btn-icon  { display: none; }
       #search-wrap {
         margin-left:0;
         display:flex;
-        justify-content:center;
+        align-items:center;
       }
       #search-box {
         width:100%;
-        max-width:280px;
+        max-width:none;
       }
       #search-dropdown {
         width:min(280px, calc(100vw - 24px));
@@ -577,7 +600,7 @@
         right:0;
         bottom:0;
         width:100%;
-        height:min(38vh, 320px);
+        height:min(28vh, 220px);
         border-left:none;
         border-top:1px solid #161628;
         padding:10px 0 0;
@@ -604,10 +627,19 @@
         z-index:2;
       }
       #sb-name { font-size:22px; }
-      #sb-links { flex-wrap:wrap; }
+      #sb-links {
+        flex-wrap:nowrap;
+        gap:6px;
+      }
+      .sb-link {
+        padding:6px 10px;
+        font-size:11px;
+        gap:4px;
+      }
       #sb-list li { padding:11px 0; }
 
       #feedback-box,
+      #about-box,
       #learn-box,
       #nl-box {
         width:calc(100vw - 24px);
@@ -630,6 +662,13 @@
       #nl-submit {
         width:100%;
       }
+    }
+
+    /* Action buttons: collapse to icons only at very narrow widths */
+    @media (max-width: 460px) {
+      .btn-label { display: none; }
+      .btn-icon  { display: inline; }
+      .action-btn { padding:4px 8px; }
     }
 
     /* ── SPOTIFY PLAYER BAR ── */
@@ -718,18 +757,19 @@
       z-index: 1;
     }
 
-    /* Dismiss button — floats above top-right corner, always reachable */
+    /* Dismiss button — tucked behind the top-right corner, peeking out */
     #sp-bar-dismiss {
       position: absolute;
-      top: -14px;
-      right: -14px;
-      width: 34px;
-      height: 34px;
+      top: -12px;
+      right: -12px;
+      width: 28px;
+      height: 28px;
+      z-index: 0;  /* below iframe (z-index:1) — the arc outside the bar is clickable */
       border-radius: 50%;
       background: rgba(18, 18, 32, 0.92);
       border: 1px solid rgba(255, 255, 255, 0.12);
       color: rgba(255, 255, 255, 0.55);
-      font-size: 15px;
+      font-size: 14px;
       line-height: 1;
       cursor: pointer;
       display: flex;
@@ -740,7 +780,6 @@
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
       transition: background 0.18s, color 0.18s, border-color 0.18s,
                   box-shadow 0.18s, transform 0.15s;
-      z-index: 3;
     }
     #sp-bar-dismiss:hover {
       background: rgba(29, 185, 84, 0.18);
@@ -748,6 +787,81 @@
       color: #1DB954;
       box-shadow: 0 0 16px rgba(29, 185, 84, 0.3), 0 2px 12px rgba(0,0,0,0.4);
       transform: scale(1.1);
+    }
+    /* ── SETTINGS ── */
+    #settings-wrap { flex-shrink:0; position:relative; margin-left:2px; }
+    #settings-btn {
+      width:26px; height:26px; border-radius:50%;
+      border:1px solid #1e1e38; background:transparent;
+      position:relative;
+      cursor:pointer; color:#606080;
+      display:flex; align-items:center; justify-content:center;
+      transition:all 0.22s;
+    }
+    #settings-btn:hover, #settings-btn.active {
+      border-color:#c8a050; color:#c8a050;
+      background:rgba(200,160,80,0.08);
+    }
+    /* Dot indicator when a filter is active */
+    #settings-btn::after {
+      content:''; position:absolute; top:2px; right:2px;
+      width:5px; height:5px; border-radius:50%;
+      background:#c8a050; opacity:0;
+      transition:opacity 0.2s;
+      pointer-events:none;
+    }
+    #settings-btn.filter-active::after { opacity:1; }
+    #settings-panel {
+      position:fixed; top:68px; right:14px;
+      width:310px; z-index:200;
+      display:none; border-radius:14px; overflow:visible;
+    }
+    #settings-panel.open { display:block; }
+    #settings-panel-bg {
+      position:absolute; inset:0; border-radius:14px;
+      background:rgba(10,10,22,0.90);
+      backdrop-filter:blur(40px) saturate(180%);
+      -webkit-backdrop-filter:blur(40px) saturate(180%);
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 8px 48px rgba(0,0,0,0.65), 0 0 0 1px rgba(200,160,80,0.07);
+      pointer-events:none;
+    }
+    #settings-content { position:relative; padding:18px 16px 16px; }
+    .settings-title {
+      font-size:9px; color:#505078; letter-spacing:2.5px;
+      text-transform:uppercase; margin-bottom:12px;
+    }
+    .strength-btns { display:flex; gap:4px; margin-bottom:10px; }
+    .str-btn {
+      flex:1; padding:5px 2px; border-radius:8px;
+      border:1px solid #1a1a30; background:transparent;
+      color:#707090; font-size:9.5px; cursor:pointer;
+      font-family:Georgia,serif; transition:all 0.2s;
+      white-space:nowrap; line-height:1.2; text-align:center;
+    }
+    .str-btn:hover:not(.active) { border-color:#3a3a58; color:#a0a0c0; }
+    .str-btn.active { background:rgba(200,160,80,0.12); border-color:#c8a050; color:#c8a050; }
+    #strength-desc {
+      font-size:10.5px; color:#404060; font-style:italic;
+      text-align:center; min-height:16px;
+    }
+    .settings-divider {
+      height:1px; background:rgba(255,255,255,0.06);
+      margin:14px 0;
+    }
+    /* Instrument grid inside settings panel */
+    .panel-instr-grid {
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap:5px;
+      margin-bottom:6px;
+    }
+    .panel-instr-grid .instr-btn {
+      display:flex;
+      align-items:center; justify-content:center;
+      padding:7px 2px;
+      font-size:10px; letter-spacing:0.3px;
+      border-radius:8px;
     }
     /* album rows with a Spotify ID get a green hover hint */
     #sb-albums li { cursor:pointer; }
@@ -785,9 +899,33 @@
       <button class="era-btn" data-era="fusion">Fusion</button>
     </div>
   </div>
+  <div id="header-spacer"></div>
   <div class="filter-sep"></div>
-  <div id="instr-filters-wrap">
-    <div id="instr-filters">
+  <div id="mobile-actions">
+    <button class="action-btn" id="about-btn"><span class="btn-label">About</span><span class="btn-icon">✦</span></button>
+    <button class="action-btn" id="newsletter-btn"><span class="btn-label">Newsletter</span><span class="btn-icon">✉</span></button>
+    <button class="action-btn" id="learn-btn"><span class="btn-label">Learn More</span><span class="btn-icon">📖</span></button>
+    <button class="action-btn" id="feedback-btn"><span class="btn-label">Feedback</span><span class="btn-icon">💬</span></button>
+    <button class="action-btn" id="coffee-btn"><span class="btn-label">Coffee</span><span class="btn-icon">☕</span></button>
+    <a class="action-btn" id="twitter-btn" href="https://x.com/thejazzmap" target="_blank" rel="noopener" title="Follow on X"><span class="btn-label">Follow</span><span class="btn-icon"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><path d="M8.72 1h1.6L6.9 4.24 10.8 10H7.44L4.85 6.63 1.9 10H.3l3.65-3.47L.1 1h3.44L5.9 4.08ZM8.15 9.06h.89L2.9 1.9H1.94Z"/></svg></span></a>
+  </div>
+  <div class="filter-sep"></div>
+  <div id="search-wrap">
+    <input type="text" id="search-box" placeholder="Search artist…" autocomplete="off">
+    <div id="search-dropdown"></div>
+  </div>
+  <div class="filter-sep"></div>
+  <div id="settings-wrap">
+    <button id="settings-btn" title="Display settings"><svg width="13" height="13" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><polygon points="10.5,6 8.97,7.22 9.18,9.18 7.22,8.97 6,10.5 4.78,8.97 2.82,9.18 3.03,7.22 1.5,6 3.03,4.78 2.82,2.82 4.78,3.03 6,1.5 7.22,3.03 9.18,2.82 8.97,4.78"/><circle cx="6" cy="6" r="1.9"/></svg></button>
+  </div>
+</div>
+
+<!-- ── SETTINGS PANEL ── -->
+<div id="settings-panel">
+  <div id="settings-panel-bg"></div>
+  <div id="settings-content">
+    <div class="settings-title">Instrument</div>
+    <div class="panel-instr-grid">
       <button class="instr-btn active" data-instr="all"      title="All instruments">All</button>
       <button class="instr-btn" data-instr="vocal"    title="Vocals">Vox</button>
       <button class="instr-btn" data-instr="trumpet"  title="Trumpet">Tpt</button>
@@ -799,30 +937,16 @@
       <button class="instr-btn" data-instr="bass"     title="Bass">Bss</button>
       <button class="instr-btn" data-instr="drums"    title="Drums">Dms</button>
     </div>
-  </div>
-  <div id="mobile-instr-row">
-    <select id="mobile-instr-select" aria-label="Filter by instrument">
-      <option value="all">All instruments</option>
-      <option value="vocal">Vocals</option>
-      <option value="trumpet">Trumpet</option>
-      <option value="trombone">Trombone</option>
-      <option value="sax">Sax / Clarinet</option>
-      <option value="guitar">Guitar</option>
-      <option value="vibes">Vibraphone</option>
-      <option value="piano">Piano</option>
-      <option value="bass">Bass</option>
-      <option value="drums">Drums / Percussion</option>
-    </select>
-  </div>
-  <div id="header-spacer"></div>
-  <div id="mobile-actions">
-    <button class="action-btn" id="learn-btn">📖 <span class="btn-label">Learn More</span></button>
-    <button class="action-btn" id="feedback-btn">💬 <span class="btn-label">Feedback</span></button>
-    <button class="action-btn" id="coffee-btn">☕ <span class="btn-label">Coffee</span></button>
-  </div>
-  <div id="search-wrap">
-    <input type="text" id="search-box" placeholder="Search artist…" autocomplete="off">
-    <div id="search-dropdown"></div>
+    <div class="settings-divider"></div>
+    <div class="settings-title">Connection Strength</div>
+    <div class="strength-btns">
+      <button class="str-btn active" data-min="1">All</button>
+      <button class="str-btn" data-min="2">Notable</button>
+      <button class="str-btn" data-min="3">Strong</button>
+      <button class="str-btn" data-min="4">Deep</button>
+      <button class="str-btn" data-min="5">Lifetime</button>
+    </div>
+    <div id="strength-desc">Showing all connections</div>
   </div>
 </div>
 
@@ -843,6 +967,7 @@
     <div id="sb-links">
       <a id="sb-wiki"    class="sb-link" href="" target="_blank" rel="noopener">📖 Wikipedia</a>
       <a id="sb-spotify" class="sb-link" href="" target="_blank" rel="noopener">🎵 Spotify</a>
+      <a id="sb-video"   class="sb-link" href="" target="_blank" rel="noopener">▶ Video</a>
     </div>
     <div id="sb-essential-head"></div>
     <ul id="sb-essential-albums"></ul>
@@ -886,7 +1011,7 @@
       <div id="learn-book-info">
         <h4>How to Listen to Jazz</h4>
         <div class="learn-author">Ted Gioia</div>
-        <p>If you want to learn more, I cannot more highly recommend Ted Gioia's <em>How to Listen to Jazz</em>. Ted's work is a gift to the jazz world and imperative reading for anyone who loves this music.</p>
+        <p>If you want to learn more, I cannot more highly recommend Ted Gioia's <em>How to Listen to Jazz</em>. Ted's work is a gift to the jazz world and imperative reading.</p>
       </div>
     </div>
     <a id="learn-link" href="https://amzn.to/41jDdnQ" target="_blank" rel="noopener">Get the Book →</a>
@@ -894,18 +1019,29 @@
   </div>
 </div>
 
+<div id="about-modal">
+  <div id="about-box">
+    <button id="about-close">✕</button>
+    <h3>About</h3>
+    <p>Every idea has a lineage. Nowhere is that more visible than in jazz.</p>
+    <p>The more I learned about the greats, the more I began to see the web of relationships beneath the music — bands, collaborations, mentorship, and influence. Every great player seems to lead you to another. Every record opens a door to five more.</p>
+    <p>That's what intrigued me. So I built The Jazz Map.</p>
+    <p>It's an attempt to visualise that network — to trace the connections between artists across generations, and to explore how the music evolves through the people who play it. You can follow the lines between musicians, discover who played with whom, and move through jazz history not as a timeline, but as a living, interconnected system.</p>
+    <p>There will undoubtedly be omissions, missed connections, and things that could be better. If you spot something, use the feedback button and I'll fix it.</p>
+    <p>I hope you enjoy exploring it as much as I've enjoyed building it.</p>
+    <div id="about-signoff">— James</div>
+  </div>
+</div>
+
 <div id="kofi-modal">
   <div id="kofi-box">
     <button id="kofi-close" onclick="document.getElementById('kofi-modal').classList.remove('open')">✕</button>
-    <div id="kofi-cup">☕</div>
-    <div id="kofi-title">Buy me a coffee</div>
     <div id="kofi-sub">
-      The Jazz Map is free and ad-free.<br>
-      If you enjoy it, a coffee keeps it going.
+      If you liked the project and want to help keep the lights on.
     </div>
-    <a id="kofi-stripe-btn" href="https://buy.stripe.com/REPLACE_WITH_YOUR_STRIPE_LINK" target="_blank" rel="noopener">
+    <a id="kofi-stripe-btn" href="https://donate.stripe.com/6oU5kF4vq8OY7RtgqBfnO00" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
-      Pay £3 with Stripe
+      Support with £3
     </a>
     <div id="kofi-note">Secure payment · No account needed</div>
   </div>
@@ -931,7 +1067,7 @@
     <button id="nl-close">✕</button>
     <div id="nl-eyebrow">The Jazz Map · Weekly</div>
     <h3>The stories behind the music</h3>
-    <p>Every week, a deep dive into the connections and relationships that shaped jazz — the mentor who passed the torch, the session that changed everything, the collaboration no one expected. No noise. Just the music and the history.</p>
+    <p>Every week, a deep dive into the connections and relationships that shaped jazz — who learned from whom, which collaborations mattered, and how ideas moved through the music.</p>
     <form id="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/gillyJames" method="post" target="popupwindow">
       <input type="email" id="nl-email" name="email" placeholder="your@email.com" required autocomplete="email">
       <button type="submit" id="nl-submit">Subscribe</button>
@@ -1898,6 +2034,17 @@ const NODE_ALBUMS = {
   "art-blakey":         ["Moanin' (1958)", "A Night in Tunisia (1960)"],
 };
 
+const VIDEO_LINKS = {
+  "miles-davis": "https://www.youtube.com/watch?v=nfroW6KaXXc",
+  "charlie-parker": "https://www.youtube.com/watch?v=q6_kbDGIBdc",
+  "nina-simone": "https://www.youtube.com/watch?v=Dz89_dV9Fuo",
+  "ornette-coleman": "https://www.youtube.com/watch?v=9ubvdXQKKAk",
+  "bill-evans": "https://www.youtube.com/watch?v=VVA-N91QZzU&list=RDVVA-N91QZzU&start_radio=1",
+  "thelonious-monk": "https://www.youtube.com/watch?v=tBxjacxRshE",
+  "louis-armstrong": "https://www.youtube.com/watch?v=JdnPzTPuFOc",
+  "charles-mingus": "https://www.youtube.com/watch?v=X9_EUc2n2gM&list=RDX9_EUc2n2gM&start_radio=1",
+};
+
 // ─── PRE-PROCESS ─────────────────────────────────────────────────────────────
 
 const graphLinks = rawLinks.map(l => ({ source:l.s, target:l.t, label:l.c, weight:l.w }));
@@ -1928,9 +2075,29 @@ function wWidth(w)   { return [0, 1.0,  1.6,  2.4,  3.6,  5.2][w] || 1.5; }
 const headerEl = document.getElementById("header");
 const getHeaderHeight = () => (headerEl ? headerEl.offsetHeight : 58);
 document.documentElement.style.setProperty("--header-h", `${getHeaderHeight()}px`);
+
+/* Scale the credit line up so its width matches "THE JAZZ MAP" title */
+function syncBrandWidths() {
+  const titleEl  = document.getElementById("header-title");
+  const creditEl = document.getElementById("header-credit");
+  if (!titleEl || !creditEl) return;
+  // Clear any previous inline overrides
+  titleEl.style.letterSpacing  = "";
+  creditEl.style.fontSize      = "";
+  creditEl.style.letterSpacing = "";
+  const titleW  = titleEl.getBoundingClientRect().width;
+  const creditW = creditEl.getBoundingClientRect().width;
+  if (!titleW || !creditW || creditW >= titleW) return;
+  // Scale credit font-size so it fills the same width as the title
+  const currentFs = parseFloat(getComputedStyle(creditEl).fontSize);
+  creditEl.style.fontSize = (currentFs * titleW / creditW).toFixed(2) + "px";
+}
+requestAnimationFrame(syncBrandWidths);
+
 window.addEventListener("resize", () => {
   document.documentElement.style.setProperty("--header-h", `${getHeaderHeight()}px`);
   if (!isMobileSheet()) collapseMobileSheet();
+  syncBrandWidths();
 });
 
 const W = window.innerWidth;
@@ -1942,7 +2109,7 @@ const defs = svg.append("defs");
 
 let activeInstr = "all";
 const gradientSet = new Set(); // indices of links currently using gradient strokes
-const mobileInstrSelect = document.getElementById("mobile-instr-select");
+const mobileInstrSelect = null; // removed — instruments now live in settings panel
 
 function instrMatches(instrStr, filter) {
   const s = (instrStr||"").toLowerCase();
@@ -1988,6 +2155,7 @@ svg.on("click", () => {
       b.classList.toggle("active", b.dataset.era === "all"));
     document.querySelectorAll(".instr-btn").forEach(b =>
       b.classList.toggle("active", b.dataset.instr === "all"));
+    settingsBtn.classList.toggle("filter-active", minWeight > 1);
     if (mobileInstrSelect) mobileInstrSelect.value = "all";
     applyFilters();
   }
@@ -2256,6 +2424,15 @@ function populateSidebar(d) {
   const wikiSlug = d.wiki || d.name.replace(/ /g,"_");
   document.getElementById("sb-wiki").href    = `https://en.wikipedia.org/wiki/${wikiSlug}`;
   document.getElementById("sb-spotify").href = `https://open.spotify.com/search/${encodeURIComponent(d.name)}`;
+  const videoBtn = document.getElementById("sb-video");
+  const videoUrl = VIDEO_LINKS[d.id];
+  if (videoUrl) {
+    videoBtn.href = videoUrl;
+    videoBtn.style.display = "inline-flex";
+  } else {
+    videoBtn.removeAttribute("href");
+    videoBtn.style.display = "none";
+  }
 
   // ── Essential albums for this artist ───────────────────────────────────────
   const essHead  = document.getElementById("sb-essential-head");
@@ -2549,20 +2726,13 @@ sidebarHandleEl.addEventListener("touchstart", e => {
 sidebarScrollEl.addEventListener("scroll", () => {
   if (!isMobileSheet() || !sidebarEl.classList.contains("open")) return;
   const currentScrollTop = sidebarScrollEl.scrollTop;
-  const scrollingBackDown = currentScrollTop < lastSidebarScrollTop;
+  const scrollingDown = currentScrollTop > lastSidebarScrollTop; // finger swiped up = content scrolls up = scrollTop increases
 
-  if (!sidebarEl.classList.contains("expanded") && currentScrollTop > 72) {
+  // Swiping up (scrollTop increases) on a collapsed panel → expand it immediately
+  if (!sidebarEl.classList.contains("expanded") && scrollingDown && currentScrollTop > 6) {
     expandMobileSheet();
   }
-  if (
-    sidebarEl.classList.contains("expanded") &&
-    scrollingBackDown &&
-    currentScrollTop <= 0 &&
-    Date.now() > suppressAutoCollapseUntil
-  ) {
-    collapseMobileSheet();
-    sidebarScrollEl.scrollTop = 0;
-  }
+  // Scrolled back to top while expanded → touch handlers handle collapse, scroll just resets
   lastSidebarScrollTop = currentScrollTop;
 }, { passive: true });
 
@@ -2587,6 +2757,7 @@ document.addEventListener("touchcancel", () => {
 // ─── FILTERS (era + instrument) ──────────────────────────────────────────────
 
 let activeEra = "all";
+let minWeight = 1; // connection strength filter (1 = all, 5 = only strongest)
 
 function applyFilters() {
   if (!introGone) return; // don't fight the era fade-in animation
@@ -2598,7 +2769,19 @@ function applyFilters() {
     if (eraOk && instrOk) vis.add(n.id);
   });
 
-  nodeSel.style("opacity", n => vis.has(n.id) ? null : 0.04);
+  // When strength filter is active, dim nodes that have no qualifying connections
+  if (minWeight > 1) {
+    const connected = new Set();
+    graphLinks.forEach(l => {
+      if (vis.has(l.source.id) && vis.has(l.target.id) && l.weight >= minWeight) {
+        connected.add(l.source.id);
+        connected.add(l.target.id);
+      }
+    });
+    nodeSel.style("opacity", n => connected.has(n.id) ? null : 0.04);
+  } else {
+    nodeSel.style("opacity", n => vis.has(n.id) ? null : 0.04);
+  }
   gradientSet.clear();
 
   linkSel.each(function(l, i) {
@@ -2606,8 +2789,12 @@ function applyFilters() {
     const tgtVis = vis.has(l.target.id);
     const col    = ERA_COLOR[l.source.era] || "#8888aa";
     const wo     = wOpacity(l.weight);
+    const wOk    = l.weight >= minWeight; // strength filter
 
-    if (srcVis && tgtVis) {
+    if (!wOk) {
+      // Below minimum strength — always hide
+      d3.select(this).attr("stroke","#111122").attr("stroke-opacity",0.015).classed("dimmed",true);
+    } else if (srcVis && tgtVis) {
       d3.select(this).attr("stroke", col).attr("stroke-width", wWidth(l.weight)).attr("stroke-opacity", wo).classed("dimmed",false);
     } else if (!srcVis && !tgtVis) {
       d3.select(this).attr("stroke","#111122").attr("stroke-opacity",0.015).classed("dimmed",true);
@@ -2670,25 +2857,57 @@ document.querySelectorAll(".era-btn").forEach(btn => {
 });
 
 document.querySelectorAll(".instr-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
+  btn.addEventListener("click", e => {
+    e.stopPropagation();
     document.querySelectorAll(".instr-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     activeInstr = btn.dataset.instr;
-    if (mobileInstrSelect) mobileInstrSelect.value = activeInstr;
+    settingsBtn.classList.toggle("filter-active", activeInstr !== "all" || minWeight > 1);
     resetHighlight(); closeSidebar(); applyFilters();
     sim.alpha(0.3).restart();
   });
 });
 
-if (mobileInstrSelect) {
-  mobileInstrSelect.addEventListener("change", e => {
-    activeInstr = e.target.value;
-    document.querySelectorAll(".instr-btn").forEach(b =>
-      b.classList.toggle("active", b.dataset.instr === activeInstr));
+
+// ─── SETTINGS PANEL ──────────────────────────────────────────────────────────
+
+const settingsBtn   = document.getElementById("settings-btn");
+const settingsPanel = document.getElementById("settings-panel");
+
+settingsBtn.addEventListener("click", e => {
+  e.stopPropagation();
+  const open = settingsPanel.classList.toggle("open");
+  settingsBtn.classList.toggle("active", open);
+});
+
+document.addEventListener("click", e => {
+  if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+    settingsPanel.classList.remove("open");
+    settingsBtn.classList.remove("active");
+  }
+});
+
+const strengthDescs = [
+  "",
+  "Showing all connections",
+  "Notable collaborations (weight 2+)",
+  "Close collaborators (weight 3+)",
+  "Deep partnerships (weight 4+)",
+  "Lifetime partners only (weight 5)"
+];
+
+document.querySelectorAll(".str-btn").forEach(btn => {
+  btn.addEventListener("click", e => {
+    e.stopPropagation();
+    document.querySelectorAll(".str-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    minWeight = parseInt(btn.dataset.min);
+    document.getElementById("strength-desc").textContent = strengthDescs[minWeight];
+    settingsBtn.classList.toggle("filter-active", activeInstr !== "all" || minWeight > 1);
     resetHighlight(); closeSidebar(); applyFilters();
-    sim.alpha(0.3).restart();
+    sim.alpha(0.22).restart();
   });
-}
+});
 
 // ─── SEARCH DROPDOWN ─────────────────────────────────────────────────────────
 
@@ -2870,12 +3089,24 @@ document.getElementById("learn-modal").addEventListener("click", e => {
     document.getElementById("learn-modal").classList.remove("open");
 });
 
+// About
+document.getElementById("about-btn").addEventListener("click", () => {
+  document.getElementById("about-modal").classList.add("open");
+});
+document.getElementById("about-close").addEventListener("click", () => {
+  document.getElementById("about-modal").classList.remove("open");
+});
+document.getElementById("about-modal").addEventListener("click", e => {
+  if (e.target === document.getElementById("about-modal"))
+    document.getElementById("about-modal").classList.remove("open");
+});
+
 // ─── NEWSLETTER POPUP ────────────────────────────────────────────────────────
 (function() {
-  const NL_KEY = "jazzmap_nl_dismissed";
-  if (localStorage.getItem(NL_KEY)) return;
+  const NL_KEY = "jazzmap_nl_joined";
 
   const modal  = document.getElementById("nl-modal");
+  const openBtn = document.getElementById("newsletter-btn");
   const closeBtn = document.getElementById("nl-close");
   const form   = document.getElementById("nl-form");
   const success = document.getElementById("nl-success");
@@ -2885,12 +3116,9 @@ document.getElementById("learn-modal").addEventListener("click", e => {
   }
   function closeNewsletter() {
     modal.classList.remove("open");
-    localStorage.setItem(NL_KEY, "1");
   }
 
-  // Show after 95 seconds
-  setTimeout(openNewsletter, 95000);
-
+  openBtn.addEventListener("click", openNewsletter);
   closeBtn.addEventListener("click", closeNewsletter);
   modal.addEventListener("click", e => {
     if (e.target === modal) closeNewsletter();
