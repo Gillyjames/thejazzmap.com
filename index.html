@@ -166,7 +166,7 @@
       z-index:7;
       transition:opacity 0.8s ease;
     }
-    #map-backdrop.open { opacity:1; pointer-events:auto; }
+    #map-backdrop.open { opacity:1; pointer-events:none; }
 
 
 
@@ -189,11 +189,37 @@
       stroke-width:2.5px !important;
       filter:drop-shadow(0 0 12px var(--era-color, #aaa));
     }
+    .node.trail-start circle {
+      stroke:#fff7d6 !important;
+      stroke-width:3px !important;
+      filter:drop-shadow(0 0 16px rgba(255, 247, 214, 0.45));
+    }
+    .node.trail-next circle {
+      stroke:#f0c060 !important;
+      stroke-width:2.6px !important;
+      filter:drop-shadow(0 0 14px rgba(240, 192, 96, 0.35));
+    }
+    .node.trail-selected circle {
+      stroke:#fff !important;
+      stroke-width:2.9px !important;
+      filter:drop-shadow(0 0 16px rgba(255,255,255,0.36));
+    }
     .node text { pointer-events:none; text-shadow:0 0 8px #0d0d1a,0 0 8px #0d0d1a,0 0 8px #0d0d1a,0 0 8px #0d0d1a; }
     .node.dimmed { opacity:0.05; pointer-events:none; }
+    .node.trail-dimmed { opacity:0.12; }
     /* ── LINKS ── */
     .link { cursor:pointer; pointer-events:visibleStroke; }
     .link-hit { cursor:pointer; pointer-events:stroke; fill:none; }
+    .link.trail-dimmed { stroke-opacity:0.035 !important; }
+    .link.trail-eligible {
+      stroke-opacity:0.88 !important;
+      stroke-width:3.1px !important;
+    }
+    .link.trail-path {
+      stroke-opacity:0.98 !important;
+      stroke-width:4.8px !important;
+      filter:drop-shadow(0 0 10px currentColor);
+    }
     #sb-link-header { font-size:11px; color:#505078; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; }
     #sb-link-names  { font-size:18px; line-height:1.4; margin-bottom:8px; font-weight:normal; }
     #sb-albums-head { font-size:9.5px; color:#505075; text-transform:uppercase; letter-spacing:2.5px; margin:14px 0 10px; }
@@ -258,6 +284,296 @@
     #sb-heading  { font-size:9.5px; color:#505075; text-transform:uppercase; letter-spacing:2.5px; margin-bottom:11px; }
     #sb-list     { list-style:none; }
     #sb-list li  { padding:9px 0; border-bottom:1px solid #0e0e22; cursor:pointer; font-size:14px; line-height:1.5; }
+
+    #trail-btn {
+      position: relative;
+      background:
+        linear-gradient(#0d0d1a, #0d0d1a) padding-box,
+        linear-gradient(90deg, #e8952a 0%, #4a90e0 35%, #9b60d8 68%, #38b870 100%) border-box;
+      border: 1px solid transparent;
+      color: #d9d6ea;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 0 24px rgba(74,144,224,0.08);
+    }
+    #trail-btn:hover,
+    #trail-btn.active {
+      color: #fff3cf;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 0 28px rgba(155,96,216,0.14);
+      background:
+        linear-gradient(rgba(18,18,36,0.95), rgba(18,18,36,0.95)) padding-box,
+        linear-gradient(90deg, #e8952a 0%, #4a90e0 35%, #9b60d8 68%, #38b870 100%) border-box;
+    }
+
+    #trail-bar {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      width: min(720px, calc(100vw - 32px));
+      min-height: 92px;
+      padding: 18px 20px 16px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      z-index: 940;
+      border-radius: 22px;
+      transform: translateX(-50%) translateY(calc(100% + 38px));
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+    }
+    #trail-bar.open {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #trail-bar-bg {
+      position: absolute;
+      inset: 0;
+      border-radius: 22px;
+      background: rgba(10, 10, 22, 0.42);
+      backdrop-filter: blur(48px) saturate(180%);
+      -webkit-backdrop-filter: blur(48px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.03),
+        0 14px 60px rgba(0,0,0,0.52),
+        0 0 56px rgba(200,160,80,0.08);
+      pointer-events: none;
+    }
+    #trail-bar-bg::after {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: 12%;
+      right: 12%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #e8952a 18%, #4a90e0 38%, #9b60d8 58%, #38b870 78%, transparent);
+      filter: blur(0.4px);
+    }
+    #trail-bar-main,
+    #trail-bar-actions {
+      position: relative;
+      z-index: 1;
+    }
+    #trail-bar-main {
+      flex: 1;
+      min-width: 0;
+    }
+    #trail-kicker {
+      font-size: 9px;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      color: #6b6b92;
+      margin-bottom: 8px;
+    }
+    #trail-summary {
+      font-size: 16px;
+      color: #efeaf6;
+      line-height: 1.45;
+      margin-bottom: 6px;
+    }
+    #trail-summary strong {
+      color: #f0c060;
+      font-weight: normal;
+    }
+    #trail-sub {
+      font-size: 12px;
+      color: #8f8fb5;
+      min-height: 18px;
+    }
+    #trail-bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .trail-action {
+      border-radius: 999px;
+      border: 1px solid #282848;
+      background: rgba(12, 12, 28, 0.82);
+      color: #d8d8ea;
+      font-family: Georgia, serif;
+      font-size: 12px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      white-space: nowrap;
+    }
+    .trail-action:hover:not(:disabled) {
+      border-color: #c8a050;
+      color: #fff4d5;
+      background: rgba(200,160,80,0.12);
+    }
+    .trail-action:disabled {
+      opacity: 0.38;
+      cursor: default;
+    }
+    .trail-action.primary {
+      background: rgba(200,160,80,0.14);
+      border-color: rgba(200,160,80,0.5);
+      color: #f0c060;
+    }
+
+    #trail-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 970;
+      background: rgba(3, 3, 10, 0.52);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.26s ease;
+    }
+    #trail-modal.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #trail-modal-box {
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%) translateY(16px);
+      width: min(720px, calc(100vw - 32px));
+      max-height: min(76vh, 760px);
+      padding: 22px 22px 18px;
+      border-radius: 24px;
+      background: rgba(10,10,22,0.54);
+      backdrop-filter: blur(52px) saturate(180%);
+      -webkit-backdrop-filter: blur(52px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 18px 70px rgba(0,0,0,0.58), 0 0 0 1px rgba(255,255,255,0.03), 0 0 60px rgba(200,160,80,0.08);
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    #trail-modal.open #trail-modal-box {
+      transform: translateX(-50%) translateY(0);
+    }
+    #trail-modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 14px;
+    }
+    #trail-modal-kicker {
+      font-size: 9px;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      color: #6b6b92;
+      margin-bottom: 8px;
+    }
+    #trail-modal-title {
+      font-size: 24px;
+      color: #f0e0a0;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    #trail-modal-sub {
+      font-size: 13px;
+      color: #9696bb;
+      line-height: 1.5;
+      max-width: 560px;
+    }
+    #trail-modal-close {
+      border: none;
+      background: none;
+      color: #505078;
+      font-size: 18px;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+    #trail-modal-close:hover { color: #cfcfe6; }
+    #trail-playlist {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .trail-album-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(15,15,32,0.72);
+      border: 1px solid rgba(255,255,255,0.05);
+      min-width: 0;
+    }
+    .trail-album-cover {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 14px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(232,149,42,0.22), rgba(74,144,224,0.2) 42%, rgba(155,96,216,0.18) 72%, rgba(56,184,112,0.16));
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 10px 34px rgba(0,0,0,0.24);
+    }
+    .trail-album-cover img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+    .trail-album-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      text-align: center;
+      color: #ece8f6;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+    .trail-album-kicker {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #6f6f98;
+    }
+    .trail-album-title {
+      color: #ece8f6;
+      font-size: 16px;
+      line-height: 1.35;
+    }
+    .trail-album-meta {
+      color: #8a8ab0;
+      font-size: 12px;
+      line-height: 1.5;
+      min-height: 34px;
+    }
+    .trail-album-open {
+      margin-top: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid #282848;
+      background: rgba(12,12,26,0.85);
+      color: #cbcbe3;
+      text-decoration: none;
+      font-size: 11.5px;
+      white-space: nowrap;
+      transition: all 0.22s ease;
+      cursor: pointer;
+      font-family: Georgia, serif;
+    }
+    .trail-album-open:hover {
+      border-color: #1DB954;
+      color: #1DB954;
+    }
+    @media (max-width: 840px) {
+      #trail-playlist {
+        grid-template-columns: 1fr;
+      }
+    }
+    #trail-empty {
+      color: #8f8fb5;
+      font-size: 13px;
+      line-height: 1.6;
+      padding: 12px 2px 2px;
+    }
     #sb-list li:hover .sb-nm { text-decoration:underline; }
     .sb-ctx      { font-size:11.5px; color:#6868a0; margin-top:3px; }
     .sb-weight   { font-size:11.5px; color:#7878a8; margin-top:3px; }
@@ -484,17 +800,18 @@
     .btn-icon { display: none; }
     .btn-icon svg { vertical-align: middle; display: inline-block; }
 
-    @media (max-width: 1180px) {
-      #search-box { width:172px; }
+    @media (max-width: 1380px) {
+      #search-box { width:188px; }
+      .btn-label { display: none; }
+      .btn-icon  { display: inline; }
+      #trail-btn .btn-label { display: inline !important; }
+      #trail-btn .btn-icon  { display: none !important; }
     }
     @media (max-width: 1100px) {
       .era-btn  { font-size: 10.5px; padding: 2px 6px; }
       .instr-btn { font-size: 10.5px; padding: 2px 5px; }
       .action-btn { font-size: 10.5px; padding: 4px 7px; }
-      #search-box { width: 130px; }
-      /* Switch: hide text labels, show icon fallbacks */
-      .btn-label { display: none; }
-      .btn-icon  { display: inline; }
+      #search-box { width: 154px; }
     }
     @media (max-width: 1000px) {
       /* Hide action buttons from the bar — they're nice-to-have but not core */
@@ -638,8 +955,12 @@
       #sb-links {
         flex-wrap:nowrap;
         gap:6px;
+        justify-content:space-between;
       }
       .sb-link {
+        flex:1 1 0;
+        min-width:0;
+        justify-content:center;
         padding:6px 10px;
         font-size:11px;
         gap:4px;
@@ -677,6 +998,8 @@
       .btn-label { display: none; }
       .btn-icon  { display: inline; }
       .action-btn { padding:4px 8px; }
+      #trail-btn .btn-label { display: inline !important; }
+      #trail-btn .btn-icon  { display: none !important; }
     }
 
     /* ── SPOTIFY PLAYER BAR ── */
@@ -703,6 +1026,9 @@
     #sp-bar.sp-visible {
       transform: translateX(-50%) translateY(0);
       opacity: 1;
+    }
+    body.trail-active #sp-bar {
+      bottom: 146px;
     }
 
     /* Glass layer — separate div behind the iframe so backdrop-filter works in Chrome */
@@ -910,6 +1236,7 @@
   <div id="header-spacer"></div>
   <div class="filter-sep"></div>
   <div id="mobile-actions">
+    <button class="action-btn" id="trail-btn"><span class="btn-label">Create a Trail</span><span class="btn-icon">✧</span></button>
     <button class="action-btn" id="about-btn"><span class="btn-label">About</span><span class="btn-icon">✦</span></button>
     <button class="action-btn" id="newsletter-btn"><span class="btn-label">Newsletter</span><span class="btn-icon">✉</span></button>
     <button class="action-btn" id="learn-btn"><span class="btn-label">Learn More</span><span class="btn-icon">📖</span></button>
@@ -973,7 +1300,7 @@
     <span id="sb-era-tag"></span>
     <div id="sb-count"></div>
     <div id="sb-links">
-      <a id="sb-wiki"    class="sb-link" href="" target="_blank" rel="noopener">📖 Wikipedia</a>
+      <a id="sb-wiki"    class="sb-link" href="" target="_blank" rel="noopener">📖 Wiki</a>
       <a id="sb-spotify" class="sb-link" href="" target="_blank" rel="noopener">🎵 Spotify</a>
       <a id="sb-video"   class="sb-link" href="" target="_blank" rel="noopener">▶ Video</a>
     </div>
@@ -995,6 +1322,34 @@
 </div>
 
 <div id="tooltip"></div>
+
+<div id="trail-bar" aria-live="polite">
+  <div id="trail-bar-bg"></div>
+  <div id="trail-bar-main">
+    <div id="trail-kicker">Trail Mode</div>
+    <div id="trail-summary">Choose your starting artist.</div>
+    <div id="trail-sub">Build a chain of 4 connected artists to reveal 3 connection albums.</div>
+  </div>
+  <div id="trail-bar-actions">
+    <button class="trail-action" id="trail-clear-btn" type="button">Clear</button>
+    <button class="trail-action primary" id="trail-playlist-btn" type="button" disabled>Reveal Albums</button>
+  </div>
+</div>
+
+<div id="trail-modal">
+  <div id="trail-modal-box">
+    <div id="trail-modal-head">
+      <div>
+        <div id="trail-modal-kicker">Listening Trail</div>
+        <div id="trail-modal-title">Three albums, one path</div>
+        <div id="trail-modal-sub">One album for each connection in your trail.</div>
+      </div>
+      <button id="trail-modal-close" type="button">✕</button>
+    </div>
+    <div id="trail-playlist"></div>
+    <div id="trail-empty" style="display:none">I couldn't find clean album matches for this trail yet. Try another path.</div>
+  </div>
+</div>
 
 
 
@@ -1297,6 +1652,9 @@ const nodes = [
   { id:"mary-halvorson",         name:"Mary Halvorson",         era:"fusion", instr:"Guitar",                years:"2003–present", wiki:"Mary_Halvorson" },
   { id:"cecile-mclorin-salvant", name:"Cécile McLorin Salvant", era:"fusion", instr:"Vocals",               years:"2011–present", wiki:"C%C3%A9cile_McLorin_Salvant" },
   { id:"shabaka-hutchings",      name:"Shabaka Hutchings",      era:"fusion", instr:"Tenor Sax / Clarinet",  years:"2007–present", wiki:"Shabaka_Hutchings" },
+  { id:"maceo-parker",           name:"Maceo Parker",           nick:'"Maceo"',                              era:"fusion", instr:"Alto / Tenor Sax",    years:"1964–present", wiki:"Maceo_Parker" },
+  { id:"eddie-harris",           name:"Eddie Harris",           era:"bebop",  instr:"Tenor Sax",             years:"1960–1996", wiki:"Eddie_Harris_(musician)" },
+  { id:"les-mccann",             name:"Les McCann",             era:"fusion", instr:"Piano / Vocals",        years:"1960–present", wiki:"Les_McCann" },
 ];
 
 // ─── LINKS ───────────────────────────────────────────────────────────────────
@@ -1439,6 +1797,11 @@ const rawLinks = [
   { s:"charles-mingus",    t:"elvin-jones",        c:"Recorded together",                               w:1 },
   { s:"charles-mingus",    t:"lee-konitz",         c:"East Coasting / early sessions",                  w:1 },
   { s:"charles-mingus",    t:"max-roach",          c:"Massey Hall Concert (1953)",                      w:2 },
+  { s:"charles-mingus",    t:"duke-ellington",    c:"Money Jungle (1962); briefly in Ellington Orchestra (1953)", w:3 },
+  { s:"charles-mingus",    t:"kid-ory",            c:"Toured with Kid Ory's band (1944–45)",                     w:2 },
+  { s:"charles-mingus",    t:"charlie-parker",     c:"Jazz at Massey Hall (1953)",                               w:2 },
+  { s:"charles-mingus",    t:"dizzy-gillespie",    c:"Jazz at Massey Hall (1953)",                               w:2 },
+  { s:"charles-mingus",    t:"bud-powell",         c:"Jazz at Massey Hall (1953)",                               w:2 },
 
   // Bill Evans Trio
   { s:"bill-evans",        t:"scott-lafaro",       c:"Evans Trio (1959–61)",                            w:5 },
@@ -1568,7 +1931,8 @@ const rawLinks = [
   { s:"alice-coltrane",   t:"elvin-jones",        c:"Briefly overlapped in Coltrane's ensemble (1965–66)", w:2 },
   { s:"alice-coltrane",   t:"mccoy-tyner",        c:"Both pianists in Coltrane's group — she succeeded him (1966)", w:2 },
 
-  // Nat King Cole — free-standing (JATP same-bill and influence links removed; no confirmed studio recordings together)
+  // Nat King Cole
+  { s:"nat-king-cole",    t:"lester-young",       c:"Lester Young with the Nat King Cole Trio (1942)",          w:3 },
 
   // Fats Waller — only keeping documented recording collaboration
   { s:"fats-waller",      t:"coleman-hawkins",    c:"Victor Records sessions together (1929–34) — genuine studio recordings", w:2 },
@@ -1628,6 +1992,12 @@ const rawLinks = [
 
   // Shabaka Hutchings
 
+  // Eddie Harris
+  { s:"eddie-harris",     t:"les-mccann",         c:"Swiss Movement, live at Montreux (1969)",                  w:4 },
+
+  // Maceo Parker
+  { s:"maceo-parker",     t:"robert-glasper",     c:"Soul-jazz / neo-funk collaborations",                      w:2 },
+  { s:"maceo-parker",     t:"kamasi-washington",  c:"Contemporary soul-jazz scene",                             w:2 },
 
   // Jimmy Smith
   { s:"jimmy-smith",      t:"wes-montgomery",     c:"The Dynamic Duo (1966) / Further Adventures of Jimmy and Wes (1966) — organ-guitar summit", w:4 },
@@ -1671,6 +2041,12 @@ const LINK_ALBUMS = {
   "charles-mingus:dannie-richmond":  ["Mingus Ah Um (1959)", "The Black Saint and the Sinner Lady (1963)", "Let My Children Hear Music (1972)"],
   "charles-mingus:eric-dolphy":      ["Oh Yeah (1962)", "The Black Saint and the Sinner Lady (1963)"],
   "charles-mingus:max-roach":        ["Jazz at Massey Hall (1953)"],
+  "charles-mingus:duke-ellington":   ["Money Jungle (1962)"],
+  "charles-mingus:charlie-parker":   ["Jazz at Massey Hall (1953)"],
+  "charles-mingus:dizzy-gillespie":  ["Jazz at Massey Hall (1953)"],
+  "charles-mingus:bud-powell":       ["Jazz at Massey Hall (1953)"],
+  "nat-king-cole:lester-young":      ["Lester Young with the Nat King Cole Trio (1942)"],
+  "eddie-harris:les-mccann":         ["Swiss Movement (1969)"],
   "clifford-brown:max-roach":        ["Clifford Brown & Max Roach (1954)", "Study in Brown (1955)", "At Basin Street (1956)"],
   "clifford-brown:sonny-rollins":    ["At Basin Street (1956)"],
   "dave-brubeck:paul-desmond":       ["Jazz Goes to College (1954)", "Time Out (1959)", "Carnegie Hall Concert (1963)"],
@@ -2040,6 +2416,9 @@ const NODE_ALBUMS = {
   "jim-hall":           ["Undercurrent (1962)", "Concierto (1975)"],
   "lee-morgan":         ["The Sidewinder (1964)", "Candy (1958)"],
   "art-blakey":         ["Moanin' (1958)", "A Night in Tunisia (1960)"],
+  "maceo-parker":       ["Roots Revisited (1990)", "Life on Planet Groove (1992)"],
+  "eddie-harris":       ["Exodus to Jazz (1961)", "Swiss Movement (1969)"],
+  "les-mccann":         ["Swiss Movement (1969)", "Layers (1972)"],
 };
 
 const VIDEO_LINKS = {
@@ -2070,6 +2449,20 @@ rawLinks.forEach(l => {
 
 const nodeMap = {};
 nodes.forEach(n => { nodeMap[n.id] = n; });
+
+function edgeKey(a, b) {
+  return [a, b].sort().join("::");
+}
+
+const edgeMap = new Map();
+rawLinks.forEach(l => {
+  edgeMap.set(edgeKey(l.s, l.t), {
+    sourceId: l.s,
+    targetId: l.t,
+    label: l.c,
+    weight: l.w,
+  });
+});
 
 const maxDeg = d3.max(Object.values(degree));
 const rScale = d3.scaleSqrt().domain([0, maxDeg]).range([7, 42]);
@@ -2156,6 +2549,10 @@ const zoomBehavior = d3.zoom()
   });
 svg.call(zoomBehavior);
 svg.on("click", () => {
+  if (trailMode) {
+    exitTrailMode();
+    return;
+  }
   resetHighlight(); closeSidebar();
   if (activeEra !== "all" || activeInstr !== "all") {
     activeEra = "all"; activeInstr = "all";
@@ -2315,10 +2712,25 @@ function onOut()    { tip.classed("visible", false); }
 
 let activeNode = null;
 let activeLink = null;
+let trailMode = false;
+let trailPath = [];
+const TRAIL_MAX_ARTISTS = 4;
 const sidebarEl = document.getElementById("sidebar");
 const sidebarHandleEl = document.getElementById("sidebar-handle");
 const sidebarScrollEl = document.getElementById("sidebar-scroll");
 const mapBackdropEl = document.getElementById("map-backdrop");
+const trailBtnEl = document.getElementById("trail-btn");
+const trailBarEl = document.getElementById("trail-bar");
+const trailSummaryEl = document.getElementById("trail-summary");
+const trailSubEl = document.getElementById("trail-sub");
+const trailClearBtnEl = document.getElementById("trail-clear-btn");
+const trailPlaylistBtnEl = document.getElementById("trail-playlist-btn");
+const trailModalEl = document.getElementById("trail-modal");
+const trailModalCloseEl = document.getElementById("trail-modal-close");
+const trailModalTitleEl = document.getElementById("trail-modal-title");
+const trailModalSubEl = document.getElementById("trail-modal-sub");
+const trailPlaylistEl = document.getElementById("trail-playlist");
+const trailEmptyEl = document.getElementById("trail-empty");
 
 function isMobileSheet() {
   return window.innerWidth <= 640;
@@ -2344,8 +2756,180 @@ function resetMobileSheet() {
   collapseMobileSheet();
 }
 
+function getTrailEdgeIds() {
+  const ids = new Set();
+  for (let i = 0; i < trailPath.length - 1; i += 1) {
+    ids.add(edgeKey(trailPath[i], trailPath[i + 1]));
+  }
+  return ids;
+}
+
+function getTrailEligibleIds() {
+  if (!trailPath.length || trailPath.length >= TRAIL_MAX_ARTISTS) return new Set();
+  const lastId = trailPath[trailPath.length - 1];
+  return new Set(
+    (adj[lastId] || [])
+      .map(conn => conn.id)
+      .filter(id => !trailPath.includes(id))
+  );
+}
+
+function updateTrailBar() {
+  const count = trailPath.length;
+  const names = trailPath.map(id => nodeMap[id]?.name).filter(Boolean);
+  const complete = count === TRAIL_MAX_ARTISTS;
+
+  document.body.classList.toggle("trail-active", trailMode);
+  trailBtnEl.classList.toggle("active", trailMode);
+  trailBarEl.classList.toggle("open", trailMode);
+  trailPlaylistBtnEl.disabled = !complete;
+  trailClearBtnEl.disabled = count === 0;
+
+  if (!trailMode) return;
+
+  if (!count) {
+    trailSummaryEl.textContent = "Choose your starting artist.";
+    trailSubEl.textContent = "Build a chain of 4 connected artists to reveal 3 connection albums.";
+    return;
+  }
+
+  trailSummaryEl.innerHTML = names
+    .map((name, idx) => idx === names.length - 1 ? `<strong>${name}</strong>` : name)
+    .join(" <span style=\"color:#55557a\">→</span> ");
+
+  if (complete) {
+    trailSubEl.textContent = "Trail complete. Reveal the three albums that sit on these connection lines.";
+  } else {
+    trailSubEl.textContent = `Step ${count} of ${TRAIL_MAX_ARTISTS}. Choose an artist directly connected to ${names[names.length - 1]}.`;
+  }
+}
+
+function applyTrailHighlight() {
+  if (!trailMode) {
+    nodeSel
+      .classed("trail-start", false)
+      .classed("trail-next", false)
+      .classed("trail-selected", false)
+      .classed("trail-dimmed", false);
+    linkSel
+      .classed("trail-dimmed", false)
+      .classed("trail-path", false)
+      .classed("trail-eligible", false);
+    return;
+  }
+
+  const selectedIds = new Set(trailPath);
+  const eligibleIds = getTrailEligibleIds();
+  const edgeIds = getTrailEdgeIds();
+  const activeId = trailPath[trailPath.length - 1] || null;
+  const focusIds = new Set([...selectedIds, ...eligibleIds]);
+
+  nodeSel
+    .classed("selected", false)
+    .classed("dimmed", false)
+    .classed("trail-start", n => trailPath[0] === n.id)
+    .classed("trail-selected", n => selectedIds.has(n.id))
+    .classed("trail-next", n => eligibleIds.has(n.id))
+    .classed("trail-dimmed", n => trailPath.length > 0 && !focusIds.has(n.id));
+
+  linkSel
+    .classed("dimmed", false)
+    .classed("lit", false)
+    .classed("active-link", false)
+    .classed("trail-dimmed", l => {
+      if (!trailPath.length) return true;
+      const key = edgeKey(l.source.id, l.target.id);
+      if (edgeIds.has(key)) return false;
+      if (!activeId) return true;
+      const srcId = l.source.id;
+      const tgtId = l.target.id;
+      return !(
+        (srcId === activeId && eligibleIds.has(tgtId)) ||
+        (tgtId === activeId && eligibleIds.has(srcId))
+      );
+    })
+    .classed("trail-path", l => edgeIds.has(edgeKey(l.source.id, l.target.id)))
+    .classed("trail-eligible", l => {
+      if (!activeId || !eligibleIds.size) return false;
+      const srcId = l.source.id;
+      const tgtId = l.target.id;
+      return (
+        (srcId === activeId && eligibleIds.has(tgtId)) ||
+        (tgtId === activeId && eligibleIds.has(srcId))
+      );
+    });
+}
+
+function clearTrail(options = {}) {
+  trailPath = [];
+  trailModalEl.classList.remove("open");
+  if (!options.keepMode) {
+    trailMode = false;
+  }
+  applyTrailHighlight();
+  updateTrailBar();
+}
+
+function enterTrailMode() {
+  trailMode = true;
+  activeNode = null;
+  activeLink = null;
+  closeSidebar();
+  resetHighlight();
+  updateTrailBar();
+  applyTrailHighlight();
+}
+
+function exitTrailMode() {
+  trailMode = false;
+  trailPath = [];
+  trailModalEl.classList.remove("open");
+  resetHighlight();
+  applyTrailHighlight();
+  updateTrailBar();
+}
+
+function toggleTrailMode() {
+  if (trailMode) {
+    exitTrailMode();
+  } else {
+    enterTrailMode();
+  }
+}
+
+function handleTrailSelect(d) {
+  if (!trailPath.length) {
+    trailPath = [d.id];
+    updateTrailBar();
+    applyTrailHighlight();
+    return;
+  }
+
+  const existingIdx = trailPath.indexOf(d.id);
+  if (existingIdx >= 0) {
+    trailPath = trailPath.slice(0, existingIdx + 1);
+    updateTrailBar();
+    applyTrailHighlight();
+    return;
+  }
+
+  if (trailPath.length >= TRAIL_MAX_ARTISTS) return;
+
+  const lastId = trailPath[trailPath.length - 1];
+  const isConnected = (adj[lastId] || []).some(conn => conn.id === d.id);
+  if (!isConnected) return;
+
+  trailPath = [...trailPath, d.id];
+  updateTrailBar();
+  applyTrailHighlight();
+}
+
 function onSelect(e, d) {
   e.stopPropagation();
+  if (trailMode) {
+    handleTrailSelect(d);
+    return;
+  }
   activeLink = null;
   if (activeNode === d.id) { resetHighlight(); closeSidebar(); return; }
   activeNode = d.id;
@@ -2374,25 +2958,35 @@ function onSelect(e, d) {
 }
 
 function zoomToNode(d) {
-  const sbW   = window.innerWidth <= 640 ? 0 : 320;
-  const cx    = sbW ? (W - sbW) / 2 : W / 2;
-  const scale = Math.max(currentTransform.k, 1.8);
-  const tx    = cx - d.x * scale;
-  const ty    = H/2 - d.y * scale;
+  const vw     = window.innerWidth;
+  const isMob  = vw <= 640;
+  const sbW    = isMob ? 0 : 320;
+  const cx     = sbW ? (W - sbW) / 2 : W / 2;
+  // On mobile the bottom sheet clips vertical space — centre above it
+  const sheetH = isMob ? Math.min(window.innerHeight * 0.28, 220) : 0;
+  const cy     = (H - sheetH) / 2;
+  // Scale: back off on narrow screens so nearby connections stay in view
+  const target = vw < 480 ? 1.4 : vw < 900 ? 1.6 : 2.0;
+  const scale  = Math.max(currentTransform.k, target);
   svg.transition().duration(800).ease(d3.easeCubicInOut)
-     .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+     .call(zoomBehavior.transform,
+           d3.zoomIdentity.translate(cx - d.x * scale, cy - d.y * scale).scale(scale));
 }
 
 function zoomToLink(l) {
-  const sbW   = window.innerWidth <= 640 ? 0 : 320;
-  const cx    = sbW ? (W - sbW) / 2 : W / 2;
-  const mx    = (l.source.x + l.target.x) / 2;
-  const my    = (l.source.y + l.target.y) / 2;
-  const scale = Math.max(currentTransform.k, 1.8);
-  const tx    = cx - mx * scale;
-  const ty    = H/2 - my * scale;
+  const vw     = window.innerWidth;
+  const isMob  = vw <= 640;
+  const sbW    = isMob ? 0 : 320;
+  const cx     = sbW ? (W - sbW) / 2 : W / 2;
+  const sheetH = isMob ? Math.min(window.innerHeight * 0.28, 220) : 0;
+  const cy     = (H - sheetH) / 2;
+  const mx     = (l.source.x + l.target.x) / 2;
+  const my     = (l.source.y + l.target.y) / 2;
+  const target = vw < 480 ? 1.4 : vw < 900 ? 1.6 : 2.0;
+  const scale  = Math.max(currentTransform.k, target);
   svg.transition().duration(800).ease(d3.easeCubicInOut)
-     .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+     .call(zoomBehavior.transform,
+           d3.zoomIdentity.translate(cx - mx * scale, cy - my * scale).scale(scale));
 }
 
 function resetHighlight() {
@@ -2403,6 +2997,7 @@ function resetHighlight() {
     .attr("stroke-width", l => wWidth(l.weight))
     .attr("stroke-opacity", l => wOpacity(l.weight));
   applyFilters();
+  if (trailMode) applyTrailHighlight();
 }
 
 // ─── SIDEBAR ─────────────────────────────────────────────────────────────────
@@ -2830,6 +3425,7 @@ function applyFilters() {
 
 function onLinkClick(e, l) {
   e.stopPropagation();
+  if (trailMode) return;
   activeNode = null;
   if (activeLink === l) { resetHighlight(); closeSidebar(); return; }
   activeLink = l;
@@ -2844,11 +3440,13 @@ function onLinkClick(e, l) {
 linkHitSel
   .on("click", onLinkClick)
   .on("mouseover", function(e, l) {
+    if (trailMode) return;
     if (activeLink === l) return;
     d3.select(linkSel.nodes()[linkHitSel.nodes().indexOf(this)])
       .attr("stroke-width", wWidth(l.weight) * 2.2);
   })
   .on("mouseout", function(e, l) {
+    if (trailMode) return;
     if (activeLink === l) return;
     d3.select(linkSel.nodes()[linkHitSel.nodes().indexOf(this)])
       .attr("stroke-width", wWidth(l.weight));
@@ -3023,6 +3621,163 @@ setTimeout(updateLabelVisibility, 100);
 
 
 // ─── BUTTONS ──────────────────────────────────────────────────────────────────
+
+function shuffle(list) {
+  const arr = [...list];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+async function fetchAlbumMatch(albumTitle, artistNames) {
+  const cleanTitle = albumTitle.replace(/\s*\(\d{4}(?:[-–]\d{2})?\)\s*$/, "").trim();
+  const query = encodeURIComponent(`${cleanTitle} ${artistNames.join(" ")}`);
+  const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=6`);
+  const data = await res.json();
+  const titleWords = cleanTitle.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+
+  const bestAlbum = (data.results || [])
+    .map(result => {
+      const name = (result.collectionName || "").toLowerCase();
+      const artist = (result.artistName || "").toLowerCase();
+      const titleScore = titleWords.filter(w => name.includes(w)).length;
+      const artistScore = artistNames.filter(namePart => artist.includes(namePart.toLowerCase())).length;
+      return { result, score: titleScore * 3 + artistScore };
+    })
+    .sort((a, b) => b.score - a.score)[0]?.result;
+
+  return {
+    requestedTitle: albumTitle,
+    cleanTitle,
+    matchTitle: bestAlbum?.collectionName || cleanTitle,
+    matchArtist: bestAlbum?.artistName || artistNames.join(" / "),
+    artworkUrl: bestAlbum?.artworkUrl100 ? bestAlbum.artworkUrl100.replace("100x100", "600x600") : "",
+  };
+}
+
+async function buildTrailAlbums() {
+  const pairs = [];
+  for (let i = 0; i < trailPath.length - 1; i += 1) {
+    const a = trailPath[i];
+    const b = trailPath[i + 1];
+    const albums = LINK_ALBUMS[`${a}:${b}`] || LINK_ALBUMS[`${b}:${a}`] || [];
+    pairs.push({
+      a,
+      b,
+      source: nodeMap[a],
+      target: nodeMap[b],
+      edge: edgeMap.get(edgeKey(a, b)),
+      albums,
+    });
+  }
+
+  const cards = [];
+
+  for (const pair of pairs) {
+    const albumChoices = shuffle(pair.albums);
+    const chosenAlbum = albumChoices[0];
+    if (!chosenAlbum) continue;
+    try {
+      const match = await fetchAlbumMatch(chosenAlbum, [pair.source.name, pair.target.name]);
+      cards.push({
+        ...match,
+        pair,
+      });
+    } catch (_) {
+      cards.push({
+        requestedTitle: chosenAlbum,
+        cleanTitle: chosenAlbum.replace(/\s*\(\d{4}(?:[-–]\d{2})?\)\s*$/, "").trim(),
+        matchTitle: chosenAlbum.replace(/\s*\(\d{4}(?:[-–]\d{2})?\)\s*$/, "").trim(),
+        matchArtist: `${pair.source.name} / ${pair.target.name}`,
+        artworkUrl: "",
+        pair,
+      });
+    }
+  }
+
+  return cards.slice(0, 3);
+}
+
+function renderTrailPlaylist(cards) {
+  const names = trailPath.map(id => nodeMap[id]?.name).filter(Boolean);
+  trailModalTitleEl.textContent = names.join(" → ");
+  trailModalSubEl.textContent = "One album surfaced from each connection along your trail.";
+  trailPlaylistEl.innerHTML = "";
+  trailEmptyEl.style.display = cards.length ? "none" : "block";
+
+  cards.forEach((card, idx) => {
+    const panel = document.createElement("div");
+    panel.className = "trail-album-card";
+
+    const cover = document.createElement("div");
+    cover.className = "trail-album-cover";
+
+    if (card.artworkUrl) {
+      const img = document.createElement("img");
+      img.src = card.artworkUrl;
+      img.alt = card.matchTitle;
+      cover.appendChild(img);
+    } else {
+      const fallback = document.createElement("div");
+      fallback.className = "trail-album-fallback";
+      fallback.textContent = card.matchTitle;
+      cover.appendChild(fallback);
+    }
+
+    const kicker = document.createElement("div");
+    kicker.className = "trail-album-kicker";
+    kicker.textContent = `Connection ${idx + 1}`;
+
+    const title = document.createElement("div");
+    title.className = "trail-album-title";
+    title.textContent = card.matchTitle;
+
+    const meta = document.createElement("div");
+    meta.className = "trail-album-meta";
+    meta.textContent = `${card.pair.source.name} ↔ ${card.pair.target.name}`;
+
+    const openBtn = document.createElement("button");
+    openBtn.className = "trail-album-open";
+    openBtn.type = "button";
+    openBtn.textContent = "Open in player";
+    openBtn.addEventListener("click", () => window.onAlbumClick(card.requestedTitle));
+
+    panel.appendChild(cover);
+    panel.appendChild(kicker);
+    panel.appendChild(title);
+    panel.appendChild(meta);
+    panel.appendChild(openBtn);
+    trailPlaylistEl.appendChild(panel);
+  });
+}
+
+async function openTrailPlaylist() {
+  if (trailPath.length !== TRAIL_MAX_ARTISTS) return;
+  trailPlaylistBtnEl.disabled = true;
+  trailPlaylistBtnEl.textContent = "Revealing…";
+  try {
+    const cards = await buildTrailAlbums();
+    renderTrailPlaylist(cards);
+    trailModalEl.classList.add("open");
+  } finally {
+    trailPlaylistBtnEl.disabled = false;
+    trailPlaylistBtnEl.textContent = "Reveal Albums";
+  }
+}
+
+trailBtnEl.addEventListener("click", e => {
+  e.stopPropagation();
+  toggleTrailMode();
+});
+
+trailClearBtnEl.addEventListener("click", () => clearTrail({ keepMode: true }));
+trailPlaylistBtnEl.addEventListener("click", openTrailPlaylist);
+trailModalCloseEl.addEventListener("click", () => trailModalEl.classList.remove("open"));
+trailModalEl.addEventListener("click", e => {
+  if (e.target === trailModalEl) trailModalEl.classList.remove("open");
+});
 
 // Feedback
 document.getElementById("feedback-btn").addEventListener("click", () => {
@@ -3305,13 +4060,13 @@ document.getElementById("about-modal").addEventListener("click", e => {
     "Highway Rider (2010)":                "4tYokQ6vjGVHC0wEBMbeY0",
     // The Köln Concert (already below but add alias)
     "The Köln Concert (1975)":             "0I8vpSE1bSmysN2PhmHoQg",
-    "Saxophone Colossus (1956)":           "2dtjLAwt7Cq763h6AupyPZ",
+    // "Saxophone Colossus (1956)" — already defined above, skip duplicate
     "Brilliant Corners (1956)":            "2Ro0xMSm5eiKvGUfnKCm5D",
     "Monk's Dream (1963)":                 "1S83MrkNYIFuEHcCFNYXsH",
     "Speak No Evil (1964)":                "5xCHfA7eTGGXvqCkCkJCWA",
     "Head Hunters (1973)":                 "5fmIosDNfMb1SIUiTURNHt",
     "Song for My Father (1964)":           "6sJLTN1J3PhPQ0OybVsqVz",
-    "A Love Supreme (1965)":               "7Eoz7hJvaX1eFkbpQxC5PA",
+    // "A Love Supreme (1965)" — already defined above, skip duplicate
     "The Inner Mounting Flame (1971)":     "0cHsnQyjBMEMpFYPfcFifx",
     "The Epic (2015)":                     "3jbT1Y0ONSFpQ4dHKhsGJn",
     "Black Radio (2012)":                  "6JopKXSGQgHCRFKHFZ3LHP",
@@ -3328,6 +4083,160 @@ document.getElementById("about-modal").addEventListener("click", e => {
     "Space Is the Place (1973)":           "3Q3HRkiJ9JnEn1XL23T3hv",
     "Jazz in Silhouette (1959)":           "1Xm6WHqGvxHRfkTBfZHqjL",
     "Liberation Music Orchestra (1969)":   "5R2PXlAaJoJMFXHHaHBkDa",
+
+    // ── QC Pass: Additional Spotify IDs ──────────────────────────────────────
+    // Fats Waller / Swing Era
+    "Ain't Misbehavin' (1929)":                            "3WepbIfHKiEgNCN9yVN5Vo",
+    "The Joint Is Jumpin' (1937)":                         "5LLjKuJLsR8NlGibxNlRhK",
+    "Drummin' Man (1938)":                                 "5aNKUcZNoaryLLYM5sVZ0w",
+    // Count Basie
+    "April in Paris (1956)":                               "4wHW2qVD6tkmF8vwuEUBd6",
+    "The Complete Atomic Basie (1957)":                    "10l9GvNgkuRCNstbOgz2mG",
+    "Count Basie at Newport (1957)":                       "5pIXnRAfXOpphPKu5gF27J",
+    // Buck Clayton / Jo Jones / Lester Young
+    "Buck Clayton Jam Session (1953)":                     "39vErtkr1xOD8DJCEJw2MO",
+    "Pres and Teddy (1956)":                               "7BsTlBs92PJa4mTPKTi8Nq",
+    "The Jo Jones Trio (1959)":                            "5RNiERRcUPu1xlQcPUFDKO",
+    // Duke Ellington
+    "Money Jungle (1962)":                                 "51EeEA0coSa8MQMSLEDy59",
+    "...And His Mother Called Him Bill (1967)":            "1VFa3WWYDJJCmEIwU4Ee2g",
+    "The Far East Suite (1967)":                           "1JJIAHF3S3R7j6OzVw3fsw",
+    "Such Sweet Thunder (1957)":                           "6AArgLbC6IZIygYX04ovo1",
+    "The Blanton\u2013Webster Band (1940\u201342)":        "4VPO6tHnU1NiPBX40EA1HZ",
+    "The Blanton-Webster Band (1940-42)":                  "4VPO6tHnU1NiPBX40EA1HZ",
+    "Duke Ellington & John Coltrane (1962)":               "1OvmilWKtrabJGEpPRlgK5",
+    // Ella Fitzgerald
+    "Ella and Louis Again (1957)":                         "4zWqQOob980K9drUrUGM8M",
+    "Ella and Basie! (1963)":                              "752AJr22BFy9yubj4XJauv",
+    "Ella and Oscar (1975)":                               "7h1Q8EVuk6FKkufo3TLgpl",
+    "Fitzgerald and Pass... Again (1976)":                 "0XjMuNIHThcE8jHfHO3rYa",
+    // Oscar Peterson
+    "Oscar Peterson & Count Basie: Satch and Josh (1974)": "1XYCvQcod7mqwFVjLHOxST",
+    "Oscar Peterson & Joe Pass \u00e0 Salle Pleyel (1975)":"1dCD3JvQiSlBL4I6JxlA8s",
+    "Oscar Peterson & Joe Pass a Salle Pleyel (1975)":     "1dCD3JvQiSlBL4I6JxlA8s",
+    // Charles Mingus
+    "Pithecanthropus Erectus (1956)":                      "4kZ55sjjRKgCphjOmSMR7o",
+    "Blues and Roots (1960)":                              "7EOQggjtK8JCqeRz9IG33e",
+    "Oh Yeah (1962)":                                      "6n5d3hxCNgofJIAMWv1DiA",
+    "Mingus Mingus Mingus Mingus Mingus (1963)":           "12DCd8u80PoRIvBgjQrtuH",
+    "Let My Children Hear Music (1972)":                   "03zH4bkGb2jSZAQIVW2px1",
+    // Miles Davis
+    "Miles Davis at Fillmore (1970)":                      "4JPRSD7jeZ0lDLONdeERpM",
+    "Live-Evil (1971)":                                    "4eK5DQxLCshZCUk6D5a8Q1",
+    // John Coltrane
+    "Ascension (1965)":                                    "2zXT7xHaJ2BkzBhPtfYNhz",
+    // Alice Coltrane
+    "A Monastic Trio (1968)":                              "6S4ZMZs9eD5gdxeP9coqXZ",
+    // Ornette Coleman
+    "This Is Our Music (1960)":                            "5dx51fo9eKRUo0GyZSKaxy",
+    "Old and New Dreams (1979)":                           "4Dy1OsoTz17d8wG1RzOs8W",
+    // Chet Baker
+    "Chet (1959)":                                         "1iv1Z1nqE1qNoQdU3oQj7b",
+    // Stan Getz
+    "Stan Getz / Jo\u00e3o Gilberto (1963)":               "73ZRKdD3Ds43IjHrhKgucY",
+    "Stan Getz / Joao Gilberto (1963)":                    "73ZRKdD3Ds43IjHrhKgucY",
+    "Stan Getz & Oscar Peterson (1957)":                   "4RDtTAyYRJAKACSEGMgrqD",
+    // Wes Montgomery
+    "Full House (1962)":                                   "0rhsS0MBfCmMcyHIj2J0n7",
+    "Movin' Wes (1964)":                                   "0dJZSz1W74REVpVeedPvS5",
+    // Sarah Vaughan
+    "Sarah Vaughan (1954)":                                "7wX89EWCK8cNZeGnBS5bMG",
+    // Thelonious Monk
+    "Thelonious Monk / Sonny Rollins (1954)":              "2WX9P0qr7LZKIVgiIEiFUI",
+    // Modern Jazz Quartet
+    "Fontessa (1956)":                                     "4ceTTa0JKnKsppT43oe8dc",
+    // Eric Dolphy
+    "Far Cry (1960)":                                      "1FTIJYaIRbesBQWL9quJz8",
+    // Jim Hall
+    "Concierto (1975)":                                    "104g5VLtuvctk0lxXHokNy",
+    // Joe Pass
+    "Virtuoso (1974)":                                     "15mqbWSQ1XtAtpx5JsRA3Y",
+    // Herbie Hancock
+    "V.S.O.P. (1977)":                                     "1ABM6xFW90sWpHQnzyIdvO",
+    // Weather Report
+    "Weather Report (1971)":                               "6MBWaIBPJG7iAqJGIQvMkL",
+    "I Sing the Body Electric (1972)":                     "4YONjOkR8gd9iMc2Z4cCfA",
+    "Sweetnighter (1973)":                                 "3i9ydF6tp0qsaIBw5VRjmV",
+    "Black Market (1976)":                                 "5354mOnKAQxDZx4MR7en0h",
+    "Mr. Gone (1978)":                                     "03CBiPwr9yFsSNtFv5HK7Y",
+    // Tony Williams Lifetime
+    "Emergency! (1969)":                                   "1waasXN8fMNbWh4xq7Akeg",
+    // Return to Forever
+    "Musicmagic (1977)":                                   "0dmDVVzPAjPHmAND1gq8LY",
+    // Pat Metheny
+    "Pat Metheny Group (1978)":                            "4TC69U5HGclykFldzvsIao",
+    "Rejoicing (1983)":                                    "21qP4b8ePeAAKISdqVu4cV",
+    "Metheny / Mehldau (2006)":                            "46toyUpsWtgtWQi4ME16nj",
+    // Gary Peacock
+    "Tales of Another (1977)":                             "0FVE1uD0e53xd3rTG47QJC",
+    // Wynton Marsalis
+    "Think of One (1983)":                                 "52nzub1zJXZ9htSr9Zcbxc",
+    "Black Codes (From the Underground) (1985)":           "3yjPy557Rtupp0nxIJ7uZt",
+    // Al Di Meola
+    "Elegant Gypsy (1977)":                                "2aZJ2ficY62PipHzQRJ7IK",
+    // Stanley Clarke
+    "School Days (1976)":                                  "1Ft0YVKLlewjIKjanadzm9",
+    // Mahavishnu Orchestra / John McLaughlin
+    "Birds of Fire (1973)":                                "6SLknspfGod3v3TyWawl8J",
+    // Eddie Harris / Les McCann
+    "Swiss Movement (1969)":                               "1CH2KvMLkMG6Py1S6sY41g",
+    "Exodus to Jazz (1961)":                               "2Wc8FxzF0UCfrh9Hwfizeh",
+    // Joshua Redman
+    "Wish (1993)":                                         "7BgaGSjJZSWv6xyNTWAGij",
+    "MoodSwing (1994)":                                    "2xxZbQosC5mbkh5nbDI0wC",
+    "Moodswing (1994)":                                    "2xxZbQosC5mbkh5nbDI0wC",
+    // Kamasi Washington
+    "Heaven and Earth (2018)":                             "2aBgwU4zIm1tekGzphKYp8",
+    // Brad Mehldau
+    "Finding Gabriel (2019)":                              "7wOosKPp2hjtrdmbn7aBQS",
+    // Ray Brown
+    "Soular Energy (1984)":                                "35X3ykw0Ysj1Epv9Vx8uo8",
+    // Art Pepper
+    "Straight Life (1970)":                                "3fCef0lBayT2rxN776sJbk",
+    // Charles Lloyd
+    "Sangam (2006)":                                       "6uQyDGfwwLpPF7qyU9VZkE",
+    // Dhafer Youssef
+    "Electric Sufi (2002)":                                "1qV5xG6bpzS6OSgje43rey",
+    // Ambrose Akinmusire
+    "When the Heart Emerges Glistening (2011)":            "2Cdwhd5tE35ZcwZ5wRQcNF",
+    "On the Tender Spot of Every Calloused Moment (2020)": "6PTSXZ3c5ZsZzmYUD749ji",
+    // Shabaka and the Ancestors
+    "Wisdom of Elders (2016)":                             "6Kf1JMtmpxC4ffNnv1keSl",
+    "We Are Sent Here by History (2020)":                  "4S5MLu2PKU7uElm2V3JphK",
+    // Julian Lage
+    "Squint (2021)":                                       "4eomOt6YKFtZhFPyoSwrSC",
+    // Art Blakey (additional)
+    "Art Blakey's Jazz Messengers with Thelonious Monk (1957)": "4LDDC0qycqg3LnywOqm46c",
+    "Buhaina's Delight (1961)":                            "72s8HvQ94TvkrRvquhofCK",
+    "Free for All (1964)":                                 "3fbiOhazY1qODOs5cXatoG",
+    "Free For All (1964)":                                 "3fbiOhazY1qODOs5cXatoG",
+    "A Night at Birdland Vol. 1 & 2 (1954)":              "00kSJu1snceWGZ0yYkTZXr",
+    // Coleman Hawkins
+    "Coleman Hawkins Encounters Ben Webster (1957)":       "0YvmTfRbNnbHbsKK2C0Dz2",
+    // Esperanza Spalding
+    "Chamber Music Society (2010)":                        "7qXlTq1d8u38dybiUXjzBG",
+    // Mary Halvorson
+    "Code Girl (2018)":                                    "0wwyhlFeG03ECc98gRw264",
+    // Charles Lloyd (additional)
+    "Hagar's Song (2013)":                                 "5yBiCXJJPWtJgdoRssVaoX",
+    // Cannonball Adderley
+    "Somethin' Else (1958)":                               "3Wu0chxAm4GxSeRnIIf2Om",
+    // Coleman Hawkins (additional)
+    "Body and Soul (1939)":                                "2v3mmTeUz1WvpIsnn4Fn2K",
+    // Art Blakey (additional)
+    "At the Jazz Corner of the World (1959)":              "6n8t2kQCO0kUzelAz6xXKK",
+    // Milt Jackson / Coltrane
+    "Bags & Trane (1959)":                                 "438EDpsx9oHYfdF2IaJXef",
+    // Wes Montgomery (additional)
+    "The Incredible Jazz Guitar of Wes Montgomery (1960)": "1LKVF896Ea9czyT2FiBl52",
+    // Jackie McLean
+    "Let Freedom Ring (1962)":                             "7cDdrBZaImUjYGqkir7bVw",
+    // Cécile McLorin Salvant
+    "WomanChild (2013)":                                   "5JE6HnCPJ9is6pnewMaaSe",
+    // Robert Glasper
+    "Double Booked (2009)":                                "4VWTfhCRysym3Ge7fE0i7F",
+    // Esperanza Spalding
+    "Esperanza (2008)":                                    "7188JsHTl3rladofF7CVvW",
   };
 
   // ── Core helpers ───────────────────────────────────────────────────────────
