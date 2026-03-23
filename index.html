@@ -4691,17 +4691,10 @@ trailModalEl.addEventListener("click", e => {
 
     if (!cards.length) throw new Error("No albums found for this trail");
 
-    // Get user profile
-    const meRes = await fetch("https://api.spotify.com/v1/me", {
-      headers: { Authorization: "Bearer " + token },
-    });
-    if (!meRes.ok) throw new Error("Spotify profile fetch failed (" + meRes.status + ")");
-    const me = await meRes.json();
-
     // Create playlist
     const names    = trail.map(id => nodeMap[id]?.name).filter(Boolean);
     const surnames = names.map(n => n.split(" ").pop());
-    const createRes = await fetch("https://api.spotify.com/v1/users/" + me.id + "/playlists", {
+    const createRes = await fetch("https://api.spotify.com/v1/me/playlists", {
       method: "POST",
       headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
       body: JSON.stringify({
