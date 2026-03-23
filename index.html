@@ -4602,15 +4602,255 @@ trailModalEl.addEventListener("click", e => {
   if (e.target === trailModalEl) trailModalEl.classList.remove("open");
 });
 
-// Coming-soon toast for Spotify playlist export
+// ── Spotify PKCE OAuth Playlist Creation ─────────────────────────────────
 (function () {
+  const CLIENT_ID    = "04f01c9ca8a54714b67e49a23be1c6b9";
+  const SCOPES       = "playlist-modify-public playlist-modify-private";
+  const REDIRECT_URI = window.location.origin + window.location.pathname.replace(/\/$/, "");
+  const SP_SVG       = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg> Create a Spotify Playlist`;
+
+  // ── PKCE helpers ──────────────────────────────────────────────────────────
+  function randomString(len) {
+    const arr = new Uint8Array(len);
+    crypto.getRandomValues(arr);
+    return btoa(String.fromCharCode(...arr))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  }
+
+  async function pkceChallenge(verifier) {
+    const data = new TextEncoder().encode(verifier);
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    return btoa(String.fromCharCode(...new Uint8Array(digest)))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  }
+
+  // ── Token storage ─────────────────────────────────────────────────────────
+  function saveToken(data) {
+    localStorage.setItem("sp_access_token", data.access_token);
+    localStorage.setItem("sp_expiry", String(Date.now() + (data.expires_in - 60) * 1000));
+    if (data.refresh_token) localStorage.setItem("sp_refresh_token", data.refresh_token);
+  }
+
+  async function silentRefresh() {
+    const rt = localStorage.getItem("sp_refresh_token");
+    if (!rt) return null;
+    try {
+      const res = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type: "refresh_token",
+          refresh_token: rt,
+          client_id: CLIENT_ID,
+        }),
+      });
+      if (!res.ok) { localStorage.removeItem("sp_refresh_token"); return null; }
+      const data = await res.json();
+      saveToken(data);
+      return data.access_token;
+    } catch (_) { return null; }
+  }
+
+  async function getValidToken() {
+    const token  = localStorage.getItem("sp_access_token");
+    const expiry = parseInt(localStorage.getItem("sp_expiry") || "0", 10);
+    if (token && Date.now() < expiry) return token;
+    return silentRefresh();
+  }
+
+  // ── Auth redirect ─────────────────────────────────────────────────────────
+  async function startAuth(pendingTrail) {
+    console.log("[JazzMap] Spotify redirect URI →", REDIRECT_URI);
+    localStorage.setItem("sp_pending_trail", JSON.stringify(pendingTrail));
+    const verifier   = randomString(64);
+    const challenge  = await pkceChallenge(verifier);
+    localStorage.setItem("sp_code_verifier", verifier);
+    const params = new URLSearchParams({
+      client_id:             CLIENT_ID,
+      response_type:         "code",
+      redirect_uri:          REDIRECT_URI,
+      scope:                 SCOPES,
+      code_challenge_method: "S256",
+      code_challenge:        challenge,
+      show_dialog:           "false",
+    });
+    window.location.href = "https://accounts.spotify.com/authorize?" + params;
+  }
+
+  // ── Build & create playlist ───────────────────────────────────────────────
+  async function buildAndCreate(token, trail) {
+    // Temporarily set trailPath so buildTrailAlbums() works
+    const savedPath = trailPath.slice();
+    trailPath = trail;
+    let cards;
+    try {
+      cards = await buildTrailAlbums();
+    } finally {
+      trailPath = savedPath;
+    }
+
+    if (!cards.length) throw new Error("No albums found for this trail");
+
+    // Get user profile
+    const meRes = await fetch("https://api.spotify.com/v1/me", {
+      headers: { Authorization: "Bearer " + token },
+    });
+    if (!meRes.ok) throw new Error("Spotify profile fetch failed (" + meRes.status + ")");
+    const me = await meRes.json();
+
+    // Create playlist
+    const names    = trail.map(id => nodeMap[id]?.name).filter(Boolean);
+    const surnames = names.map(n => n.split(" ").pop());
+    const createRes = await fetch("https://api.spotify.com/v1/users/" + me.id + "/playlists", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name:        surnames.join(" – "),
+        description: "A jazz trail: " + names.join(" → ") + ". Created with The Jazz Map · thejazzmap.com",
+        public:      true,
+      }),
+    });
+    if (!createRes.ok) throw new Error("Playlist create failed (" + createRes.status + ")");
+    const playlist = await createRes.json();
+
+    // Resolve album track URIs — 2 tracks per album, 6 total
+    const trackUris = [];
+    for (const card of cards) {
+      const albumId = window.spId ? window.spId(card.requestedTitle) : null;
+      if (!albumId) continue;
+      try {
+        const tr = await fetch(
+          "https://api.spotify.com/v1/albums/" + albumId + "/tracks?limit=2",
+          { headers: { Authorization: "Bearer " + token } }
+        );
+        if (!tr.ok) continue;
+        const td = await tr.json();
+        (td.items || []).forEach(t => { if (t?.uri) trackUris.push(t.uri); });
+      } catch (_) { /* skip this album */ }
+    }
+
+    // Add tracks (if any matched)
+    if (trackUris.length) {
+      await fetch("https://api.spotify.com/v1/playlists/" + playlist.id + "/tracks", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+        body: JSON.stringify({ uris: trackUris }),
+      });
+    }
+
+    localStorage.removeItem("sp_pending_trail");
+    return { url: playlist.external_urls?.spotify, trackCount: trackUris.length };
+  }
+
+  // ── Feedback toasts ───────────────────────────────────────────────────────
   let toastTimer = null;
   const toast = document.getElementById("coming-soon-toast");
-  document.getElementById("trail-spotify-btn").addEventListener("click", () => {
+
+  function showToast(html, duration) {
     clearTimeout(toastTimer);
+    toast.innerHTML = html;
     toast.classList.add("show");
-    toastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
+    toastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+      setTimeout(() => { toast.textContent = ""; }, 400);
+    }, duration || 5000);
+  }
+
+  function resetBtn() {
+    const btn = document.getElementById("trail-spotify-btn");
+    if (btn) { btn.disabled = false; btn.innerHTML = SP_SVG; }
+  }
+
+  function setBtnLabel(label) {
+    const btn = document.getElementById("trail-spotify-btn");
+    if (btn) btn.textContent = label;
+  }
+
+  // ── Button click ──────────────────────────────────────────────────────────
+  document.getElementById("trail-spotify-btn").addEventListener("click", async () => {
+    const btn = document.getElementById("trail-spotify-btn");
+    btn.disabled = true;
+    btn.textContent = "Connecting…";
+    try {
+      let token = await getValidToken();
+      if (!token) {
+        // No token — kick off PKCE auth (page will redirect)
+        await startAuth(trailPath.slice());
+        return;
+      }
+      btn.textContent = "Creating playlist…";
+      const result = await buildAndCreate(token, trailPath.slice());
+      showToast(
+        "✓ Playlist created! " +
+        (result.url
+          ? `<a href="${result.url}" target="_blank" rel="noopener" ` +
+            `style="color:#1db954;text-decoration:underline;margin-left:4px">Open in Spotify →</a>`
+          : ""),
+        7000
+      );
+    } catch (err) {
+      console.error("[JazzMap] Playlist error:", err);
+      showToast("Couldn't create playlist — please try again.", 4000);
+    } finally {
+      resetBtn();
+    }
   });
+
+  // ── OAuth callback handler (runs once on page load if ?code= present) ────
+  (async function handleCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    if (!code) return;
+
+    // Clean the URL immediately so a refresh doesn't re-trigger
+    history.replaceState({}, "", window.location.pathname);
+
+    const verifier = localStorage.getItem("sp_code_verifier");
+    if (!verifier) return;
+    localStorage.removeItem("sp_code_verifier");
+
+    const pendingTrailRaw = localStorage.getItem("sp_pending_trail");
+    if (!pendingTrailRaw) return;
+
+    setBtnLabel("Authorising…");
+    const btn = document.getElementById("trail-spotify-btn");
+    if (btn) btn.disabled = true;
+
+    try {
+      // Exchange code for tokens
+      const tokenRes = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type:    "authorization_code",
+          code:          code,
+          redirect_uri:  REDIRECT_URI,
+          client_id:     CLIENT_ID,
+          code_verifier: verifier,
+        }),
+      });
+      if (!tokenRes.ok) throw new Error("Token exchange failed (" + tokenRes.status + ")");
+      const tokenData = await tokenRes.json();
+      saveToken(tokenData);
+
+      setBtnLabel("Creating playlist…");
+      const trail = JSON.parse(pendingTrailRaw);
+      const result = await buildAndCreate(tokenData.access_token, trail);
+      showToast(
+        "✓ Playlist created! " +
+        (result.url
+          ? `<a href="${result.url}" target="_blank" rel="noopener" ` +
+            `style="color:#1db954;text-decoration:underline;margin-left:4px">Open in Spotify →</a>`
+          : ""),
+        8000
+      );
+    } catch (err) {
+      console.error("[JazzMap] OAuth callback error:", err);
+      showToast("Authorisation failed — please try again.", 4000);
+    } finally {
+      resetBtn();
+    }
+  })();
 })();
 
 // Feedback
@@ -5184,6 +5424,7 @@ document.getElementById("about-modal").addEventListener("click", e => {
     const n = album.replace(/\u2013/g, "-");
     return SP[n] || null;
   }
+  window.spId = spId;
 
   window.canPlayAlbum = function (album) {
     return !!spId(album);
