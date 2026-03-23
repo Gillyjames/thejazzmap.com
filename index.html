@@ -4701,7 +4701,7 @@ trailModalEl.addEventListener("click", e => {
       body: JSON.stringify({
         name:        surnames.join(" – "),
         description: "thejazzmap.com – " + names.join(" → ") + ". Created with The Jazz Map",
-        public:      true,
+        public:      false,
       }),
     });
     if (!createRes.ok) throw new Error("Playlist create failed (" + createRes.status + ")");
