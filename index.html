@@ -4752,9 +4752,9 @@ trailModalEl.addEventListener("click", e => {
 // ── Spotify PKCE OAuth Playlist Creation ─────────────────────────────────
 (function () {
   const CLIENT_ID    = "04f01c9ca8a54714b67e49a23be1c6b9";
-  const SCOPES       = "user-modify-playback-state";
+  const SCOPES       = "playlist-modify-public playlist-modify-private";
   const REDIRECT_URI = window.location.origin + window.location.pathname.replace(/\/$/, "");
-  const SP_SVG       = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg> Queue on Spotify`;
+  const SP_SVG       = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg> Create Spotify Playlist`;
 
   // ── PKCE helpers ──────────────────────────────────────────────────────────
   function randomString(len) {
@@ -4804,9 +4804,9 @@ trailModalEl.addEventListener("click", e => {
   }
 
   async function getValidToken() {
-    // If stored token is from old scopes, force re-auth
+    // If stored token is missing playlist scopes (e.g. from a previous queue-only auth), force re-auth
     const grantedScope = localStorage.getItem("sp_scope") || "";
-    if (grantedScope && !grantedScope.includes("user-modify-playback-state")) {
+    if (grantedScope && !grantedScope.includes("playlist-modify-public")) {
       clearTokens();
       return null;
     }
@@ -4835,8 +4835,9 @@ trailModalEl.addEventListener("click", e => {
     window.location.href = "https://accounts.spotify.com/authorize?" + params;
   }
 
-  // ── Build trail albums & queue tracks ────────────────────────────────────
+  // ── Build trail albums & create playlist ─────────────────────────────────
   async function buildAndCreate(token, trail) {
+    // Resolve albums from trail
     const savedPath = trailPath.slice();
     trailPath = trail;
     let cards;
@@ -4844,43 +4845,65 @@ trailModalEl.addEventListener("click", e => {
     if (!cards.length) throw new Error("No albums found for this trail");
 
     // Resolve 2 tracks per album (up to 6 total)
-    const tracks = [];
+    const trackUris = [];
     for (const card of cards) {
       const albumId = window.spId ? window.spId(card.requestedTitle) : null;
-      if (!albumId) continue;
+      if (!albumId) { console.log("[JazzMap] no spId for:", card.requestedTitle); continue; }
       try {
         const tr = await fetch(
           "https://api.spotify.com/v1/albums/" + albumId + "/tracks?limit=2",
           { headers: { Authorization: "Bearer " + token } }
         );
-        if (!tr.ok) continue;
+        if (!tr.ok) { console.warn("[JazzMap] album tracks fetch", tr.status); continue; }
         const td = await tr.json();
-        (td.items || []).forEach(t => {
-          if (t?.uri) tracks.push({ name: t.name || "Track", uri: t.uri, albumTitle: card.requestedTitle });
-        });
+        (td.items || []).forEach(t => { if (t?.uri) trackUris.push(t.uri); });
       } catch (_) {}
     }
-    if (!tracks.length) throw new Error("No tracks found for this trail");
+    console.log("[JazzMap] resolved", trackUris.length, "track URIs");
 
-    // Queue each track via POST /v1/me/player/queue
-    let queued = 0;
-    for (const t of tracks) {
-      const res = await fetch(
-        "https://api.spotify.com/v1/me/player/queue?uri=" + encodeURIComponent(t.uri),
-        { method: "POST", headers: { Authorization: "Bearer " + token } }
+    // Create the playlist
+    const names    = trail.map(id => nodeMap[id]?.name).filter(Boolean);
+    const surnames = names.map(n => n.split(" ").pop());
+    const createRes = await fetch("https://api.spotify.com/v1/me/playlists", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name:        surnames.join(" – "),
+        description: "thejazzmap.com – " + names.join(" → ") + ". Created with The Jazz Map",
+        public:      true,
+      }),
+    });
+    if (!createRes.ok) {
+      const e = await createRes.text();
+      throw new Error("Playlist create failed (" + createRes.status + "): " + e);
+    }
+    const playlist = await createRes.json();
+    console.log("[JazzMap] created playlist:", playlist.id, "owner:", playlist.owner?.id);
+
+    // Add tracks
+    let tracksAdded = 0;
+    if (trackUris.length) {
+      // Small delay — let Spotify's backend register the new playlist
+      await new Promise(r => setTimeout(r, 1000));
+      const addRes = await fetch(
+        "https://api.spotify.com/v1/playlists/" + playlist.id + "/tracks",
+        {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+          body: JSON.stringify({ uris: trackUris }),
+        }
       );
-      console.log("[JazzMap] queue", t.name, "→", res.status);
-      if (res.ok || res.status === 204) {
-        queued++;
-      } else if (res.status === 404 || res.status === 403) {
-        const body = await res.text();
-        console.warn("[JazzMap] queue failed", res.status, body);
-        throw new Error("no_active_device");
+      console.log("[JazzMap] add tracks →", addRes.status);
+      if (addRes.ok) {
+        tracksAdded = trackUris.length;
+      } else {
+        const errBody = await addRes.text();
+        console.warn("[JazzMap] add tracks failed:", addRes.status, errBody);
       }
     }
 
     localStorage.removeItem("sp_pending_trail");
-    return { trackCount: queued };
+    return { url: playlist.external_urls?.spotify, name: playlist.name, trackCount: tracksAdded };
   }
 
   // ── Feedback toasts ───────────────────────────────────────────────────────
@@ -4918,35 +4941,43 @@ trailModalEl.addEventListener("click", e => {
     spPanel.classList.remove("show");
   });
 
-  function queueSuccessHtml(trackCount) {
-    toast.classList.remove("expanded");
-    return "♫ " + trackCount + " track" + (trackCount !== 1 ? "s" : "") + " added to your Spotify queue";
+  function successHtml(result) {
+    const open = result.url
+      ? ` <a href="${result.url}" target="_blank" rel="noopener" style="color:#1db954;text-decoration:underline;margin-left:4px">Open →</a>`
+      : "";
+    if (result.trackCount > 0) {
+      return "✓ " + result.name + " — " + result.trackCount + " tracks" + open;
+    }
+    return "✓ Playlist created!" + open;
   }
 
-  function queueErrorHtml(err) {
-    toast.classList.remove("expanded");
-    if (err.message === "no_active_device") {
-      return "Open Spotify on any device first, then try again";
-    }
-    return "Something went wrong — please try again";
-  }
+  // ── Mutex — only one Spotify operation at a time ──────────────────────────
+  let spBusy = false;
 
   // ── Button click ──────────────────────────────────────────────────────────
   document.getElementById("trail-spotify-btn").addEventListener("click", async () => {
+    if (spBusy) return;
+    // Don't run if the callback handler is about to fire (page just loaded with ?code=)
     if (new URLSearchParams(window.location.search).get("code")) return;
+    spBusy = true;
     const btn = document.getElementById("trail-spotify-btn");
     btn.disabled = true;
     btn.textContent = "Connecting…";
     try {
       let token = await getValidToken();
-      if (!token) { await startAuth(trailPath.slice()); return; }
-      btn.textContent = "Adding to queue…";
+      if (!token) {
+        spBusy = false; // releasing before redirect — page will reload
+        await startAuth(trailPath.slice());
+        return;
+      }
+      btn.textContent = "Creating playlist…";
       const result = await buildAndCreate(token, trailPath.slice());
-      showToast(queueSuccessHtml(result.trackCount), 6000);
+      showToast(successHtml(result), 8000);
     } catch (err) {
-      console.error("[JazzMap] Queue error:", err);
-      showToast(queueErrorHtml(err), 5000);
+      console.error("[JazzMap] Playlist error:", err);
+      showToast("Couldn't create playlist — please try again.", 5000);
     } finally {
+      spBusy = false;
       resetBtn();
     }
   });
@@ -4957,22 +4988,24 @@ trailModalEl.addEventListener("click", e => {
     const code = params.get("code");
     if (!code) return;
 
-    // Clean the URL immediately so a refresh doesn't re-trigger
+    // Claim the mutex immediately — before anything else runs
+    if (spBusy) return;
+    spBusy = true;
+
+    // Clean URL so a refresh doesn't re-trigger
     history.replaceState({}, "", window.location.pathname);
 
     const verifier = localStorage.getItem("sp_code_verifier");
-    if (!verifier) return;
+    if (!verifier) { spBusy = false; return; }
     localStorage.removeItem("sp_code_verifier");
 
     const pendingTrailRaw = localStorage.getItem("sp_pending_trail");
-    if (!pendingTrailRaw) return;
+    if (!pendingTrailRaw) { spBusy = false; return; }
 
-    setBtnLabel("Authorising…");
     const btn = document.getElementById("trail-spotify-btn");
-    if (btn) btn.disabled = true;
+    if (btn) { btn.disabled = true; btn.textContent = "Authorising…"; }
 
     try {
-      // Exchange code for tokens
       const tokenRes = await fetch("https://accounts.spotify.com/api/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -4989,14 +5022,15 @@ trailModalEl.addEventListener("click", e => {
       console.log("[JazzMap] token scopes granted:", tokenData.scope);
       saveToken(tokenData);
 
-      setBtnLabel("Adding to queue…");
+      if (btn) btn.textContent = "Creating playlist…";
       const trail = JSON.parse(pendingTrailRaw);
       const result = await buildAndCreate(tokenData.access_token, trail);
-      showToast(queueSuccessHtml(result.trackCount), 6000);
+      showToast(successHtml(result), 8000);
     } catch (err) {
       console.error("[JazzMap] OAuth callback error:", err);
-      showToast(queueErrorHtml(err), 5000);
+      showToast("Authorisation failed — please try again.", 5000);
     } finally {
+      spBusy = false;
       resetBtn();
     }
   })();
