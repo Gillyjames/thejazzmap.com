@@ -3664,7 +3664,6 @@ const sim = d3.forceSimulation(nodes)
     .distance(d => 110 + (5-d.weight)*18)
     .strength(0.30))
   .force("charge",    d3.forceManyBody().strength(d => -380 - degree[d.id]*14))
-  .force("center",    d3.forceCenter(W/2, H/2).strength(0.03))
   .force("collision", d3.forceCollide(d => popularityR(d.id) + 14))
   .force("x",         d3.forceX(d => W * yearToX(nodeStartYear(d))).strength(0.18))
   .force("y",         d3.forceY(d => H * instrBand(d.instr)).strength(0.10));
