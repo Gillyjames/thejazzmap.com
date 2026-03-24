@@ -2001,7 +2001,7 @@ setTimeout(() => {
               .delay(j * 18)
               .duration(520)
               .ease(d3.easeBackOut.overshoot(1.6))
-              .attr("r", rScale(degree[d.id]));
+              .attr("r", popularityR(d.id));
             // Give each node a unique random velocity so they drift independently
             const angle = Math.random() * 2 * Math.PI;
             const speed = 2.5 + Math.random() * 4.5;
@@ -3205,6 +3205,162 @@ rawLinks.forEach(l => {
 const maxDeg = d3.max(Object.values(degree));
 const rScale = d3.scaleSqrt().domain([0, maxDeg]).range([7, 42]);
 
+// ─── SPOTIFY POPULARITY → NODE SIZE ──────────────────────────────────────────
+// Run popularity-fetcher.html on thejazzmap.com to refresh this data.
+// Scores are Spotify popularity (0–100) as of March 2026.
+const ARTIST_POPULARITY = {
+  "airto-moreira":        37,
+  "al-di-meola":          44,
+  "alice-coltrane":       51,
+  "ambrose-akinmusire":   34,
+  "art-blakey":           55,
+  "art-tatum":            52,
+  "ben-webster":          49,
+  "benny-golson":         38,
+  "benny-goodman":        55,
+  "bill-evans":           63,
+  "billie-holiday":       68,
+  "billy-cobham":         41,
+  "billy-higgins":        30,
+  "billy-strayhorn":      42,
+  "bobby-hutcherson":     36,
+  "bobby-timmons":        33,
+  "booker-ervin":         32,
+  "brad-mehldau":         49,
+  "branford-marsalis":    45,
+  "buck-clayton":         33,
+  "bud-powell":           54,
+  "cannonball-adderley":  60,
+  "cecile-mclorin-salvant": 43,
+  "cedar-walton":         34,
+  "charles-lloyd":        40,
+  "charles-mingus":       64,
+  "charlie-christian":    43,
+  "charlie-haden":        43,
+  "charlie-parker":       65,
+  "chet-baker":           67,
+  "chick-corea":          58,
+  "chris-potter":         36,
+  "clifford-brown":       52,
+  "coleman-hawkins":      52,
+  "connie-kay":           25,
+  "cootie-williams":      31,
+  "count-basie":          59,
+  "dannie-richmond":      27,
+  "dave-brubeck":         63,
+  "dave-holland":         39,
+  "dexter-gordon":        56,
+  "dhafer-youssef":       37,
+  "dizzy-gillespie":      62,
+  "don-cherry":           46,
+  "donald-byrd":          52,
+  "duke-ellington":       67,
+  "earl-hines":           40,
+  "ed-blackwell":         30,
+  "eddie-gomez":          32,
+  "eddie-harris":         39,
+  "ella-fitzgerald":      72,
+  "elvin-jones":          46,
+  "eric-dolphy":          51,
+  "esperanza-spalding":   48,
+  "fats-waller":          55,
+  "freddie-hubbard":      56,
+  "gary-peacock":         33,
+  "gene-krupa":           52,
+  "gerry-mulligan":       51,
+  "herbie-hancock":       65,
+  "horace-silver":        51,
+  "jack-dejohnette":      40,
+  "jack-teagarden":       38,
+  "jackie-mclean":        43,
+  "jaco-pastorius":       58,
+  "jaki-byard":           28,
+  "jelly-roll-morton":    46,
+  "jim-hall":             43,
+  "jimmy-garrison":       29,
+  "jimmy-smith":          53,
+  "jo-jones":             31,
+  "joe-henderson":        48,
+  "joe-pass":             49,
+  "joe-zawinul":          43,
+  "john-coltrane":        72,
+  "john-lewis":           37,
+  "john-mclaughlin":      53,
+  "johnny-hodges":        43,
+  "joshua-redman":        43,
+  "julian-lage":          46,
+  "kamasi-washington":    53,
+  "keith-jarrett":        62,
+  "kenny-burrell":        46,
+  "kenny-clarke":         33,
+  "kid-ory":              34,
+  "lee-konitz":           38,
+  "lee-morgan":           54,
+  "lenny-white":          31,
+  "les-mccann":           41,
+  "lester-young":         52,
+  "lionel-hampton":       50,
+  "louis-armstrong":      72,
+  "lyle-mays":            40,
+  "maceo-parker":         50,
+  "mary-halvorson":       30,
+  "max-roach":            55,
+  "mccoy-tyner":          53,
+  "miles-davis":          77,
+  "milt-jackson":         47,
+  "miroslav-vitous":      30,
+  "nat-king-cole":        68,
+  "nina-simone":          72,
+  "ornette-coleman":      57,
+  "oscar-peterson":       63,
+  "pat-metheny":          59,
+  "paul-chambers":        39,
+  "paul-desmond":         52,
+  "paul-motian":          33,
+  "percy-heath":          29,
+  "pharoah-sanders":      52,
+  "philly-joe-jones":     30,
+  "ray-brown":            47,
+  "red-garland":          36,
+  "red-rodney":           28,
+  "robert-glasper":       53,
+  "ron-carter":           49,
+  "sarah-vaughan":        62,
+  "scott-lafaro":         32,
+  "shabaka-hutchings":    40,
+  "sidney-bechet":        52,
+  "sonny-rollins":        63,
+  "stan-getz":            64,
+  "stanley-clarke":       46,
+  "sun-ra":               51,
+  "teddy-wilson":         38,
+  "thelonious-monk":      69,
+  "tony-williams":        48,
+  "wayne-shorter":        61,
+  "wes-montgomery":       59,
+  "woody-shaw":           40,
+  "wynton-kelly":         36,
+  "wynton-marsalis":      55,
+  "zakir-hussain":        52,
+};
+
+// 7 discrete radius tiers based on popularity score
+const POP_TIERS = [
+  { max: 25,  r: 7  },
+  { max: 35,  r: 11 },
+  { max: 44,  r: 15 },
+  { max: 53,  r: 20 },
+  { max: 62,  r: 27 },
+  { max: 71,  r: 34 },
+  { max: 100, r: 42 },
+];
+function popularityR(id) {
+  const pop = ARTIST_POPULARITY[id];
+  if (pop == null) return rScale(degree[id] || 1);
+  for (const t of POP_TIERS) { if (pop <= t.max) return t.r; }
+  return 42;
+}
+
 // Opacity only — no width variation
 function wOpacity(w) { return [0, 0.10, 0.24, 0.44, 0.68, 0.90][w] || 0.15; }
 function wWidth(w)   { return [0, 1.0,  1.6,  2.4,  3.6,  5.2][w] || 1.5; }
@@ -3453,10 +3609,10 @@ nodeSel.append("circle")
   .attr("stroke-opacity", 0.88);
 
 nodeSel.append("text")
-  .attr("dy", d => rScale(degree[d.id]) + 11)
+  .attr("dy", d => popularityR(d.id) + 11)
   .attr("text-anchor","middle")
   .attr("font-family","Georgia")
-  .attr("font-size", d => { const r=rScale(degree[d.id]); return r>24?12:r>16?10.5:9; })
+  .attr("font-size", d => { const r=popularityR(d.id); return r>24?12:r>16?10.5:9; })
   .attr("fill", "#e8e8f0")
   .text(d => d.name);
 
@@ -3472,7 +3628,7 @@ const sim = d3.forceSimulation(nodes)
     .strength(0.30))
   .force("charge",    d3.forceManyBody().strength(d => -380 - degree[d.id]*14))
   .force("center",    d3.forceCenter(W/2, H/2).strength(0.03))
-  .force("collision", d3.forceCollide(d => rScale(degree[d.id]) + 14))
+  .force("collision", d3.forceCollide(d => popularityR(d.id) + 14))
   .force("x",         d3.forceX(d => W * ERA_X[d.era]).strength(0.15))
   .force("y",         d3.forceY(d => H * instrBand(d.instr)).strength(0.10));
 
@@ -3513,7 +3669,7 @@ sim.on("end", updateLabelVisibility);
 function updateLabelVisibility() {
   const k = currentTransform.k;
   nodeSel.select("text").attr("display", d => {
-    const renderedR = rScale(degree[d.id]) * k;
+    const renderedR = popularityR(d.id) * k;
     return renderedR < 9 ? "none" : null;
   });
 }
