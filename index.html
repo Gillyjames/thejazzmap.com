@@ -5015,8 +5015,6 @@ trailModalEl.addEventListener("click", e => {
 
   // ── Button click ──────────────────────────────────────────────────────────
   document.getElementById("trail-spotify-btn").addEventListener("click", async () => {
-    showToast("Coming soon — Spotify playlist export is on the roadmap 🎵", 3200);
-    return;
     if (spBusy) return;
     // Don't run if the callback handler is about to fire (page just loaded with ?code=)
     if (new URLSearchParams(window.location.search).get("code")) return;
