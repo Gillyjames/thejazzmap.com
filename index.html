@@ -4912,7 +4912,7 @@ trailModalEl.addEventListener("click", e => {
       if (!albumId) { console.log("[JazzMap] no spId for:", card.requestedTitle); continue; }
       try {
         const tr = await fetch(
-          "https://api.spotify.com/v1/albums/" + albumId + "/tracks?limit=2",
+          "https://api.spotify.com/v1/albums/" + albumId + "/tracks?limit=2", // album tracks endpoint unchanged
           { headers: { Authorization: "Bearer " + token } }
         );
         if (!tr.ok) { console.warn("[JazzMap] album tracks fetch", tr.status); continue; }
@@ -4941,48 +4941,23 @@ trailModalEl.addEventListener("click", e => {
     const playlist = await createRes.json();
     console.log("[JazzMap] created playlist:", playlist.id, "| owner:", playlist.owner?.id);
 
-    // DIAG 2: re-fetch playlist to verify it looks right before modifying
+    // Add tracks — use /items endpoint (updated Feb 2026, /tracks is deprecated for new apps)
     await new Promise(r => setTimeout(r, 800));
-    const checkRes = await fetch(
-      "https://api.spotify.com/v1/playlists/" + playlist.id + "?fields=id,owner,public,collaborative",
-      { headers: { Authorization: "Bearer " + token } }
-    );
-    const check = await checkRes.json();
-    console.log("[JazzMap] playlist verify — owner:", check.owner?.id,
-      "| public:", check.public, "| collab:", check.collaborative,
-      "| owner===me:", check.owner?.id === me.id);
-
-    // DIAG 3: try ONE hardcoded known track before touching our URIs
-    // "So What" – Miles Davis, Kind of Blue
-    const TEST_URI = "spotify:track:0ofHAoxe9vBkTCp2UQIavz";
-    console.log("[JazzMap] testing single hardcoded URI:", TEST_URI);
-    const testRes = await fetch(
-      "https://api.spotify.com/v1/playlists/" + playlist.id + "/tracks",
-      {
-        method: "POST",
-        headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
-        body: JSON.stringify({ uris: [TEST_URI] }),
-      }
-    );
-    const testBody = await testRes.text();
-    console.log("[JazzMap] hardcoded track add →", testRes.status, testBody);
-
-    // Only add real tracks if the test passed
     let tracksAdded = 0;
-    if (testRes.ok && trackUris.length) {
+    if (trackUris.length) {
       const addRes = await fetch(
-        "https://api.spotify.com/v1/playlists/" + playlist.id + "/tracks",
+        "https://api.spotify.com/v1/playlists/" + playlist.id + "/items",
         {
           method: "POST",
           headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
           body: JSON.stringify({ uris: trackUris }),
         }
       );
-      console.log("[JazzMap] real tracks →", addRes.status);
+      console.log("[JazzMap] add items →", addRes.status);
       if (addRes.ok) {
-        tracksAdded = trackUris.length + 1;
+        tracksAdded = trackUris.length;
       } else {
-        console.warn("[JazzMap] real tracks failed:", addRes.status, await addRes.text());
+        console.warn("[JazzMap] add items failed:", addRes.status, await addRes.text());
       }
     }
 
