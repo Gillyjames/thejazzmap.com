@@ -293,15 +293,25 @@
     .album-title    { line-height:1.4; }
     .node.selected circle {
       stroke:#fff !important; stroke-width:2.5px;
-      animation:selectedGlow 2.5s 0.3s ease-in-out infinite backwards;
     }
-    body.dense-selection .node.selected circle {
-      animation:none;
-      filter:drop-shadow(0 0 5px rgba(255,255,255,0.2));
+    /* Glow ring: a second circle animated via opacity — no filter, no repaint cost */
+    .glow-ring {
+      fill: none;
+      stroke: rgba(255,255,255,0.55);
+      stroke-width: 14px;
+      pointer-events: none;
+      opacity: 0;
     }
-    @keyframes selectedGlow {
-      0%,100% { filter:drop-shadow(0 0 4px rgba(255,255,255,0.28)); }
-      50%      { filter:drop-shadow(0 0 12px rgba(255,255,255,0.5)); }
+    .node.selected .glow-ring {
+      animation: glowPulse 2.5s 0.3s ease-in-out infinite backwards;
+    }
+    body.dense-selection .node.selected .glow-ring {
+      animation: none;
+      opacity: 0.18;
+    }
+    @keyframes glowPulse {
+      0%,100% { opacity: 0.18; }
+      50%      { opacity: 0.48; }
     }
 
     /* ── SIDEBAR ── */
@@ -1996,12 +2006,16 @@ setTimeout(() => {
           sel.transition().duration(450).style("opacity", null);
           // Bounce each circle in with a slight stagger per node
           sel.each(function(d, j) {
-            d3.select(this).select("circle")
+            const r = popularityR(d.id);
+            // Animate main circle (not the glow ring)
+            d3.select(this).select("circle:not(.glow-ring)")
               .transition()
               .delay(j * 18)
               .duration(520)
               .ease(d3.easeBackOut.overshoot(1.6))
-              .attr("r", popularityR(d.id));
+              .attr("r", r);
+            // Set glow ring to same radius immediately (no bounce needed)
+            d3.select(this).select(".glow-ring").attr("r", r);
             // Give each node a unique random velocity so they drift independently
             const angle = Math.random() * 2 * Math.PI;
             const speed = 2.5 + Math.random() * 4.5;
@@ -2477,6 +2491,9 @@ const rawLinks = [
   { s:"alice-coltrane",   t:"elvin-jones",        c:"Briefly overlapped in Coltrane's ensemble (1965–66)", w:2 },
   { s:"alice-coltrane",   t:"mccoy-tyner",        c:"Both pianists in Coltrane's group — she succeeded him (1966)", w:2 },
 
+  // Art Tatum
+  { s:"art-tatum",        t:"ben-webster",        c:"The Art Tatum–Ben Webster Quartet (Verve, 1956)",          w:4 },
+
   // Nat King Cole
   { s:"nat-king-cole",    t:"lester-young",       c:"Lester Young with the Nat King Cole Trio (1942)",          w:3 },
 
@@ -2788,6 +2805,9 @@ const LINK_ALBUMS = {
   "alice-coltrane:jimmy-garrison":   ["Expression (1967)", "Stellar Regions (1967)", "A Monastic Trio (1968)"],
   "alice-coltrane:elvin-jones":      ["Live in Japan (1966)", "Expression (1967)"],
   "alice-coltrane:mccoy-tyner":      ["Journey in Satchidananda (1971)", "Universal Consciousness (1971)"],
+
+  // Art Tatum
+  "art-tatum:ben-webster":           ["The Art Tatum–Ben Webster Quartet (Verve, 1956)"],
 
   // Nat King Cole
   "nat-king-cole:art-tatum":         ["Jazz at the Philharmonic, Vol. 1 (1944)", "The First JATP Concert (1944)"],
@@ -3346,13 +3366,13 @@ const ARTIST_POPULARITY = {
 
 // 7 discrete radius tiers based on popularity score
 const POP_TIERS = [
-  { max: 25,  r: 7  },
-  { max: 35,  r: 11 },
-  { max: 44,  r: 15 },
+  { max: 25,  r: 5  },
+  { max: 35,  r: 9  },
+  { max: 44,  r: 14 },
   { max: 53,  r: 20 },
-  { max: 62,  r: 27 },
-  { max: 71,  r: 34 },
-  { max: 100, r: 42 },
+  { max: 62,  r: 29 },
+  { max: 71,  r: 38 },
+  { max: 100, r: 50 },
 ];
 function popularityR(id) {
   const pop = ARTIST_POPULARITY[id];
@@ -3537,11 +3557,24 @@ const eraLabelSel = g.append("g")
 
 updateEraHeaderLayout();
 
-// Era dividers
-[0.245, 0.49, 0.73].forEach(x => {
+// ─── TIMELINE X-AXIS ─────────────────────────────────────────────────────────
+const YEAR_DOMAIN = [1918, 2026];
+const yearToX = d3.scaleLinear().domain(YEAR_DOMAIN).range([0.04, 0.96]);
+function nodeStartYear(d) {
+  const m = (d.years || "").match(/\d{4}/);
+  return m ? +m[0] : 1960;
+}
+
+// Decade dividers + labels
+[1930,1940,1950,1960,1970,1980,1990,2000,2010,2020].forEach(yr => {
+  const x = W * yearToX(yr);
   g.append("line")
-    .attr("x1",W*x).attr("y1",0).attr("x2",W*x).attr("y2",H)
+    .attr("x1",x).attr("y1",0).attr("x2",x).attr("y2",H)
     .attr("stroke","#121224").attr("stroke-width",1).attr("stroke-dasharray","3,8");
+  g.append("text")
+    .attr("x", x + 5).attr("y", 20)
+    .attr("fill","#3a3a5a").attr("font-size","11px").attr("font-family","Georgia")
+    .text(yr);
 });
 
 // ─── LINKS ───────────────────────────────────────────────────────────────────
@@ -3600,6 +3633,11 @@ const nodeSel = g.append("g")
   .on("click",     onSelect)
   .style("opacity", 0);  // revealed after intro fades
 
+// Glow ring sits BEHIND the main circle — no filter, just opacity animation
+nodeSel.append("circle")
+  .attr("class", "glow-ring")
+  .attr("r", 0);  // set to popularityR after intro alongside main circle
+
 nodeSel.append("circle")
   .attr("r", 0)  // animated to full size after intro
   .attr("fill", d => `url(#node-glass-${d.era})`)
@@ -3629,7 +3667,7 @@ const sim = d3.forceSimulation(nodes)
   .force("charge",    d3.forceManyBody().strength(d => -380 - degree[d.id]*14))
   .force("center",    d3.forceCenter(W/2, H/2).strength(0.03))
   .force("collision", d3.forceCollide(d => popularityR(d.id) + 14))
-  .force("x",         d3.forceX(d => W * ERA_X[d.era]).strength(0.15))
+  .force("x",         d3.forceX(d => W * yearToX(nodeStartYear(d))).strength(0.18))
   .force("y",         d3.forceY(d => H * instrBand(d.instr)).strength(0.10));
 
 sim.on("tick", () => {
@@ -4039,15 +4077,17 @@ function zoomToNode(d) {
   const isMob  = vw <= 640;
   const sbW    = isMob ? 0 : 320;
   const cx     = sbW ? (W - sbW) / 2 : W / 2;
-  // On mobile the bottom sheet clips vertical space — centre above it
   const sheetH = isMob ? Math.min(window.innerHeight * 0.28, 220) : 0;
   const cy     = (H - sheetH) / 2;
-  // Scale: back off on narrow screens so nearby connections stay in view
   const target = vw < 480 ? 1.4 : vw < 900 ? 1.6 : 2.0;
   const scale  = Math.max(currentTransform.k, target);
-  svg.transition().duration(800).ease(d3.easeCubicInOut)
+  // Pin node so it can't drift during the zoom transition
+  d.fx = d.x;
+  d.fy = d.y;
+  svg.transition().duration(700).ease(d3.easeCubicInOut)
      .call(zoomBehavior.transform,
-           d3.zoomIdentity.translate(cx - d.x * scale, cy - d.y * scale).scale(scale));
+           d3.zoomIdentity.translate(cx - d.x * scale, cy - d.y * scale).scale(scale))
+     .on("end", () => { d.fx = null; d.fy = null; });
 }
 
 function zoomToLink(l) {
