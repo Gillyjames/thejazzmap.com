@@ -269,6 +269,7 @@
       filter:drop-shadow(0 0 9px rgba(255,255,255,0.24));
     }
     .node text { pointer-events:none; text-shadow:0 0 3px rgba(13,13,26,0.85); }
+    .node { transition: opacity 70ms linear; }
     .node.dimmed { opacity:0.05; pointer-events:none; }
     .node.trail-dimmed { opacity:0.12; }
     /* ── LINKS ── */
@@ -4111,27 +4112,31 @@ function resetHighlight() {
   setDenseSelectionMode(false);
   activeNode = null;
   activeLink = null;
-  nodeSel.classed("selected", false);
-  linkSel.classed("active-link", false);
-  linkGlassSel.classed("active-link", false);
+  // Defer all DOM class changes to the next animation frame so they don't
+  // collide with a simulation tick and cause a GPU compositing flash.
+  requestAnimationFrame(() => {
+    nodeSel.classed("selected", false);
+    linkSel.classed("active-link", false);
+    linkGlassSel.classed("active-link", false);
 
-  const hasActiveFilters = activeEra !== "all" || activeInstr !== "all" || minWeight > 1;
-  if (!hasActiveFilters && !trailMode) {
+    const hasActiveFilters = activeEra !== "all" || activeInstr !== "all" || minWeight > 1;
+    if (!hasActiveFilters && !trailMode) {
+      nodeSel.classed("dimmed", false);
+      linkSel.classed("dimmed", false).classed("lit", false)
+        .attr("stroke-width", l => wWidth(l.weight))
+        .attr("stroke-opacity", l => wOpacity(l.weight));
+      linkGlassSel.classed("dimmed", false).classed("lit", false)
+        .attr("stroke-width", l => Math.max(0.7, wWidth(l.weight) * 0.26))
+        .attr("stroke-opacity", l => Math.max(0.05, wOpacity(l.weight) * 0.18));
+      return;
+    }
+
     nodeSel.classed("dimmed", false);
-    linkSel.classed("dimmed", false).classed("lit", false)
-      .attr("stroke-width", l => wWidth(l.weight))
-      .attr("stroke-opacity", l => wOpacity(l.weight));
-    linkGlassSel.classed("dimmed", false).classed("lit", false)
-      .attr("stroke-width", l => Math.max(0.7, wWidth(l.weight) * 0.26))
-      .attr("stroke-opacity", l => Math.max(0.05, wOpacity(l.weight) * 0.18));
-    return;
-  }
-
-  nodeSel.classed("dimmed", false);
-  linkSel.classed("dimmed", false).classed("lit", false);
-  linkGlassSel.classed("dimmed", false).classed("lit", false);
-  applyFilters();
-  if (trailMode) applyTrailHighlight();
+    linkSel.classed("dimmed", false).classed("lit", false);
+    linkGlassSel.classed("dimmed", false).classed("lit", false);
+    applyFilters();
+    if (trailMode) applyTrailHighlight();
+  });
 }
 
 // ─── SIDEBAR ─────────────────────────────────────────────────────────────────
