@@ -294,25 +294,17 @@
     .node.selected circle {
       stroke:#fff !important; stroke-width:2.5px;
     }
-    /* Glow ring: a second circle animated via opacity — no filter, no repaint cost */
+    /* Glow ring: opacity transition only — no CSS animation, no compositing layer churn */
     .glow-ring {
       fill: none;
       stroke: rgba(255,255,255,0.55);
       stroke-width: 14px;
       pointer-events: none;
       opacity: 0;
+      transition: opacity 0.18s ease;
     }
-    .node.selected .glow-ring {
-      animation: glowPulse 2.5s 0.3s ease-in-out infinite backwards;
-    }
-    body.dense-selection .node.selected .glow-ring {
-      animation: none;
-      opacity: 0.18;
-    }
-    @keyframes glowPulse {
-      0%,100% { opacity: 0.18; }
-      50%      { opacity: 0.48; }
-    }
+    .node.selected .glow-ring { opacity: 0.32; }
+    body.dense-selection .node.selected .glow-ring { opacity: 0.18; }
 
     /* ── SIDEBAR ── */
     #sidebar {
@@ -3660,6 +3652,13 @@ linkHitSel.raise();
 
 // ─── SIMULATION ──────────────────────────────────────────────────────────────
 
+// Pre-seed positions so nodes start near their equilibrium — prevents
+// the visible "drift into place" sweep on first load.
+nodes.forEach(d => {
+  d.x = W * yearToX(nodeStartYear(d)) + (Math.random() - 0.5) * 60;
+  d.y = H * instrBand(d.instr)         + (Math.random() - 0.5) * 60;
+});
+
 const sim = d3.forceSimulation(nodes)
   .force("link",      d3.forceLink(graphLinks).id(d=>d.id)
     .distance(d => 110 + (5-d.weight)*18)
@@ -4044,15 +4043,14 @@ function onSelect(e, d) {
     const kickSpeed = 4.5 + Math.random() * 4.0;
     d.vx = (d.vx || 0) + Math.cos(kickAngle) * kickSpeed;
     d.vy = (d.vy || 0) + Math.sin(kickAngle) * kickSpeed;
-    sim.alpha(Math.max(sim.alpha(), 0.32)).restart();
+    sim.alpha(Math.max(sim.alpha(), 0.14)).restart();
   }
 
   const connected = new Set([d.id]);
   adj[d.id].forEach(a => connected.add(a.id));
 
-  // Double-rAF: let D3's sim tick (which also uses rAF) fire in frame N,
-  // then apply class changes in frame N+1 so they never collide with a position update.
-  requestAnimationFrame(() => requestAnimationFrame(() => {
+  // Single rAF: let the kick fire first, then apply class changes next frame.
+  requestAnimationFrame(() => {
     nodeSel.classed("dimmed",   n => !connected.has(n.id));
     nodeSel.classed("selected", n => n.id === d.id);
     linkSel
@@ -4066,7 +4064,7 @@ function onSelect(e, d) {
         if (denseSelection) return 0;
         return (l.source.id === d.id || l.target.id === d.id) ? 0.24 : 0;
       });
-  }));
+  });
 
   populateSidebar(d);
   scheduleNodeFocus(d);
@@ -4112,8 +4110,7 @@ function resetHighlight() {
   setDenseSelectionMode(false);
   activeNode = null;
   activeLink = null;
-  // Double-rAF: ensure class changes land in a frame after D3's sim tick.
-  requestAnimationFrame(() => requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
     nodeSel.classed("selected", false);
     linkSel.classed("active-link", false);
     linkGlassSel.classed("active-link", false);
@@ -4135,7 +4132,7 @@ function resetHighlight() {
     linkGlassSel.classed("dimmed", false).classed("lit", false);
     applyFilters();
     if (trailMode) applyTrailHighlight();
-  }));
+  });
 }
 
 // ─── SIDEBAR ─────────────────────────────────────────────────────────────────
