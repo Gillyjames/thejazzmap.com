@@ -269,7 +269,6 @@
       filter:drop-shadow(0 0 9px rgba(255,255,255,0.24));
     }
     .node text { pointer-events:none; text-shadow:0 0 3px rgba(13,13,26,0.85); }
-    .node { transition: opacity 70ms linear; }
     .node.dimmed { opacity:0.05; pointer-events:none; }
     .node.trail-dimmed { opacity:0.12; }
     /* ── LINKS ── */
@@ -3573,7 +3572,7 @@ function nodeStartYear(d) {
     .attr("x1",x).attr("y1",0).attr("x2",x).attr("y2",H)
     .attr("stroke","#121224").attr("stroke-width",1).attr("stroke-dasharray","3,8");
   g.append("text")
-    .attr("x", x + 5).attr("y", 20)
+    .attr("x", x + 5).attr("y", H - 8)
     .attr("fill","#3a3a5a").attr("font-size","11px").attr("font-family","Georgia")
     .text(yr);
 });
@@ -4051,8 +4050,9 @@ function onSelect(e, d) {
   const connected = new Set([d.id]);
   adj[d.id].forEach(a => connected.add(a.id));
 
-  // Delay class changes by one frame so the kick fires before the repaint
-  requestAnimationFrame(() => {
+  // Double-rAF: let D3's sim tick (which also uses rAF) fire in frame N,
+  // then apply class changes in frame N+1 so they never collide with a position update.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     nodeSel.classed("dimmed",   n => !connected.has(n.id));
     nodeSel.classed("selected", n => n.id === d.id);
     linkSel
@@ -4066,7 +4066,7 @@ function onSelect(e, d) {
         if (denseSelection) return 0;
         return (l.source.id === d.id || l.target.id === d.id) ? 0.24 : 0;
       });
-  });
+  }));
 
   populateSidebar(d);
   scheduleNodeFocus(d);
@@ -4112,9 +4112,8 @@ function resetHighlight() {
   setDenseSelectionMode(false);
   activeNode = null;
   activeLink = null;
-  // Defer all DOM class changes to the next animation frame so they don't
-  // collide with a simulation tick and cause a GPU compositing flash.
-  requestAnimationFrame(() => {
+  // Double-rAF: ensure class changes land in a frame after D3's sim tick.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     nodeSel.classed("selected", false);
     linkSel.classed("active-link", false);
     linkGlassSel.classed("active-link", false);
@@ -4136,7 +4135,7 @@ function resetHighlight() {
     linkGlassSel.classed("dimmed", false).classed("lit", false);
     applyFilters();
     if (trailMode) applyTrailHighlight();
-  });
+  }));
 }
 
 // ─── SIDEBAR ─────────────────────────────────────────────────────────────────
