@@ -4036,14 +4036,7 @@ function onSelect(e, d) {
   const denseSelection = degree[d.id] >= 14;
   setDenseSelectionMode(denseSelection);
 
-  if (!denseSelection) {
-    // Kick on the clicked node — gentle nudge so it feels alive
-    const kickAngle = Math.random() * 2 * Math.PI;
-    const kickSpeed = 4.5 + Math.random() * 4.0;
-    d.vx = (d.vx || 0) + Math.cos(kickAngle) * kickSpeed;
-    d.vy = (d.vy || 0) + Math.sin(kickAngle) * kickSpeed;
-    sim.alpha(Math.max(sim.alpha(), 0.14)).restart();
-  }
+  // KICK DISABLED FOR FLICKER TEST — re-enable once root cause confirmed
 
   const connected = new Set([d.id]);
   adj[d.id].forEach(a => connected.add(a.id));
