@@ -4032,14 +4032,10 @@ function onSelect(e, d) {
   activeLink = null;
   if (activeNode === d.id) { resetHighlight(); closeSidebar(); return; }
   activeNode = d.id;
-  const denseSelection = degree[d.id] >= 14;
-  setDenseSelectionMode(denseSelection);
 
-  // Kick: nudge the sim so connected nodes ripple outward slightly.
-  // (Link transitions are now disabled globally so no GPU flash from this.)
-  if (!denseSelection) {
-    sim.alpha(Math.max(sim.alpha(), 0.14)).restart();
-  }
+  // Kick: nudge sim so connected nodes ripple. Link transitions are disabled
+  // globally so no GPU flash risk here regardless of node degree.
+  sim.alpha(Math.max(sim.alpha(), 0.22)).restart();
 
   const connected = new Set([d.id]);
   adj[d.id].forEach(a => connected.add(a.id));
@@ -4052,12 +4048,10 @@ function onSelect(e, d) {
       .classed("lit",    l => l.source.id === d.id || l.target.id === d.id);
     linkGlassSel
       .classed("dimmed", l => l.source.id !== d.id && l.target.id !== d.id)
-      .classed("lit",    l => !denseSelection && (l.source.id === d.id || l.target.id === d.id))
+      .classed("lit",    l => l.source.id === d.id || l.target.id === d.id)
       .classed("active-link", false)
-      .attr("stroke-opacity", l => {
-        if (denseSelection) return 0;
-        return (l.source.id === d.id || l.target.id === d.id) ? 0.24 : 0;
-      });
+      .attr("stroke-opacity", l =>
+        (l.source.id === d.id || l.target.id === d.id) ? 0.24 : 0);
   });
 
   populateSidebar(d);
@@ -4069,17 +4063,38 @@ function zoomToNode(d) {
   const vw     = window.innerWidth;
   const isMob  = vw <= 640;
   const sbW    = isMob ? 0 : 320;
-  const cx     = sbW ? (W - sbW) / 2 : W / 2;
   const sheetH = isMob ? Math.min(window.innerHeight * 0.28, 220) : 0;
-  const cy     = (H - sheetH) / 2;
-  const target = vw < 480 ? 1.4 : vw < 900 ? 1.6 : 2.0;
-  const scale  = Math.max(currentTransform.k, target);
+  const availW = W - sbW;
+  const availH = H - sheetH;
+
+  // Build bounding box of selected node + all direct neighbours
+  const neighbourIds = new Set([d.id]);
+  (adj[d.id] || []).forEach(a => neighbourIds.add(a.id));
+  const pts = nodes.filter(n => neighbourIds.has(n.id));
+
+  const pad = 90;
+  const xs  = pts.map(n => n.x);
+  const ys  = pts.map(n => n.y);
+  const x0  = Math.min(...xs) - pad;
+  const x1  = Math.max(...xs) + pad;
+  const y0  = Math.min(...ys) - pad;
+  const y1  = Math.max(...ys) + pad;
+
+  const scaleX  = availW / (x1 - x0);
+  const scaleY  = availH / (y1 - y0);
+  const minZoom = vw < 480 ? 1.2 : 1.4;
+  const scale   = Math.min(Math.max(Math.min(scaleX, scaleY), minZoom), 4.0);
+
+  const midX = (x0 + x1) / 2;
+  const midY = (y0 + y1) / 2;
+  const cx   = sbW + availW / 2;
+  const cy   = availH / 2;
+
   // Pin node so it can't drift during the zoom transition
-  d.fx = d.x;
-  d.fy = d.y;
+  d.fx = d.x; d.fy = d.y;
   svg.transition().duration(700).ease(d3.easeCubicInOut)
      .call(zoomBehavior.transform,
-           d3.zoomIdentity.translate(cx - d.x * scale, cy - d.y * scale).scale(scale))
+           d3.zoomIdentity.translate(cx - midX * scale, cy - midY * scale).scale(scale))
      .on("end", () => { d.fx = null; d.fy = null; });
 }
 
@@ -4564,6 +4579,12 @@ function applyFilters() {
 function onLinkClick(e, l) {
   e.stopPropagation();
   if (trailMode) return;
+  // When viewing a connection and no artist is selected, any click on the map
+  // (including accidentally on another link) always deselects — prevents the
+  // "trying to click off but keep selecting another connection" problem.
+  if (activeLink !== null && activeNode === null) {
+    resetHighlight(); closeSidebar(); return;
+  }
   activeNode = null;
   if (activeLink === l) { resetHighlight(); closeSidebar(); return; }
   activeLink = l;
