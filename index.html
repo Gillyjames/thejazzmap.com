@@ -217,8 +217,12 @@
 
 
     /* ── LINKS ── */
+    /* No CSS transition on links — simultaneous stroke-opacity transitions on 200+
+       SVG path elements force full re-rasterisation every frame while the D3 sim
+       is also ticking transforms, producing a GPU repaint flash on click/deselect.
+       Nodes use opacity on <g> elements (cheap compositor layer); links use
+       stroke-opacity on <path> elements (expensive). Instant snap is the fix. */
     .link {
-      transition:stroke-opacity 0.55s ease, stroke-width 0.2s ease;
       stroke-linecap: round;
     }
     .link.dimmed { stroke-opacity:0.02 !important; }
@@ -233,15 +237,10 @@
       stroke:#ffffff;
       stroke-linecap:round;
       opacity:0;
-      transition:opacity 0.55s ease, stroke-width 0.2s ease;
     }
     .link-glass.dimmed { opacity:0 !important; }
     .link-glass.lit { opacity:0.26 !important; }
     .link-glass.active-link { opacity:0.34 !important; }
-    body.dense-selection .link,
-    body.dense-selection .link-glass {
-      transition:none !important;
-    }
 
     /* ── NODES ── */
     .node circle {
@@ -4036,12 +4035,15 @@ function onSelect(e, d) {
   const denseSelection = degree[d.id] >= 14;
   setDenseSelectionMode(denseSelection);
 
-  // KICK DISABLED FOR FLICKER TEST — re-enable once root cause confirmed
+  // Kick: nudge the sim so connected nodes ripple outward slightly.
+  // (Link transitions are now disabled globally so no GPU flash from this.)
+  if (!denseSelection) {
+    sim.alpha(Math.max(sim.alpha(), 0.14)).restart();
+  }
 
   const connected = new Set([d.id]);
   adj[d.id].forEach(a => connected.add(a.id));
 
-  // Single rAF: let the kick fire first, then apply class changes next frame.
   requestAnimationFrame(() => {
     nodeSel.classed("dimmed",   n => !connected.has(n.id));
     nodeSel.classed("selected", n => n.id === d.id);
