@@ -1778,6 +1778,17 @@
       <button class="instr-btn" data-instr="drums"    title="Drums">Dms</button>
     </div>
     <div class="settings-divider"></div>
+    <div class="settings-title">Popularity</div>
+    <div class="strength-btns" id="tier-btns">
+      <button class="str-btn active" data-pop="0">All</button>
+      <button class="str-btn" data-pop="13">Celebrated+</button>
+      <button class="str-btn" data-pop="18">Acclaimed+</button>
+      <button class="str-btn" data-pop="25">Renowned+</button>
+      <button class="str-btn" data-pop="34">Icon+</button>
+      <button class="str-btn" data-pop="47">Giant+</button>
+      <button class="str-btn" data-pop="63">Legend</button>
+    </div>
+    <div class="settings-divider"></div>
     <div class="settings-title">Connection Strength</div>
     <div class="strength-btns">
       <button class="str-btn active" data-min="1">All</button>
@@ -2355,6 +2366,7 @@ const rawLinks = [
 
   // Bill Evans Trio
   { s:"bill-evans",        t:"scott-lafaro",       c:"Evans Trio (1959–61)",                            w:5 },
+  { s:"ornette-coleman",   t:"scott-lafaro",       c:"Free Jazz (1960)",                                 w:2 },
   { s:"bill-evans",        t:"paul-motian",        c:"Evans Trio (1959–64)",                            w:4 },
   { s:"bill-evans",        t:"eddie-gomez",        c:"Evans Trio (1966–77) — 11 years",                 w:5 },
 
@@ -2582,6 +2594,7 @@ const LINK_ALBUMS = {
   "thelonious-monk:sonny-rollins":   ["Thelonious Monk / Sonny Rollins (1954)", "Monk's Music (1957)"],
   "thelonious-monk:art-blakey":      ["Art Blakey's Jazz Messengers with Thelonious Monk (1957)"],
   "bill-evans:scott-lafaro":         ["Portrait in Jazz (1959)", "Waltz for Debby (1961)", "Sunday at the Village Vanguard (1961)"],
+  "ornette-coleman:scott-lafaro":    ["Free Jazz: A Collective Improvisation (1960)"],
   "bill-evans:paul-motian":          ["Portrait in Jazz (1959)", "Waltz for Debby (1961)"],
   "bill-evans:eddie-gomez":          ["At the Montreux Jazz Festival (1968)", "Intuition (1974)", "You Must Believe in Spring (1977)"],
   "jim-hall:bill-evans":             ["Undercurrent (1962)", "Intermodulation (1966)"],
@@ -3507,7 +3520,7 @@ svg.on("click", () => {
       b.classList.toggle("active", b.dataset.era === "all"));
     document.querySelectorAll(".instr-btn").forEach(b =>
       b.classList.toggle("active", b.dataset.instr === "all"));
-    settingsBtn.classList.toggle("filter-active", minWeight > 1);
+    settingsBtn.classList.toggle("filter-active", anyFilterActive());
     if (mobileInstrSelect) mobileInstrSelect.value = "all";
     applyFilters();
   }
@@ -3711,7 +3724,7 @@ function updateLabelVisibility() {
   const k = currentTransform.k;
   nodeSel.select("text").attr("display", d => {
     const renderedR = popularityR(d.id) * k;
-    return renderedR < 9 ? "none" : null;
+    return renderedR < 3 ? "none" : null; // only hide when truly microscopic
   });
 }
 
@@ -3790,12 +3803,24 @@ function isPlayerVisible() {
   return !!bar && bar.classList.contains("sp-visible");
 }
 
+function isSpotifyPlaying() {
+  return document.body.classList.contains("sp-playing");
+}
+
 function maybeOpenAutoAlbum(albums) {
-  if (isPlayerVisible()) return;
   const playableAlbums = (albums || []).filter(album =>
     typeof window.canPlayAlbum === "function" ? window.canPlayAlbum(album) : true
   );
   if (!playableAlbums.length) return;
+
+  if (isSpotifyPlaying()) {
+    // Song is playing — don't interrupt, but nudge the user toward the album cards
+    if (typeof showToast === "function") {
+      showToast("♫ Song playing — tap an album above to switch");
+    }
+    return;
+  }
+
   const chosenAlbum = shuffle(playableAlbums)[0];
   if (chosenAlbum) {
     setTimeout(() => window.onAlbumClick(chosenAlbum), 120);
@@ -4090,7 +4115,8 @@ function zoomToNode(d) {
 
   const midX = (x0 + x1) / 2;
   const midY = (y0 + y1) / 2;
-  const cx   = sbW + availW / 2;
+  // Sidebar is on the RIGHT, so available area is 0..availW. Centre of that area:
+  const cx   = availW / 2;
   const cy   = availH / 2;
 
   // Pin node so it can't drift during the zoom transition
@@ -4504,7 +4530,8 @@ document.addEventListener("touchcancel", () => {
 // ─── FILTERS (era + instrument) ──────────────────────────────────────────────
 
 let activeEra = "all";
-let minWeight = 1; // connection strength filter (1 = all, 5 = only strongest)
+let minWeight   = 1; // connection strength filter (1 = all, 5 = only strongest)
+let minPopScore = 0; // popularity filter: 0 = all, otherwise minimum score
 
 function applyFilters() {
   if (!introGone) return; // don't fight the era fade-in animation
@@ -4513,7 +4540,8 @@ function applyFilters() {
   nodes.forEach(n => {
     const eraOk  = activeEra   === "all" || n.era === activeEra;
     const instrOk = activeInstr === "all" || instrMatches(n.instr, activeInstr);
-    if (eraOk && instrOk) vis.add(n.id);
+    const popOk  = minPopScore === 0 || (ARTIST_POPULARITY[n.id] ?? 0) >= minPopScore;
+    if (eraOk && instrOk && popOk) vis.add(n.id);
   });
 
   // When strength filter is active, dim nodes that have no qualifying connections
@@ -4642,7 +4670,7 @@ document.querySelectorAll(".instr-btn").forEach(btn => {
     document.querySelectorAll(".instr-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     activeInstr = btn.dataset.instr;
-    settingsBtn.classList.toggle("filter-active", activeInstr !== "all" || minWeight > 1);
+    settingsBtn.classList.toggle("filter-active", anyFilterActive());
     resetHighlight(); closeSidebar(); applyFilters();
     sim.alpha(0.3).restart();
   });
@@ -4676,14 +4704,32 @@ const strengthDescs = [
   "Lifetime partners only (weight 5)"
 ];
 
-document.querySelectorAll(".str-btn").forEach(btn => {
+function anyFilterActive() {
+  return activeInstr !== "all" || minWeight > 1 || minPopScore > 0;
+}
+
+// Popularity tier filter
+document.querySelectorAll("#tier-btns .str-btn").forEach(btn => {
   btn.addEventListener("click", e => {
     e.stopPropagation();
-    document.querySelectorAll(".str-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll("#tier-btns .str-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    minPopScore = parseInt(btn.dataset.pop);
+    settingsBtn.classList.toggle("filter-active", anyFilterActive());
+    resetHighlight(); closeSidebar(); applyFilters();
+    sim.alpha(0.22).restart();
+  });
+});
+
+// Connection strength filter
+document.querySelectorAll(".str-btn:not(#tier-btns .str-btn)").forEach(btn => {
+  btn.addEventListener("click", e => {
+    e.stopPropagation();
+    document.querySelectorAll(".str-btn:not(#tier-btns .str-btn)").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     minWeight = parseInt(btn.dataset.min);
     document.getElementById("strength-desc").textContent = strengthDescs[minWeight];
-    settingsBtn.classList.toggle("filter-active", activeInstr !== "all" || minWeight > 1);
+    settingsBtn.classList.toggle("filter-active", anyFilterActive());
     resetHighlight(); closeSidebar(); applyFilters();
     sim.alpha(0.22).restart();
   });
@@ -5128,19 +5174,23 @@ trailModalEl.addEventListener("click", e => {
     try { cards = await buildTrailAlbums(); } finally { trailPath = savedPath; }
     if (!cards.length) throw new Error("No albums found for this trail");
 
-    // Resolve 2 tracks per album (up to 6 total)
+    // Resolve 3 random tracks per album — 3 albums × 3 tracks = 9 total.
+    const TRACKS_PER_ALBUM = 3;
     const trackUris = [];
     for (const card of cards) {
       const albumId = window.spId ? window.spId(card.requestedTitle) : null;
       if (!albumId) { console.log("[JazzMap] no spId for:", card.requestedTitle); continue; }
       try {
         const tr = await fetch(
-          "https://api.spotify.com/v1/albums/" + albumId + "/tracks?limit=2", // album tracks endpoint unchanged
+          "https://api.spotify.com/v1/albums/" + albumId + "/tracks?limit=50",
           { headers: { Authorization: "Bearer " + token } }
         );
         if (!tr.ok) { console.warn("[JazzMap] album tracks fetch", tr.status); continue; }
         const td = await tr.json();
-        (td.items || []).forEach(t => { if (t?.uri) trackUris.push(t.uri); });
+        const eligible = (td.items || []).filter(t => t?.uri);
+        // Shuffle and take up to TRACKS_PER_ALBUM
+        const shuffled = eligible.sort(() => Math.random() - 0.5);
+        shuffled.slice(0, TRACKS_PER_ALBUM).forEach(t => trackUris.push(t.uri));
       } catch (_) {}
     }
     console.log("[JazzMap] resolved URIs:", trackUris);
@@ -5201,6 +5251,8 @@ trailModalEl.addEventListener("click", e => {
       setTimeout(() => { toast.innerHTML = ""; toast.classList.remove("expanded"); }, 400);
     }, duration || 5000);
   }
+  // Expose so maybeOpenAutoAlbum (outer scope) can use it
+  window.showToast = showToast;
 
   function resetBtn() {
     const btn = document.getElementById("trail-spotify-btn");
