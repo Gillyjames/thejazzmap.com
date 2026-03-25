@@ -303,7 +303,6 @@
       transition: opacity 0.18s ease;
     }
     .node.selected .glow-ring { opacity: 0.32; }
-    body.dense-selection .node.selected .glow-ring { opacity: 0.18; }
 
     /* ── SIDEBAR ── */
     #sidebar {
@@ -3219,151 +3218,158 @@ const rScale = d3.scaleSqrt().domain([0, maxDeg]).range([7, 42]);
 // ─── SPOTIFY POPULARITY → NODE SIZE ──────────────────────────────────────────
 // Run popularity-fetcher.html on thejazzmap.com to refresh this data.
 // Scores are Spotify popularity (0–100) as of March 2026.
+// Popularity scores derived from Wikipedia 12-month pageview counts (Mar 2025–Feb 2026),
+// sqrt-normalised to 0–100. Name-collision artists resolved to disambiguated pages:
+//   John Lewis → John Lewis (pianist), Tony Williams → Tony Williams (drummer),
+//   Jimmy Smith / Ray Brown / Jim Hall → (musician), Charles Lloyd → (jazz musician).
 const ARTIST_POPULARITY = {
-  "airto-moreira":        37,
-  "al-di-meola":          44,
-  "alice-coltrane":       51,
-  "ambrose-akinmusire":   34,
-  "art-blakey":           55,
-  "art-tatum":            52,
-  "ben-webster":          49,
-  "benny-golson":         38,
-  "benny-goodman":        55,
-  "bill-evans":           63,
-  "billie-holiday":       68,
-  "billy-cobham":         41,
-  "billy-higgins":        30,
-  "billy-strayhorn":      42,
-  "bobby-hutcherson":     36,
-  "bobby-timmons":        33,
-  "booker-ervin":         32,
-  "brad-mehldau":         49,
-  "branford-marsalis":    45,
-  "buck-clayton":         33,
-  "bud-powell":           54,
-  "cannonball-adderley":  60,
-  "cecile-mclorin-salvant": 43,
-  "cedar-walton":         34,
-  "charles-lloyd":        40,
-  "charles-mingus":       64,
-  "charlie-christian":    43,
-  "charlie-haden":        43,
-  "charlie-parker":       65,
-  "chet-baker":           67,
-  "chick-corea":          58,
-  "chris-potter":         36,
-  "clifford-brown":       52,
-  "coleman-hawkins":      52,
-  "connie-kay":           25,
-  "cootie-williams":      31,
-  "count-basie":          59,
-  "dannie-richmond":      27,
-  "dave-brubeck":         63,
-  "dave-holland":         39,
-  "dexter-gordon":        56,
-  "dhafer-youssef":       37,
-  "dizzy-gillespie":      62,
-  "don-cherry":           46,
-  "donald-byrd":          52,
-  "duke-ellington":       67,
-  "earl-hines":           40,
-  "ed-blackwell":         30,
-  "eddie-gomez":          32,
-  "eddie-harris":         39,
-  "ella-fitzgerald":      72,
-  "elvin-jones":          46,
-  "eric-dolphy":          51,
-  "esperanza-spalding":   48,
-  "fats-waller":          55,
-  "freddie-hubbard":      56,
-  "gary-peacock":         33,
-  "gene-krupa":           52,
-  "gerry-mulligan":       51,
-  "herbie-hancock":       65,
-  "horace-silver":        51,
-  "jack-dejohnette":      40,
-  "jack-teagarden":       38,
-  "jackie-mclean":        43,
-  "jaco-pastorius":       58,
-  "jaki-byard":           28,
-  "jelly-roll-morton":    46,
-  "jim-hall":             43,
-  "jimmy-garrison":       29,
-  "jimmy-smith":          53,
-  "jo-jones":             31,
-  "joe-henderson":        48,
-  "joe-pass":             49,
-  "joe-zawinul":          43,
-  "john-coltrane":        72,
-  "john-lewis":           37,
-  "john-mclaughlin":      53,
-  "johnny-hodges":        43,
-  "joshua-redman":        43,
-  "julian-lage":          46,
-  "kamasi-washington":    53,
-  "keith-jarrett":        62,
-  "kenny-burrell":        46,
-  "kenny-clarke":         33,
-  "kid-ory":              34,
-  "lee-konitz":           38,
-  "lee-morgan":           54,
-  "lenny-white":          31,
-  "les-mccann":           41,
-  "lester-young":         52,
-  "lionel-hampton":       50,
-  "louis-armstrong":      72,
-  "lyle-mays":            40,
-  "maceo-parker":         50,
-  "mary-halvorson":       30,
-  "max-roach":            55,
-  "mccoy-tyner":          53,
-  "miles-davis":          77,
-  "milt-jackson":         47,
-  "miroslav-vitous":      30,
-  "nat-king-cole":        68,
-  "nina-simone":          72,
-  "ornette-coleman":      57,
-  "oscar-peterson":       63,
-  "pat-metheny":          59,
-  "paul-chambers":        39,
-  "paul-desmond":         52,
-  "paul-motian":          33,
-  "percy-heath":          29,
-  "pharoah-sanders":      52,
-  "philly-joe-jones":     30,
-  "ray-brown":            47,
-  "red-garland":          36,
-  "red-rodney":           28,
-  "robert-glasper":       53,
-  "ron-carter":           49,
-  "sarah-vaughan":        62,
-  "scott-lafaro":         32,
-  "shabaka-hutchings":    40,
-  "sidney-bechet":        52,
-  "sonny-rollins":        63,
-  "stan-getz":            64,
-  "stanley-clarke":       46,
-  "sun-ra":               51,
-  "teddy-wilson":         38,
-  "thelonious-monk":      69,
-  "tony-williams":        48,
-  "wayne-shorter":        61,
-  "wes-montgomery":       59,
-  "woody-shaw":           40,
-  "wynton-kelly":         36,
-  "wynton-marsalis":      55,
-  "zakir-hussain":        52,
+  "miles-davis":          100,
+  "louis-armstrong":       93,
+  "billie-holiday":        88,
+  "nina-simone":           87,
+  "nat-king-cole":         79,
+  "john-coltrane":         78,
+  "ella-fitzgerald":       75,
+  "duke-ellington":        66,
+  "herbie-hancock":        62,
+  "charlie-parker":        61,
+  "chet-baker":            61,
+  "jaco-pastorius":        57,
+  "bill-evans":            55,
+  "thelonious-monk":       53,
+  "charles-mingus":        51,
+  "chick-corea":           51,
+  "dizzy-gillespie":       50,
+  "dave-brubeck":          50,
+  "pat-metheny":           50,
+  "keith-jarrett":         49,
+  "wynton-marsalis":       49,
+  "don-cherry":            47,
+  "stan-getz":             47,
+  "oscar-peterson":        44,
+  "sun-ra":                44,
+  "count-basie":           43,
+  "benny-goodman":         42,
+  "alice-coltrane":        41,
+  "jack-dejohnette":       39,
+  "esperanza-spalding":    39,
+  "sonny-rollins":         38,
+  "wayne-shorter":         38,
+  "sarah-vaughan":         38,
+  "al-di-meola":           37,
+  "jelly-roll-morton":     36,
+  "fats-waller":           36,
+  "gene-krupa":            35,
+  "charlie-haden":         35,
+  "stanley-clarke":        35,
+  "cannonball-adderley":   34,
+  "wes-montgomery":        34,
+  "ron-carter":            34,
+  "branford-marsalis":     34,
+  "kamasi-washington":     34,
+  "art-blakey":            33,
+  "max-roach":             32,
+  "ornette-coleman":       32,
+  "tony-williams":         32,
+  "billy-cobham":          32,
+  "art-tatum":             31,
+  "sidney-bechet":         31,
+  "kenny-burrell":         31,
+  "gerry-mulligan":        31,
+  "pharoah-sanders":       31,
+  "paul-desmond":          30,
+  "lester-young":          29,
+  "lee-morgan":            29,
+  "freddie-hubbard":       29,
+  "dexter-gordon":         29,
+  "mccoy-tyner":           29,
+  "joe-zawinul":           29,
+  "robert-glasper":        29,
+  "billy-strayhorn":       28,
+  "eric-dolphy":           28,
+  "donald-byrd":           27,
+  "joe-pass":              27,
+  "lionel-hampton":        26,
+  "clifford-brown":        26,
+  "horace-silver":         26,
+  "ray-brown":             26,
+  "elvin-jones":           26,
+  "coleman-hawkins":       25,
+  "bud-powell":            25,
+  "benny-golson":          25,
+  "jimmy-smith":           25,
+  "brad-mehldau":          25,
+  "paul-chambers":         24,
+  "julian-lage":           24,
+  "charlie-christian":     23,
+  "joe-henderson":         23,
+  "lyle-mays":             23,
+  "jo-jones":              22,
+  "maceo-parker":          22,
+  "scott-lafaro":          21,
+  "charles-lloyd":         21,
+  "joshua-redman":         21,
+  "earl-hines":            20,
+  "ben-webster":           20,
+  "jackie-mclean":         20,
+  "jim-hall":              20,
+  "cecile-mclorin-salvant":20,
+  "eddie-harris":          20,
+  "red-garland":           19,
+  "philly-joe-jones":      19,
+  "milt-jackson":          19,
+  "paul-motian":           19,
+  "wynton-kelly":          19,
+  "lenny-white":           19,
+  "airto-moreira":         19,
+  "kenny-clarke":          18,
+  "teddy-wilson":          17,
+  "johnny-hodges":         17,
+  "jack-teagarden":        17,
+  "woody-shaw":            17,
+  "shabaka-hutchings":     17,
+  "bobby-timmons":         16,
+  "john-lewis":            16,
+  "billy-higgins":         16,
+  "lee-konitz":            16,
+  "bobby-hutcherson":      16,
+  "gary-peacock":          16,
+  "les-mccann":            16,
+  "kid-ory":               15,
+  "cedar-walton":          15,
+  "jimmy-garrison":        15,
+  "mary-halvorson":        14,
+  "buck-clayton":          13,
+  "percy-heath":           13,
+  "dannie-richmond":       13,
+  "jaki-byard":            13,
+  "ambrose-akinmusire":    13,
+  "red-rodney":            12,
+  "booker-ervin":          12,
+  "dhafer-youssef":        12,
+  "cootie-williams":       11,
+  "connie-kay":            11,
+  "john-mclaughlin":       11,
+  "ed-blackwell":          10,
+  "dave-holland":          10,
+  "zakir-hussain":          5,
+  "miroslav-vitous":        4,
+  "eddie-gomez":            3,
+  "chris-potter":           0,
 };
 
-// 7 discrete radius tiers based on popularity score
+// 7 discrete radius tiers. Breakpoints tuned for the real Wikipedia-derived
+// 0–100 distribution. Names reflect mainstream recognition, not artistry —
+// every artist on this map is a master regardless of tier.
+// Distribution: 12 / 21 / 24 / 32 / 21 / 15 / 8 artists.
 const POP_TIERS = [
-  { max: 25,  r: 5  },
-  { max: 35,  r: 9  },
-  { max: 44,  r: 14 },
-  { max: 53,  r: 20 },
-  { max: 62,  r: 29 },
-  { max: 71,  r: 38 },
-  { max: 100, r: 50 },
+  { max: 12,  r: 5,  label: "Specialist" },
+  { max: 17,  r: 9,  label: "Celebrated" },
+  { max: 24,  r: 14, label: "Acclaimed"  },
+  { max: 33,  r: 20, label: "Renowned"   },
+  { max: 46,  r: 29, label: "Icon"       },
+  { max: 62,  r: 38, label: "Giant"      },
+  { max: 100, r: 50, label: "Legend"     },
 ];
 function popularityR(id) {
   const pop = ARTIST_POPULARITY[id];
@@ -3803,9 +3809,6 @@ function clearPendingFocus() {
   }
 }
 
-function setDenseSelectionMode(enabled) {
-  document.body.classList.toggle("dense-selection", !!enabled);
-}
 
 function scheduleNodeFocus(d) {
   clearPendingFocus();
@@ -4116,7 +4119,6 @@ function zoomToLink(l) {
 
 function resetHighlight() {
   clearPendingFocus();
-  setDenseSelectionMode(false);
   activeNode = null;
   activeLink = null;
   requestAnimationFrame(() => {
@@ -4163,7 +4165,10 @@ function populateSidebar(d) {
 
   document.getElementById("sb-instr").textContent = d.instr;
   document.getElementById("sb-years").textContent = "Active: " + d.years;
-  document.getElementById("sb-count").textContent = `${degree[d.id]} documented connections`;
+  const pop   = ARTIST_POPULARITY[d.id];
+  const tier  = pop != null ? POP_TIERS.find(t => pop <= t.max) : null;
+  const tierStr = tier ? ` · ${tier.label}` : "";
+  document.getElementById("sb-count").textContent = `${degree[d.id]} documented connections${tierStr}`;
 
   const tag = document.getElementById("sb-era-tag");
   tag.textContent  = ERA_LABEL[d.era];
@@ -4579,9 +4584,15 @@ function applyFilters() {
 function onLinkClick(e, l) {
   e.stopPropagation();
   if (trailMode) return;
-  // When viewing a connection and no artist is selected, any click on the map
-  // (including accidentally on another link) always deselects — prevents the
-  // "trying to click off but keep selecting another connection" problem.
+  // Artist selected → only allow clicking CONNECTED (lit) links; dimmed links
+  // act like background — they deselect. Prevents accidentally opening a random
+  // connection when trying to click off an artist.
+  if (activeNode !== null) {
+    const isConnected = l.source.id === activeNode || l.target.id === activeNode;
+    if (!isConnected) { resetHighlight(); closeSidebar(); return; }
+    // Connected link clicked while artist selected → fall through to open it
+  }
+  // Connection selected and no artist → any link click deselects.
   if (activeLink !== null && activeNode === null) {
     resetHighlight(); closeSidebar(); return;
   }
