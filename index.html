@@ -3807,6 +3807,8 @@ function isSpotifyPlaying() {
   return document.body.classList.contains("sp-playing");
 }
 
+let _playingToastShown = false; // only nudge the user once per session
+
 function maybeOpenAutoAlbum(albums) {
   const playableAlbums = (albums || []).filter(album =>
     typeof window.canPlayAlbum === "function" ? window.canPlayAlbum(album) : true
@@ -3814,9 +3816,10 @@ function maybeOpenAutoAlbum(albums) {
   if (!playableAlbums.length) return;
 
   if (isSpotifyPlaying()) {
-    // Song is playing — don't interrupt, but nudge the user toward the album cards
-    if (typeof showToast === "function") {
-      showToast("♫ Song playing — tap an album above to switch");
+    // Song is playing — don't interrupt. Nudge once so the user knows why.
+    if (!_playingToastShown && typeof window.showToast === "function") {
+      _playingToastShown = true;
+      window.showToast("♫ Song playing — tap an album above to switch");
     }
     return;
   }
