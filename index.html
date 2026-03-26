@@ -2636,7 +2636,7 @@ const LINK_ALBUMS = {
   "benny-goodman:lionel-hampton":    ["The Famous 1938 Carnegie Hall Jazz Concert (1938)", "Benny Goodman Quartet (1937)"],
   "benny-goodman:teddy-wilson":      ["The Famous 1938 Carnegie Hall Jazz Concert (1938)", "After You've Gone (1935)", "Benny Goodman Trio (1935)"],
   "benny-goodman:charlie-christian": ["Solo Flight: The Genius of Charlie Christian (1939–41)", "After You've Gone (1940)"],
-  "benny-goodman:cootie-williams":   ["Wholly Cats (1941)", "Breakfast Feud (1941)"],
+  "benny-goodman:cootie-williams":   ["Small Groups: 1941-1945 (1989)", "Complete Jazz Series 1940 – 1941 (2009)"],
 
   // Billie Holiday
   "billie-holiday:lester-young":     ["The Quintessential Billie Holiday Vol. 3 (1936–37)", "The Quintessential Billie Holiday Vol. 5 (1937–38)", "The Complete Commodore Recordings (1939)"],
@@ -5138,24 +5138,45 @@ trailModalEl.addEventListener("click", e => {
     // the SP dict doesn't have a hardcoded entry for a particular album.
     async function resolveAlbumId(card) {
       const allTitles = [card.requestedTitle, ...(card.pair?.albums || []).filter(t => t !== card.requestedTitle)];
-      // 1. Fast path: hardcoded SP dict
+
+      // 1. Fast path: hardcoded SP dict — try every album title in the pair
       for (const title of allTitles) {
         const id = window.spId ? window.spId(title) : null;
         if (id) return id;
       }
-      // 2. Fallback: Spotify Search API
-      const cleanTitle = card.requestedTitle.replace(/\s*\(\d{4}(?:[-–]\d{2,4})?\)\s*$/, "").trim();
-      const artistName = card.pair?.source?.name || "";
-      const q = encodeURIComponent(`album:${cleanTitle} artist:${artistName}`);
-      try {
-        const sr = await fetch(`https://api.spotify.com/v1/search?q=${q}&type=album&limit=1`,
-          { headers: { Authorization: "Bearer " + token } });
-        if (sr.ok) {
-          const sd = await sr.json();
-          const firstId = sd.albums?.items?.[0]?.id;
-          if (firstId) { console.log("[JazzMap] search found:", cleanTitle, "→", firstId); return firstId; }
+
+      // 2. Spotify Search — for each album title try: strict (source artist),
+      //    strict (target artist), then a loose title-only query.
+      //    Return as soon as any query succeeds.
+      const sourceName = card.pair?.source?.name || "";
+      const targetName = card.pair?.target?.name || "";
+      const artists = [...new Set([sourceName, targetName].filter(Boolean))];
+
+      async function spSearch(q) {
+        try {
+          const sr = await fetch(
+            `https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=album&limit=3`,
+            { headers: { Authorization: "Bearer " + token } }
+          );
+          if (sr.ok) return (await sr.json()).albums?.items?.[0]?.id || null;
+        } catch (_) {}
+        return null;
+      }
+
+      for (const title of allTitles) {
+        const clean = title.replace(/\s*\(\d{4}(?:[-–]\d{2,4})?\)\s*$/, "").trim();
+
+        // Strict: album field filter + each artist
+        for (const artist of artists) {
+          const id = await spSearch(`album:${clean} artist:${artist}`);
+          if (id) { console.log("[JazzMap] strict search:", clean, "→", id); return id; }
         }
-      } catch (_) {}
+
+        // Loose: title only (no field filters)
+        const id = await spSearch(clean);
+        if (id) { console.log("[JazzMap] loose search:", clean, "→", id); return id; }
+      }
+
       console.log("[JazzMap] no Spotify ID for:", card.requestedTitle);
       return null;
     }
@@ -5790,6 +5811,17 @@ document.getElementById("about-modal").addEventListener("click", e => {
     "A Night at Birdland Vol. 1 & 2 (1954)":              "00kSJu1snceWGZ0yYkTZXr",
     // Coleman Hawkins
     "Coleman Hawkins Encounters Ben Webster (1957)":       "0YvmTfRbNnbHbsKK2C0Dz2",
+    // Ella Fitzgerald / Duke Ellington (new connections)
+    "Ella Fitzgerald Sings the Duke Ellington Song Book, Vol. 1 (1957)": "2VgS17fUEsUer5nCbM2juj",
+    "Ella Fitzgerald Sings the Duke Ellington Song Book, Vol. 2 (1957)": "2VgS17fUEsUer5nCbM2juj",
+    "Côte d'Azur Concerts (1966)":                         "6HB7DIimNNH9IEQyNbZhLi",
+    // Ben Webster / Johnny Hodges
+    "Side by Side (Verve, 1958)":                          "0j7RqsEnjaGpo3aEPQxjrS",
+    // Billie Holiday / Ben Webster
+    "The Quintessential Billie Holiday Vol. 7 (1938–40)":  "7jF6GOdweyLTJllRimpheb",
+    "Body and Soul (1940)":                                "3aJNsCTs6AlnGcLs2b6Rc3",
+    // Benny Goodman / Cootie Williams
+    "Small Groups: 1941-1945 (1989)":                      "2hcioj7Ylhau26ffRy9WE4",
     // Esperanza Spalding
     "Chamber Music Society (2010)":                        "7qXlTq1d8u38dybiUXjzBG",
     // Mary Halvorson
