@@ -2237,6 +2237,7 @@ const rawLinks = [
   { s:"duke-ellington",    t:"kenny-burrell",      c:"NYC studio sessions (1960s)",                     w:2 },
   { s:"duke-ellington",    t:"john-coltrane",      c:"Duke Ellington & John Coltrane (Impulse!, 1962)", w:3 },
   { s:"duke-ellington",    t:"sidney-bechet",      c:"Ellington Orchestra (1925, briefly)",             w:1 },
+  { s:"duke-ellington",    t:"ella-fitzgerald",    c:"Ella Fitzgerald Sings the Duke Ellington Song Book (Verve, 1957)", w:3 },
 
   // Count Basie
   { s:"count-basie",       t:"lester-young",       c:"Basie Orchestra (1936–40)",                       w:4 },
@@ -2251,14 +2252,17 @@ const rawLinks = [
   { s:"benny-goodman",     t:"lionel-hampton",     c:"Goodman Quartet (1936–40)",                       w:4 },
   { s:"benny-goodman",     t:"teddy-wilson",       c:"Goodman Trio / Quartet (1935–39)",                w:4 },
   { s:"benny-goodman",     t:"charlie-christian",  c:"Goodman Sextet (1939–41)",                        w:3 },
+  { s:"benny-goodman",     t:"cootie-williams",    c:"Goodman Orchestra (1940–41)",                     w:2 },
 
   // Billie Holiday
   { s:"billie-holiday",    t:"lester-young",       c:"Recorded together (1937–41)",                     w:4 },
   { s:"billie-holiday",    t:"teddy-wilson",       c:"Recorded together (1935–42)",                     w:3 },
   { s:"billie-holiday",    t:"buck-clayton",       c:"Recorded together (1937–38)",                     w:3 },
+  { s:"billie-holiday",    t:"ben-webster",        c:"Recorded together (1937–40)",                     w:2 },
 
   // Coleman Hawkins
   { s:"coleman-hawkins",   t:"thelonious-monk",    c:"'Round Midnight sessions (1944)",                 w:2 },
+  { s:"coleman-hawkins",   t:"ben-webster",        c:"Coleman Hawkins Encounters Ben Webster (Verve, 1957)", w:3 },
 
   // Dizzy Gillespie
   { s:"dizzy-gillespie",   t:"charlie-parker",     c:"Bebop co-creators — small groups & big band (1944–46)", w:5 },
@@ -2496,6 +2500,9 @@ const rawLinks = [
   // Art Tatum
   { s:"art-tatum",        t:"ben-webster",        c:"The Art Tatum–Ben Webster Quartet (Verve, 1956)",          w:4 },
 
+  // Ben Webster small-group collaborations
+  { s:"ben-webster",      t:"johnny-hodges",      c:"Side by Side (Verve, 1958)",                               w:2 },
+
   // Nat King Cole
   { s:"nat-king-cole",    t:"lester-young",       c:"Lester Young with the Nat King Cole Trio (1942)",          w:3 },
 
@@ -2665,6 +2672,9 @@ const LINK_ALBUMS = {
   "louis-armstrong:sidney-bechet":   ["Clarence Williams Blue Five Sessions (1924–25)"],
 
   // Duke Ellington
+  "duke-ellington:ella-fitzgerald":  ["Ella Fitzgerald Sings the Duke Ellington Song Book, Vol. 1 (1957)", "Ella Fitzgerald Sings the Duke Ellington Song Book, Vol. 2 (1957)", "Côte d'Azur Concerts (1966)"],
+  "duke-ellington:coleman-hawkins":  ["Duke Ellington Meets Coleman Hawkins (1962)"],
+  "duke-ellington:sidney-bechet":    ["The Duke's Men: Small Groups Vol. 1 (1925)"],
   "duke-ellington:billy-strayhorn":  ["...And His Mother Called Him Bill (1967)", "The Far East Suite (1967)", "Such Sweet Thunder (1957)"],
   "duke-ellington:johnny-hodges":    ["Ellington at Newport (1956)", "Such Sweet Thunder (1957)", "The Far East Suite (1967)"],
   "duke-ellington:ben-webster":      ["The Blanton–Webster Band (1940–42)", "Duke Ellington Presents... (1956)"],
@@ -2676,6 +2686,7 @@ const LINK_ALBUMS = {
   "count-basie:lester-young":        ["The Original American Decca Recordings (1937–39)", "One O'Clock Jump (1937)", "Lester Leaps In (1939)"],
   "count-basie:jo-jones":            ["The Original American Decca Recordings (1937–39)", "Count Basie at Newport (1957)", "April in Paris (1956)"],
   "count-basie:buck-clayton":        ["The Original American Decca Recordings (1937–39)", "The Complete Atomic Basie (1957)"],
+  "count-basie:billie-holiday":      ["The Original American Decca Recordings (1937–39)", "One O'Clock Jump (1937)"],
   "count-basie:ella-fitzgerald":     ["Ella and Basie! (1963)"],
   "count-basie:oscar-peterson":      ["Oscar Peterson & Count Basie: Satch and Josh (1974)"],
 
@@ -2684,11 +2695,13 @@ const LINK_ALBUMS = {
   "benny-goodman:lionel-hampton":    ["The Famous 1938 Carnegie Hall Jazz Concert (1938)", "Benny Goodman Quartet (1937)"],
   "benny-goodman:teddy-wilson":      ["The Famous 1938 Carnegie Hall Jazz Concert (1938)", "After You've Gone (1935)", "Benny Goodman Trio (1935)"],
   "benny-goodman:charlie-christian": ["Solo Flight: The Genius of Charlie Christian (1939–41)", "After You've Gone (1940)"],
+  "benny-goodman:cootie-williams":   ["Wholly Cats (1941)", "Breakfast Feud (1941)"],
 
   // Billie Holiday
   "billie-holiday:lester-young":     ["The Quintessential Billie Holiday Vol. 3 (1936–37)", "The Quintessential Billie Holiday Vol. 5 (1937–38)", "The Complete Commodore Recordings (1939)"],
   "billie-holiday:teddy-wilson":     ["The Quintessential Billie Holiday Vol. 1 (1933–35)", "The Quintessential Billie Holiday Vol. 2 (1936)", "A Fine Romance (1936)"],
   "billie-holiday:buck-clayton":     ["The Quintessential Billie Holiday Vol. 4 (1937)", "The Quintessential Billie Holiday Vol. 6 (1938)"],
+  "billie-holiday:ben-webster":      ["The Quintessential Billie Holiday Vol. 7 (1938–40)", "Body and Soul (1940)", "All of Me (1941)"],
 
   // Charlie Parker
   "charlie-parker:miles-davis":      ["The Charlie Parker Story (1945)", "Bird: The Complete Dial Sessions (1946–47)", "Jazz at Massey Hall (1953)"],
@@ -2799,6 +2812,7 @@ const LINK_ALBUMS = {
   "thelonious-monk:max-roach":       ["Thelonious Monk Quintet (1954)", "Monk's Music (1957)"],
   "thelonious-monk:milt-jackson":    ["Blue Note Sessions (1948)", "Thelonious Monk Quintet (1954)"],
   "coleman-hawkins:thelonious-monk": ["'Round Midnight (1944)", "Rainbow Mist (1944)"],
+  "coleman-hawkins:ben-webster":     ["Coleman Hawkins Encounters Ben Webster (1957)"],
 
   // Sonny Rollins
   "sonny-rollins:horace-silver":     ["Horace Silver and the Jazz Messengers (1955)", "Sonny Rollins Vol. 1 (1956)"],
@@ -2811,6 +2825,7 @@ const LINK_ALBUMS = {
 
   // Art Tatum
   "art-tatum:ben-webster":           ["The Art Tatum–Ben Webster Quartet (Verve, 1956)"],
+  "ben-webster:johnny-hodges":       ["Side by Side (Verve, 1958)"],
 
   // Nat King Cole
   "nat-king-cole:art-tatum":         ["Jazz at the Philharmonic, Vol. 1 (1944)", "The First JATP Concert (1944)"],
