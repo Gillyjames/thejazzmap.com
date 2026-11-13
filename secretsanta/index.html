@@ -86,9 +86,9 @@ a{color:inherit}
 
 /* game */
 .game{position:fixed;inset:0;z-index:30;background:var(--white);touch-action:none;user-select:none;-webkit-user-select:none}
-#game{position:absolute;inset:0;display:block;cursor:crosshair}
+#game{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
 .cap{position:absolute;left:var(--pad);top:calc(var(--pad) + 56px);max-width:min(460px,calc(100vw - 2*var(--pad)));background:var(--white);border:1px solid var(--blue);padding:10px 12px;font-family:var(--mono);font-size:12px;line-height:1.45;letter-spacing:.04em;transition:opacity .25s}
-.cap:empty{opacity:0}
+.cap:empty{display:none}
 .hud{position:absolute;right:var(--pad);bottom:var(--pad);display:flex;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
 .hud span{background:var(--white);border:1px solid var(--blue);padding:9px 12px}
 .hud span+span{border-left:0}
@@ -347,11 +347,13 @@ const Game = (() => {
   function layout(){
     cw = innerWidth; ch = innerHeight; dpr = Math.min(2, devicePixelRatio || 1);
     cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
-    s = Math.min(cw / (cw < ch ? 760 : 1000), ch / 650);
+    const tall = cw < ch;
+    s = Math.min(cw / (tall ? 660 : 1000), ch / 650);
     VW = cw / s; VH = ch / s;
-    L.B = Math.max(175, VW * .16);
-    L.tx0 = VW - 270; L.ty = 120; L.R0 = 44;
-    L.groundCy = .36 * VH;
+    L.B = Math.max(170, VW * .16);
+    L.tx0 = VW - (tall ? 200 : 270); L.ty = 120; L.R0 = 44;
+    L.gOff = tall ? 100 : 135; L.sOff = tall ? 175 : 225;
+    L.groundCy = (tall ? .22 : .36) * VH;
     L.landX = VW * .26; L.treeX = VW * .52; L.flagX = VW * .72; L.lmX = VW * .87;
     L.D = L.tx0 - (L.B + 30);
   }
@@ -385,14 +387,16 @@ const Game = (() => {
     fire(st.aimA, st.power);
   }
   function aimFromDrag(){
-    const d = st.drag, dx = d.x0 - d.x, dy = d.y0 - d.y;
+    const d = st.drag;
+    let dx = d.x0 - d.x, dy = d.y0 - d.y;
+    if (dx < 0){ dx = -dx; dy = -dy; }   // dragged towards the target: treat it as pointing
     const len = Math.hypot(dx, dy), max = Math.max(110, .3 * Math.min(cw, ch));
     if (len > 4) st.aimA = clamp(Math.atan2(-dy, dx), -.25, 1.45);
     st.power = clamp(len / max);
   }
   function launchPt(){ return { x: L.B + 30, y: 92 }; }
   function fire(a, p){
-    const v = p * Math.sqrt(1.5 * L.D * G), o = launchPt();
+    const v = p * Math.sqrt(1.4 * L.D * G), o = launchPt();
     st.cur = { x: o.x + Math.cos(a) * 34, y: o.y + Math.sin(a) * 34, vx: Math.cos(a) * v, vy: Math.sin(a) * v, a };
     st.mode = 'fly'; st.power = 0; setCap('');
   }
@@ -636,7 +640,7 @@ const Game = (() => {
     for (let gx = -40; gx < VW + 40; gx += 26){ line([gx, -6, gx + 8, -14]); }
     ctx.lineWidth = px(2.2);
 
-    const X = tx(), r = R(), gx = X + 135, sx = X + 225;
+    const X = tx(), r = R(), gx = X + L.gOff, sx = X + L.sOff;
     // chain reaction timings
     const tip = seq ? clamp(t / .8) : 0;
     const trot = -.95 * tip * tip + (t > .8 && t < 1.1 ? Math.sin((t - .8) * 20) * .03 : 0);
@@ -663,7 +667,14 @@ const Game = (() => {
     const aiming = st.mode === 'aim' && st.drag;
     drawBalloon(L.B, by, { aim: st.aimA, pull: aiming ? st.power : 0, nocked: st.mode === 'aim', bow: true });
     invert(false);
-    if (st.cur) drawArrow(st.cur.x, st.cur.y, st.cur.a);
+    if (st.cur){
+      drawArrow(st.cur.x, st.cur.y, st.cur.a);
+      const top = cam.y + (ch / 2) / s - 30;
+      if (st.cur.y > top){
+        ctx.fillStyle = INK; ctx.beginPath();
+        ctx.moveTo(st.cur.x, top + 18); ctx.lineTo(st.cur.x - 9, top + 2); ctx.lineTo(st.cur.x + 9, top + 2); ctx.closePath(); ctx.fill();
+      }
+    }
     // aim guide
     if (aiming && st.power > .02){
       const o = launchPt(), c = Math.cos(st.aimA), sn = Math.sin(st.aimA), len = 40 + st.power * 150;
@@ -672,7 +683,7 @@ const Game = (() => {
 
     // captions + hud
     if (st.mode === 'aim' || st.mode === 'fly' || st.mode === 'wait'){
-      if (st.mode === 'aim' && !st.misses && !st.drag) setCap('Drag back anywhere to aim. Let go to shoot. Hit the target.');
+      if (st.mode === 'aim' && !st.misses && !st.drag) setCap('Press anywhere and drag to aim. Drag further for more power. Let go to shoot.');
       if (st.mode === 'aim' && st.drag) setCap('');
       setHud([[`Power ${String(Math.round(st.power * 100)).padStart(2, '0')}%`], [`Angle ${Math.round(st.aimA * 57.3)}°`], [`Arrow ${String(st.misses + 1).padStart(2, '0')}`, 'solid']]);
     } else {
