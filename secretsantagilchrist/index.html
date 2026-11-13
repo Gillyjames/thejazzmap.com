@@ -209,6 +209,7 @@ a{color:inherit}
 /* ---------- settings ---------- */
 const SUPABASE_URL = '';
 const SUPABASE_KEY = '';
+const TABLE = 'secretsanta_gilchrist_wishes';
 
 const PEOPLE = ['James','Ruth','Amy','David','Tash','Al'];
 /* The draw. Made once, one loop, no partners. Scrambled so nobody reads it by accident. */
@@ -974,21 +975,21 @@ const Lists = (() => {
 
   async function load(){
     if (!sb){ rows = local.all(); render(); return; }
-    const { data, error } = await sb.from('wishes').select('id,person,body,created_at').order('created_at', { ascending: true }).order('id', { ascending: true });
+    const { data, error } = await sb.from(TABLE).select('id,person,body,created_at').order('created_at', { ascending: true }).order('id', { ascending: true });
     if (error){ status.textContent = 'Could not load the lists. Try refreshing.'; return; }
     rows = data; render();
   }
   async function add(person, body){
     if (!sb){ const r = local.all(); r.push({ id: Date.now(), person, body }); local.save(r); return load(); }
     rows.push({ id: 'tmp' + Date.now(), person, body }); render();
-    const { error } = await sb.from('wishes').insert({ person, body });
+    const { error } = await sb.from(TABLE).insert({ person, body });
     if (error) status.textContent = 'That did not save. Try again.';
     load();
   }
   async function remove(id){
     if (!sb){ local.save(local.all().filter(r => r.id !== id)); return load(); }
     rows = rows.filter(r => r.id !== id); render();
-    const { error } = await sb.from('wishes').delete().eq('id', id);
+    const { error } = await sb.from(TABLE).delete().eq('id', id);
     if (error) status.textContent = 'That did not delete. Try again.';
     load();
   }
@@ -1000,7 +1001,7 @@ const Lists = (() => {
       load();
       if (sb && !live){
         live = true;
-        sb.channel('wishes').on('postgres_changes', { event: '*', schema: 'public', table: 'wishes' }, () => load()).subscribe();
+        sb.channel(TABLE).on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, () => load()).subscribe();
       }
     }
   };
