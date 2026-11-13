@@ -328,6 +328,10 @@ const Game = (() => {
   let cw, ch, dpr, s, VW, VH, L = {}, cam = { x:0, y:0, zoom:1, rot:0 };
   let me, them, st, raf = 0, last = 0, stars = [], clouds = [], tOverride = null;
 
+  const QUIPS = [
+    'Not quite. The target is fine, thanks for asking.',
+    'That one is in Wales now.'
+  ];
   const EASIER = 'YOU SUCK. WE HAVE TO MAKE THIS EASIER FOR YOU.';
 
   function layout(){
@@ -348,8 +352,8 @@ const Game = (() => {
   function newState(){
     return { mode:'aim', arrows:[], cur:null, misses:0, t0:0, drag:null, aimA:.55, power:0, hit:null, quipT:0 };
   }
-  function tx(){ return L.tx0 - Math.min(st.misses, 9) * .055 * L.D; }
-  function R(){ return L.R0 * Math.min(1.75, 1 + .08 * st.misses); }
+  function tx(){ const k = Math.max(0, st.misses - 2); return L.tx0 - Math.min(k, 9) * .055 * L.D; }
+  function R(){ return L.R0 * Math.min(1.75, 1 + .08 * Math.max(0, st.misses - 2)); }
   function seqT(now){ return tOverride != null ? tOverride : (now - st.t0) / 1000; }
 
   function setCap(text){ if (cap.textContent !== text) cap.textContent = text; }
@@ -410,7 +414,7 @@ const Game = (() => {
   function miss(now){
     st.cur = null; st.misses++;
     if (st.arrows.length > 14) st.arrows.shift();
-    setCap(EASIER);
+    setCap(st.misses <= QUIPS.length ? QUIPS[st.misses - 1] : EASIER);
     st.mode = 'wait'; st.quipT = now + 650;
   }
 
