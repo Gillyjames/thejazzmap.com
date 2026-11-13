@@ -110,21 +110,22 @@ a{color:inherit}
 
 /* lists */
 .lists .sub{margin-top:24px;max-width:46em}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));margin-top:clamp(30px,5vw,56px);border-left:1px solid var(--blue);border-top:1px solid var(--blue)}
-.card{border-right:1px solid var(--blue);border-bottom:1px solid var(--blue);display:flex;flex-direction:column;min-height:300px}
-.card header{display:flex;justify-content:space-between;align-items:baseline;padding:18px 18px 0}
-.card h2{font-weight:850;font-size:clamp(40px,4.4vw,60px);letter-spacing:-.035em;line-height:.9;padding:10px 18px 18px}
-.card ol{list-style:none;flex:1;border-top:1px solid var(--pale)}
-.card li{display:grid;grid-template-columns:34px 1fr 30px;align-items:start;gap:6px;padding:11px 12px 11px 18px;border-bottom:1px solid var(--pale);font-size:16px;line-height:1.35;overflow-wrap:anywhere}
-.card li .i{font-family:var(--mono);font-size:11px;padding-top:4px;letter-spacing:.06em}
-.card li .x{border:0;background:none;font-family:var(--mono);font-size:14px;line-height:1;padding:3px;opacity:.35}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));margin-top:clamp(30px,5vw,56px);border-left:1px solid var(--blue);border-top:1px solid var(--blue)}
+.card{border-right:1px solid var(--blue);border-bottom:1px solid var(--blue);display:flex;flex-direction:column;min-height:380px}
+.card header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:28px 26px 24px}
+.card h2{font-weight:850;font-size:clamp(40px,4.4vw,60px);letter-spacing:-.035em;line-height:.9}
+.card ul{list-style:none;flex:1;border-top:1px solid var(--pale)}
+.card li{display:grid;grid-template-columns:1fr 30px;align-items:start;gap:12px;padding:18px 18px 18px 26px;border-bottom:1px solid var(--pale);font-size:17px;line-height:1.45;overflow-wrap:anywhere}
+.card li a{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.card li a:hover{background:var(--blue);color:var(--white);text-decoration:none}
+.card li .x{border:0;background:none;font-family:var(--mono);font-size:15px;line-height:1;padding:4px;opacity:.35}
 .card li:hover .x{opacity:1}
 .card li .x:hover{background:var(--blue);color:var(--white)}
-.card .empty{padding:14px 18px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;opacity:.55}
+.card .empty{padding:18px 26px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;opacity:.55}
 .card form{display:flex;border-top:1px solid var(--blue)}
-.card input{flex:1;min-width:0;border:0;padding:14px 18px;font-size:16px;background:var(--white);outline:none}
+.card input{flex:1;min-width:0;border:0;padding:18px 26px;font-size:16px;background:var(--white);outline:none}
 .card input::placeholder{color:var(--blue);opacity:.45}
-.card form button{border:0;border-left:1px solid var(--blue);padding:0 18px;font-family:var(--mono);font-size:12px;letter-spacing:.1em}
+.card form button{border:0;border-left:1px solid var(--blue);padding:0 22px;font-family:var(--mono);font-size:12px;letter-spacing:.1em}
 .card form button:hover{background:var(--blue);color:var(--white)}
 .status{margin-top:18px}
 </style>
@@ -144,14 +145,14 @@ a{color:inherit}
 <main data-view="home">
   <section class="hero" id="hero">
     <canvas id="field" aria-label="A field of blue and white cells that drifts slowly. Click it to send a wave through."></canvas>
-    <div class="tags mono"><span>Six people</span><span>One loop</span></div>
+    <div class="tags mono"><span>The Gilchrists</span><span>Christmas 2026</span></div>
     <div class="words wide">
       <span class="word w1">secret</span>
       <span class="word w2">Santa</span>
     </div>
     <div class="note">
-      <p>Six people, one loop, nobody draws their other half. You have to shoot an arrow to find out who you're buying for.</p>
-      <span class="mono">Click the snow to stir it up</span>
+      <p>Hit the target to find out who you're buying for.</p>
+      <span class="mono">Click anywhere to stir the snow</span>
     </div>
     <nav class="go">
       <a href="#/draw"><span class="mono">01</span><span class="t wide">The draw</span><span class="mono">→</span></a>
@@ -166,15 +167,15 @@ a{color:inherit}
     <p class="mono kicker">01 / 02 · The draw</p>
     <h1 class="big wide">Who are you?</h1>
     <div class="names" id="names"></div>
-    <p class="mono foot">Pick yourself. Honesty is the whole security system.</p>
+    <p class="mono foot">Pick your own name. No peeking at anyone else's.</p>
   </section>
 
   <section class="page again" id="again" hidden>
     <p class="mono kicker">01 / 02 · The draw</p>
     <h1 class="big wide" id="againTitle">Hello again.</h1>
-    <p>You've already earned this one. Watch the bauble again, or have another go with the bow for fun. It's the same name either way. The draw is locked.</p>
+    <p>You've already hit the target. Go straight to your bauble, or shoot again for fun.</p>
     <div class="row">
-      <button class="box solid" id="againShow">Just show me the bauble</button>
+      <button class="box solid" id="againShow">Show me my bauble</button>
       <button class="box" id="againPlay">Shoot again</button>
       <button class="box" id="againNot">I'm not <span id="againName"></span></button>
     </div>
@@ -202,7 +203,7 @@ a{color:inherit}
   <section class="page lists">
     <p class="mono kicker">02 / 02 · The lists</p>
     <h1 class="big wide">The lists</h1>
-    <p class="mono sub">Write what you want. Write what they want. Write nonsense in someone else's box, as is tradition.</p>
+    <p class="mono sub">Put what you want on your own list. Anyone can add to anyone's.</p>
     <p class="mono status" id="status"></p>
     <div class="grid" id="grid"></div>
   </section>
@@ -327,22 +328,15 @@ const Game = (() => {
   let INK = BLUE, PAPER = WHITE;
   function invert(on){ INK = on ? WHITE : BLUE; PAPER = on ? BLUE : WHITE; }
   const G = 800;
-  const T = { ascend: 1.6, ascendEnd: 9.6, land: 13.0, zoom: 15.6, zoomEnd: 18.6 };
+  const T = { ascend: 1.6, ascendEnd: 9.6, zoom: 18.4, zoomEnd: 21.4 };
   let cw, ch, dpr, s, VW, VH, L = {}, cam = { x:0, y:0, zoom:1, rot:0 };
   let me, them, st, raf = 0, last = 0, stars = [], clouds = [], tOverride = null;
 
   const QUIPS = [
     'Not quite. The target is fine, thanks for asking.',
-    'That one is in Wales now.',
-    'Bold choice.',
-    'Santa saw that.',
-    'Closer. Ish.',
-    'Try aiming at the big round thing.',
-    'The target felt a breeze. Encouraging.',
-    'Out of pity, the target has shuffled closer.',
-    'It is coming to you now. Meet it halfway.',
-    'At this point the target is basically on your lap.'
+    'That one is in Wales now.'
   ];
+  const EASIER = 'YOU SUCK. WE HAVE TO MAKE THIS EASIER FOR YOU.';
 
   function layout(){
     cw = innerWidth; ch = innerHeight; dpr = Math.min(2, devicePixelRatio || 1);
@@ -413,7 +407,7 @@ const Game = (() => {
         if (Math.abs(yy - L.ty) <= r){
           st.hit = { ly: yy, a: ar.a };
           st.mode = 'seq'; st.t0 = now; st.cur = null;
-          store.set('ss-played-' + me, '1');
+          store.set('ssg-played-' + me, '1');
           return;
         }
       }
@@ -424,7 +418,7 @@ const Game = (() => {
   function miss(now){
     st.cur = null; st.misses++;
     if (st.arrows.length > 14) st.arrows.shift();
-    setCap(QUIPS[Math.min(st.misses - 1, QUIPS.length - 1)]);
+    setCap(st.misses <= QUIPS.length ? QUIPS[st.misses - 1] : EASIER);
     st.mode = 'wait'; st.quipT = now + 650;
   }
 
@@ -438,7 +432,8 @@ const Game = (() => {
     ctx.lineWidth = 2.2 / (s * cam.zoom);
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
   }
-  function px(n){ return n / (s * cam.zoom); }
+  let LW = 1;
+  function px(n){ return n / (s * cam.zoom * LW); }
 
   /* -------- drawing kit (world units, y up) -------- */
   function line(pts){ ctx.beginPath(); ctx.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i+1]); ctx.stroke(); }
@@ -687,7 +682,7 @@ const Game = (() => {
       if (st.mode === 'aim' && st.drag) setCap('');
       setHud([[`Power ${String(Math.round(st.power * 100)).padStart(2, '0')}%`], [`Angle ${Math.round(st.aimA * 57.3)}°`], [`Arrow ${String(st.misses + 1).padStart(2, '0')}`, 'solid']]);
     } else {
-      const caps = [[0, 'Bullseye.'], [.85, 'Oh no. That was attached to something.'], [1.2, 'Snip.'], [2.1, 'Up you go.'], [5.0, 'A pigeon. Unimpressed.'], [6.2, 'A flight to Malaga. Nobody waves back.'], [7.6, 'Getting a bit chilly.'], [9.0, 'A satellite. Still no signal.']];
+      const caps = [[0, 'Bullseye.'], [.85, 'Oh no. That was attached to something.'], [1.2, 'Snip.'], [2.1, 'Up you go.'], [5.0, 'This pigeon is not impressed.'], [6.2, 'Nobody on the Malaga flight waves back.'], [7.6, 'Getting a bit chilly.'], [9.0, 'Still no phone signal up here.']];
       let c = ''; for (const [tt, txt] of caps) if (t >= tt) c = txt; setCap(c);
       setHud([[`Altitude ${altitude(by)}`, 'solid']]);
     }
@@ -708,16 +703,27 @@ const Game = (() => {
 
   function renderMoon(t){
     const tm = t - T.ascendEnd;
-    const rot = Math.PI * (1 - ease(clamp(tm / 2.6)));
-    let my;
-    if (tm < 3.4) my = 3000 * (1 - Math.pow(tm / 3.4, 2));
-    else if (tm < 3.9) my = 34 * Math.sin(Math.PI * (tm - 3.4) / .5);
-    else my = 0;
-    const defl = ease(clamp((tm - 3.8) / 1.1));
+    const TD = 4.0;                                   // touchdown
+    const a = clamp(tm / TD);
+    // the Moon starts small overhead and grows as the balloon closes in
+    const f = tm < TD ? Math.exp(Math.log(.012) * Math.pow(1 - a, 1.4)) : 1;
+    const MR = 9000;
+    let my = tm < TD ? 700 * (1 - a * a) : tm < TD + .4 ? 26 * Math.sin(Math.PI * (tm - TD) / .4) : 0;
+    // the balloon flips upside down to land basket first
+    const flip = Math.PI * (1 - ease(clamp((tm - .6) / 1.1)));
+    // after touchdown the whole world turns the right way up
+    const rot = Math.PI * (1 - ease(clamp((tm - (TD + .2)) / 2.0)));
+    const defl = ease(clamp((tm - 5.7) / 1.1));
     const P = { x: L.landX, y: my + 270 };
-    const off = lerp(270, Math.min(270, L.groundCy), ease(clamp(tm / 2.6)));
-    const k = ease(clamp(1 - my / 1400));
-    let cx = lerp(P.x, VW / 2, k), cy = Math.max(L.groundCy, my + off), zoom = 1;
+
+    const e0 = ease(clamp(tm / .9)), k = ease(clamp((tm - (TD + .2)) / 2.0));
+    // early on, frame the whole little Moon above the balloon; later, the balloon and the horizon
+    const Mr = MR * f, top = my + 270 + 220, bot = -2 * Mr - 60;
+    const cyE = (top + bot) / 2, zE = clamp((VH * .92) / (top - bot), .2, 1);
+    const cyL = (my + 270) * .55, zL = lerp(.5, .8, a);
+    const w = ease(clamp((f - .06) / .35));
+    const cyA = lerp(my + 270, lerp(cyE, cyL, w), e0), zA = lerp(1, lerp(zE, zL, w), e0);
+    let cx = lerp(L.landX, VW / 2, k), cy = lerp(cyA, L.groundCy, k), zoom = lerp(zA, 1, k);
     const Q = bauble();
     const zEnd = .42 * Math.min(cw, ch) / (s * Q.r);
     if (t > T.zoom){
@@ -735,60 +741,78 @@ const Game = (() => {
     invert(true);
     ctx.strokeStyle = INK;
 
-    // Earth, hanging in the sky
-    ctx.save(); ctx.strokeStyle = INK;
-    circ(VW * .84, 520, 34, null);
-    ctx.beginPath(); ctx.arc(VW * .84, 520, 34, -Math.PI / 2, Math.PI / 2); ctx.fillStyle = INK; ctx.fill();
-    ctx.restore();
-
-    // the Moon
-    const MR = 9000;
-    ctx.beginPath(); ctx.arc(VW / 2, -MR, MR, 0, Math.PI * 2); ctx.fillStyle = PAPER; ctx.fill(); ctx.strokeStyle = INK; ctx.stroke();
-    ctx.lineWidth = px(1.4);
-    for (const [cxr, w] of [[.06, 60], [.34, 34], [.62, 90], [.95, 44], [1.15, 70], [-.2, 80]]){ ell(VW * cxr, -26, w, w * .16, null); ell(VW * cxr + w * .1, -24, w * .7, w * .1, null); }
-    for (const [cxr, w] of [[.18, 24], [.44, 16], [.8, 28]]) ell(VW * cxr, -70, w, w * .18, null);
-    // footprints from the lander to the tree
-    for (let i = 0; i < 12; i++){
-      const fx = lerp(L.lmX - 30, L.treeX + 90, i / 11), fy = -10 - (i % 2) * 9;
-      ell(fx, fy, 4.5, 2.2, INK, false);
+    // Earth, once we're the right way up
+    const ea = clamp(1 - rot / (Math.PI * .4));
+    if (ea > 0){
+      ctx.save(); ctx.globalAlpha = ea; ctx.strokeStyle = INK;
+      circ(VW * .84, 520, 34, null);
+      ctx.beginPath(); ctx.arc(VW * .84, 520, 34, -Math.PI / 2, Math.PI / 2); ctx.fillStyle = INK; ctx.fill();
+      ctx.restore();
     }
-    ctx.lineWidth = px(2.2);
 
-    // Apollo 11: lunar module descent stage
-    const lx = L.lmX;
-    line([lx - 36, 46, lx - 62, 4]); line([lx + 36, 46, lx + 62, 4]); line([lx - 20, 40, lx - 30, 4]); line([lx + 20, 40, lx + 30, 4]);
-    ell(lx - 66, 3, 12, 3, PAPER); ell(lx + 66, 3, 12, 3, PAPER);
-    ctx.beginPath(); ctx.moveTo(lx - 46, 40); ctx.lineTo(lx + 46, 40); ctx.lineTo(lx + 38, 96); ctx.lineTo(lx - 38, 96); ctx.closePath(); ctx.fillStyle = PAPER; ctx.fill(); ctx.stroke();
-    ctx.lineWidth = px(1); for (let i = -30; i <= 30; i += 15) line([lx + i, 44, lx + i * .85, 92]); ctx.lineWidth = px(2.2);
-    line([lx - 30, 40, lx - 30, 8]); for (let yy = 12; yy < 40; yy += 7) line([lx - 36, yy, lx - 24, yy]);
-    ctx.fillStyle = INK; ctx.fillRect(lx - 14, 18, 28, 8);
-
-    // the flag
-    const fx = L.flagX;
-    line([fx, 0, fx, 170]); line([fx, 166, fx + 74, 166]);
-    ctx.fillStyle = PAPER; ctx.fillRect(fx, 120, 74, 46); ctx.strokeRect(fx, 120, 74, 46);
-    ctx.fillStyle = INK; for (let i = 0; i < 7; i += 2) ctx.fillRect(fx, 120 + i * 46 / 7, 74, 46 / 7);
-    ctx.fillRect(fx, 140, 30, 26);
-    ctx.fillStyle = PAPER; for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) ctx.fillRect(fx + 5 + i * 9, 146 + j * 9, 2.5, 2.5);
-    ctx.fillStyle = PAPER; ctx.fillRect(fx + 22, 0, 30, 16); ctx.strokeStyle = INK; ctx.strokeRect(fx + 22, 0, 30, 16); line([fx + 27, 6, fx + 47, 6]); line([fx + 27, 10, fx + 41, 10]);
-
-    // the tree
-    drawTree(L.treeX, t);
-
-    // the balloon, kept upright while the world spins round it
+    // the Moon, scaled about the landing spot so it seems to approach
     ctx.save();
-    ctx.translate(P.x, P.y); ctx.rotate(rot); ctx.translate(-P.x, -P.y);
+    ctx.translate(L.landX, 0); ctx.scale(f, f); ctx.translate(-L.landX, 0);
+    LW = f; ctx.lineWidth = px(2.2);
+    const kf = ease(clamp((f - .3) / .45));
+    ctx.beginPath(); ctx.arc(L.landX, -MR, MR, 0, Math.PI * 2); ctx.fillStyle = mix(WHITE, BLUE, kf); ctx.fill(); ctx.strokeStyle = WHITE; ctx.stroke();
+    // craters on the face, only really visible while it's far away
+    ctx.strokeStyle = kf < .5 ? BLUE : WHITE; ctx.lineWidth = px(2);
+    for (const [dx, dy, r] of [[-.42, .3, .16], [.32, .42, .1], [.08, -.18, .22], [-.25, -.55, .12], [.5, -.05, .09], [-.6, -.2, .07], [.28, -.62, .08], [-.05, .62, .07]]){
+      circ(L.landX + dx * MR, -MR + dy * MR, r * MR, null);
+      ctx.beginPath(); ctx.arc(L.landX + dx * MR + r * MR * .12, -MR + dy * MR - r * MR * .12, r * MR * .8, 2.2, 3.6); ctx.stroke();
+    }
+    ctx.strokeStyle = INK; ctx.lineWidth = px(2.2);
+    if (f > .45){
+      ctx.globalAlpha = clamp((f - .45) / .3);
+      ctx.lineWidth = px(1.4);
+      for (const [cxr, w] of [[.06, 60], [.34, 34], [.62, 90], [.95, 44], [1.15, 70], [-.2, 80]]){ ell(VW * cxr, -26, w, w * .16, null); ell(VW * cxr + w * .1, -24, w * .7, w * .1, null); }
+      for (const [cxr, w] of [[.18, 24], [.44, 16], [.8, 28]]) ell(VW * cxr, -70, w, w * .18, null);
+      for (let i = 0; i < 12; i++){
+        const fx = lerp(L.lmX - 30, L.treeX + 90, i / 11), fy = -10 - (i % 2) * 9;
+        ell(fx, fy, 4.5, 2.2, INK, false);
+      }
+      ctx.lineWidth = px(2.2);
+
+      // Apollo 11: lunar module descent stage
+      const lx = L.lmX;
+      line([lx - 36, 46, lx - 62, 4]); line([lx + 36, 46, lx + 62, 4]); line([lx - 20, 40, lx - 30, 4]); line([lx + 20, 40, lx + 30, 4]);
+      ell(lx - 66, 3, 12, 3, PAPER); ell(lx + 66, 3, 12, 3, PAPER);
+      ctx.beginPath(); ctx.moveTo(lx - 46, 40); ctx.lineTo(lx + 46, 40); ctx.lineTo(lx + 38, 96); ctx.lineTo(lx - 38, 96); ctx.closePath(); ctx.fillStyle = PAPER; ctx.fill(); ctx.stroke();
+      ctx.lineWidth = px(1); for (let i = -30; i <= 30; i += 15) line([lx + i, 44, lx + i * .85, 92]); ctx.lineWidth = px(2.2);
+      line([lx - 30, 40, lx - 30, 8]); for (let yy = 12; yy < 40; yy += 7) line([lx - 36, yy, lx - 24, yy]);
+      ctx.fillStyle = INK; ctx.fillRect(lx - 14, 18, 28, 8);
+
+      // the flag
+      const fx = L.flagX;
+      line([fx, 0, fx, 170]); line([fx, 166, fx + 74, 166]);
+      ctx.fillStyle = PAPER; ctx.fillRect(fx, 120, 74, 46); ctx.strokeRect(fx, 120, 74, 46);
+      ctx.fillStyle = INK; for (let i = 0; i < 7; i += 2) ctx.fillRect(fx, 120 + i * 46 / 7, 74, 46 / 7);
+      ctx.fillRect(fx, 140, 30, 26);
+      ctx.fillStyle = PAPER; for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) ctx.fillRect(fx + 5 + i * 9, 146 + j * 9, 2.5, 2.5);
+      ctx.fillStyle = PAPER; ctx.fillRect(fx + 22, 0, 30, 16); ctx.strokeStyle = INK; ctx.strokeRect(fx + 22, 0, 30, 16); line([fx + 27, 6, fx + 47, 6]); line([fx + 27, 10, fx + 41, 10]);
+
+      // the tree
+      drawTree(L.treeX, t);
+      ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+    LW = 1; ctx.lineWidth = px(2.2);
+
+    // the balloon: upright at first, then flipped so the basket meets the Moon
+    ctx.save();
+    ctx.translate(P.x, P.y); ctx.rotate(flip); ctx.translate(-P.x, -P.y);
     drawBalloon(L.landX, my, { defl, bow: false });
     ctx.restore();
     // dust
-    if (tm > 3.35 && tm < 5){
-      const d = clamp((tm - 3.35) / 1.4);
+    if (tm > TD - .05 && tm < TD + 1.6){
+      const d = clamp((tm - TD + .05) / 1.4);
       ctx.globalAlpha = 1 - d;
-      for (let i = 0; i < 9; i++){ const a = Math.PI * (i / 8); circ(L.landX + Math.cos(a) * (40 + d * 120), 4 + Math.sin(a) * d * 40, 5 + d * 10, PAPER); }
+      for (let i = 0; i < 9; i++){ const an = Math.PI * (i / 8); circ(L.landX + Math.cos(an) * (40 + d * 120), 4 + Math.sin(an) * d * 40, 5 + d * 10, PAPER); }
       ctx.globalAlpha = 1;
     }
 
-    const caps = [[.6, 'Space is confusing. Up is down now.'], [3.5, 'Tranquility Base. Apollo 11 parked here in 1969.'], [4.9, 'Someone has put a tree up.'], [6.0, 'Look closer.'], [8.7, '']];
+    const caps = [[.2, "That's the Moon."], [1.0, 'Turning round to park.'], [TD + .1, 'Space is confusing. Up is down now.'], [TD + 2.4, 'Tranquility Base. Apollo 11 parked here in 1969.'], [TD + 3.7, 'Someone has put a tree up.'], [TD + 4.8, 'Look closer.'], [TD + 7.5, '']];
     let c = ''; for (const [tt, txt] of caps) if (tm >= tt) c = txt; setCap(c);
     setHud(t < T.zoom ? [['Altitude 384,400 km', 'solid']] : []);
 
@@ -852,7 +876,7 @@ const Game = (() => {
     wrap.hidden = false; $('#ctrls').hidden = true; $('#closeBtn').hidden = false;
     reveal.classList.remove('on'); after.classList.remove('on');
     layout(); seed();
-    st = newState(); st.replay = !!store.get('ss-played-' + name);
+    st = newState(); st.replay = !!store.get('ssg-played-' + name);
     tOverride = null;
     if (opts.straightToBauble){ st.mode = 'seq'; st.t0 = performance.now() - T.zoomEnd * 1000; st.hit = { ly: L.ty, a: .1 }; }
     cancelAnimationFrame(raf); last = 0; raf = requestAnimationFrame(frame);
@@ -885,16 +909,16 @@ const Game = (() => {
     names.appendChild(b);
   });
   function choose(p){
-    store.set('ss-me', p);
-    if (store.get('ss-played-' + p)){
+    store.set('ssg-me', p);
+    if (store.get('ssg-played-' + p)){
       $('#pick').hidden = true; $('#again').hidden = false;
       $('#againTitle').textContent = `Hello again, ${p}.`;
       $('#againName').textContent = p;
     } else Game.open(p);
   }
-  $('#againShow').onclick = () => Game.open(store.get('ss-me'), { straightToBauble: true });
-  $('#againPlay').onclick = () => Game.open(store.get('ss-me'));
-  $('#againNot').onclick = () => { store.del('ss-me'); $('#again').hidden = true; $('#pick').hidden = false; };
+  $('#againShow').onclick = () => Game.open(store.get('ssg-me'), { straightToBauble: true });
+  $('#againPlay').onclick = () => Game.open(store.get('ssg-me'));
+  $('#againNot').onclick = () => { store.del('ssg-me'); $('#again').hidden = true; $('#pick').hidden = false; };
   $('#closeBtn').onclick = () => { Game.close(); };
   addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#gameWrap').hidden) Game.close(); });
 })();
@@ -905,16 +929,31 @@ const Lists = (() => {
   const sb = (SUPABASE_URL && SUPABASE_KEY && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
   let rows = [], live = false;
   const local = {
-    all(){ try { return JSON.parse(store.get('ss-wishes') || '[]') } catch(e){ return [] } },
-    save(r){ store.set('ss-wishes', JSON.stringify(r)); }
+    all(){ try { return JSON.parse(store.get('ssg-wishes') || '[]') } catch(e){ return [] } },
+    save(r){ store.set('ssg-wishes', JSON.stringify(r)); }
   };
+
+  // turn web addresses into links, built from DOM nodes so nothing typed is run as HTML
+  function linkify(el, text){
+    const re = /\b((?:https?:\/\/|www\.)[^\s<>"]+[^\s<>".,;:!?)\]])/gi;
+    let last = 0, m;
+    while ((m = re.exec(text))){
+      if (m.index > last) el.append(text.slice(last, m.index));
+      const href = /^https?:/i.test(m[1]) ? m[1] : 'https://' + m[1];
+      let label = m[1];
+      try { const u = new URL(href); label = u.hostname.replace(/^www\./, '') + (u.pathname.length > 1 || u.search ? '/…' : ''); } catch(e){ continue; }
+      const a = document.createElement('a');
+      a.href = href; a.textContent = label; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      el.append(a); last = m.index + m[1].length;
+    }
+    if (last < text.length) el.append(text.slice(last));
+  }
 
   function build(){
     grid.innerHTML = '';
     PEOPLE.forEach((p, i) => {
       const card = document.createElement('article'); card.className = 'card'; card.dataset.person = p;
-      card.innerHTML = `<header><span class="mono">${String(i + 1).padStart(2, '0')} / 06</span><span class="mono count"></span></header>
-        <h2 class="wide"></h2><ol></ol>
+      card.innerHTML = `<header><h2 class="wide"></h2><span class="mono count"></span></header><ul></ul>
         <form autocomplete="off"><input maxlength="280" aria-label=""><button type="submit">Add</button></form>`;
       card.querySelector('h2').textContent = p;
       const input = card.querySelector('input');
@@ -927,15 +966,15 @@ const Lists = (() => {
 
   function render(){
     for (const card of grid.children){
-      const p = card.dataset.person, ol = card.querySelector('ol');
+      const p = card.dataset.person, ol = card.querySelector('ul');
       const mine = rows.filter(r => r.person === p);
       card.querySelector('.count').textContent = mine.length ? `${mine.length} thing${mine.length > 1 ? 's' : ''}` : '';
       ol.innerHTML = '';
-      if (!mine.length){ const li = document.createElement('li'); li.className = 'empty'; li.style.display = 'block'; li.textContent = 'Nothing yet. Suspicious.'; ol.appendChild(li); }
+      if (!mine.length){ const li = document.createElement('li'); li.className = 'empty'; li.style.display = 'block'; li.textContent = 'Nothing yet.'; ol.appendChild(li); }
       mine.forEach((r, i) => {
         const li = document.createElement('li');
-        li.innerHTML = `<span class="i">${String(i + 1).padStart(2, '0')}</span><span class="t"></span><button class="x" title="Remove">×</button>`;
-        li.querySelector('.t').textContent = r.body;
+        li.innerHTML = `<span class="t"></span><button class="x" title="Remove">×</button>`;
+        linkify(li.querySelector('.t'), r.body);
         li.querySelector('.x').onclick = () => { if (confirm(`Remove "${r.body}" from ${p}'s list?`)) remove(r.id); };
         ol.appendChild(li);
       });
@@ -964,7 +1003,7 @@ const Lists = (() => {
   }
 
   build();
-  status.textContent = sb ? '' : 'Not connected to the shared lists yet. Anything you add stays on this device.';
+  status.textContent = sb ? '' : 'The lists aren\'t shared yet, so only you can see what you add.';
   return {
     show(){
       load();
