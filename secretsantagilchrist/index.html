@@ -80,7 +80,7 @@ a{color:inherit}
 @media (max-width:620px){.names{grid-template-columns:repeat(2,1fr)}}
 .again{max-width:760px}
 .again p{font-size:20px;line-height:1.35;margin:26px 0 30px;max-width:30em}
-.again .row{display:flex;flex-wrap:wrap;gap:0}
+.again .row{display:flex;flex-wrap:wrap;gap:0;margin-top:clamp(28px,5vw,60px)}
 .again .row .box{padding:16px 18px;font-size:13px}
 .again .row .box+.box{border-left:0}
 
@@ -145,14 +145,12 @@ a{color:inherit}
 <main data-view="home">
   <section class="hero" id="hero">
     <canvas id="field" aria-label="A field of blue and white cells that drifts slowly. Click it to send a wave through."></canvas>
-    <div class="tags mono"><span>The Gilchrists</span><span>Christmas 2026</span></div>
     <div class="words wide">
       <span class="word w1">secret</span>
       <span class="word w2">Santa</span>
     </div>
     <div class="note">
-      <p>Hit the target to find out who you're buying for.</p>
-      <span class="mono">Click anywhere to stir the snow</span>
+      <p>Click the draw to find out who your Secret Santa is.</p>
     </div>
     <nav class="go">
       <a href="#/draw"><span class="mono">01</span><span class="t wide">The draw</span><span class="mono">→</span></a>
@@ -167,13 +165,11 @@ a{color:inherit}
     <p class="mono kicker">01 / 02 · The draw</p>
     <h1 class="big wide">Who are you?</h1>
     <div class="names" id="names"></div>
-    <p class="mono foot">Pick your own name. No peeking at anyone else's.</p>
   </section>
 
   <section class="page again" id="again" hidden>
     <p class="mono kicker">01 / 02 · The draw</p>
     <h1 class="big wide" id="againTitle">Hello again.</h1>
-    <p>You've already hit the target. Go straight to your bauble, or shoot again for fun.</p>
     <div class="row">
       <button class="box solid" id="againShow">Show me my bauble</button>
       <button class="box" id="againPlay">Shoot again</button>
@@ -203,7 +199,6 @@ a{color:inherit}
   <section class="page lists">
     <p class="mono kicker">02 / 02 · The lists</p>
     <h1 class="big wide">The lists</h1>
-    <p class="mono sub">Put what you want on your own list. Anyone can add to anyone's.</p>
     <p class="mono status" id="status"></p>
     <div class="grid" id="grid"></div>
   </section>
@@ -332,10 +327,6 @@ const Game = (() => {
   let cw, ch, dpr, s, VW, VH, L = {}, cam = { x:0, y:0, zoom:1, rot:0 };
   let me, them, st, raf = 0, last = 0, stars = [], clouds = [], tOverride = null;
 
-  const QUIPS = [
-    'Not quite. The target is fine, thanks for asking.',
-    'That one is in Wales now.'
-  ];
   const EASIER = 'YOU SUCK. WE HAVE TO MAKE THIS EASIER FOR YOU.';
 
   function layout(){
@@ -356,8 +347,8 @@ const Game = (() => {
   function newState(){
     return { mode:'aim', arrows:[], cur:null, misses:0, t0:0, drag:null, aimA:.55, power:0, hit:null, quipT:0 };
   }
-  function tx(){ const k = Math.max(0, st.misses - 2); return L.tx0 - Math.min(k, 9) * .055 * L.D; }
-  function R(){ return L.R0 * Math.min(1.75, 1 + .08 * Math.max(0, st.misses - 2)); }
+  function tx(){ return L.tx0 - Math.min(st.misses, 9) * .055 * L.D; }
+  function R(){ return L.R0 * Math.min(1.75, 1 + .08 * st.misses); }
   function seqT(now){ return tOverride != null ? tOverride : (now - st.t0) / 1000; }
 
   function setCap(text){ if (cap.textContent !== text) cap.textContent = text; }
@@ -418,7 +409,7 @@ const Game = (() => {
   function miss(now){
     st.cur = null; st.misses++;
     if (st.arrows.length > 14) st.arrows.shift();
-    setCap(st.misses <= QUIPS.length ? QUIPS[st.misses - 1] : EASIER);
+    setCap(EASIER);
     st.mode = 'wait'; st.quipT = now + 650;
   }
 
@@ -970,7 +961,7 @@ const Lists = (() => {
       const mine = rows.filter(r => r.person === p);
       card.querySelector('.count').textContent = mine.length ? `${mine.length} thing${mine.length > 1 ? 's' : ''}` : '';
       ol.innerHTML = '';
-      if (!mine.length){ const li = document.createElement('li'); li.className = 'empty'; li.style.display = 'block'; li.textContent = 'Nothing yet.'; ol.appendChild(li); }
+      if (!mine.length){ const li = document.createElement('li'); li.className = 'empty'; li.style.display = 'block'; li.textContent = 'Nothing yet. Suspicious.'; ol.appendChild(li); }
       mine.forEach((r, i) => {
         const li = document.createElement('li');
         li.innerHTML = `<span class="t"></span><button class="x" title="Remove">×</button>`;
