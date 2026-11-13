@@ -211,9 +211,9 @@ const SUPABASE_URL = 'https://wrmsjmzytoarvomtonoq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_2vwrTh38JNgj95bhX8A1_w_zcZqdZUi';
 const TABLE = 'secretsanta_sibs_wishes';
 
-const PEOPLE = ['James','Ruth','Matt','Steph','Josh','Juliet'];
+const PEOPLE = ['James','Ruth','Matt','Steph','Josh','Juliette'];
 /* The draw. Made once, one loop, no partners. Scrambled so nobody reads it by accident. */
-const DRAW = 'Fks5AQAMERtHF0MkBUASGkxJTyMSGQkWVlVHfhULFEVVRUw2GQwDHE5fVj0QWQlMSA8lHBoNT1NRPgMWHE1JDysBF0VVU0woDB0HVkBHOQ4RWUNURmcCBQcAGUsO';
+const DRAW = 'Fks5AQAMERsRSENURmcWBAsWT0VRPg0IERxHF0M9EEgHAUxJTzoHERwNVlVHfxQaDA9bSzwQGQFRTk4vGxwND01MLkIEAUxfTyQSABhHWE0oTBUaRhdVIxsJBAwHAAlHCQ==';
 function drawFor(name){
   const k = 'mistletoe-and-wine', raw = atob(DRAW);
   let s = ''; for (let i = 0; i < raw.length; i++) s += String.fromCharCode(raw.charCodeAt(i) ^ k.charCodeAt(i % k.length));
